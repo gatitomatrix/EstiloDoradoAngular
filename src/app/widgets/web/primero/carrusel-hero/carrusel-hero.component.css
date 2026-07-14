@@ -1,0 +1,21 @@
+.ed-hero {
+  border-bottom: 1px solid #eee;
+  background: #fff;
+}
+
+/* Altura sugerida en desktop */
+.ed-hero .carousel-item img {
+  height: 380px;
+  width: 10px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .ed-hero .carousel-item img { height: 300px; }
+}
+@media (max-width: 576px) {
+  .ed-hero .carousel-item img { height: 220px; }
+}

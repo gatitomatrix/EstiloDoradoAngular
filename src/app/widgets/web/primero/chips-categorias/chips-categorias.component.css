@@ -1,0 +1,39 @@
+.ed-chips {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 20px 46px;
+}
+
+.ed-chips__scroll {
+  display: flex;
+  gap: 45px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.ed-chip {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #f8f8f8;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all .15s ease-in-out;
+  white-space: nowrap;
+}
+
+.ed-chip:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+.ed-chip--active {
+  background: #C9A227;   /* dorado Estilo Dorado */
+  border-color: #C9A227;
+  color: #111;
+}

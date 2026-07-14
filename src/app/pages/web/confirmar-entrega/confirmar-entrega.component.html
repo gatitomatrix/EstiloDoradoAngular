@@ -1,0 +1,86 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<div class="container my-3">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+    <img src="https://i.imgur.com/hixFJ0L.jpeg" style="height: 50px; width: 50px; margin-left: 30px; border-radius: 15px;" alt="logo">
+    <div>¿Necesitas ayuda para comprar? Llámanos al <strong>+51 904 811 627</strong></div>
+  </div>
+
+  <br>
+
+  <!-- Timeline (estás en Entrega) -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="ed-step ed-step--active">1</div><span>Carro</span>
+    <div class="ed-line"></div>
+    <div class="ed-step ed-step--active">2</div><span>Entrega</span>
+    <div class="ed-line"></div>
+    <div class="ed-step ed-step--mute">3</div><span class="text-muted">Pago</span>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Dirección confirmada -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex align-items-start gap-3">
+          <div style="font-size:22px">📍</div>
+          <div>
+            <div class="small text-muted">Dirección</div>
+            <div class="fw-semibold">{{ address }}</div>
+          </div>
+          <a class="ms-auto small" routerLink="/entrega">Cambiar</a>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="mb-2 small">Vendido por <em style="color:#9C7B2F">Estilo Dorado</em></div>
+
+          <!-- Retiro en tienda -->
+          <label class="ed-radio">
+            <input type="radio" name="ship" [checked]="selected==='STORE_PICKUP'" (change)="onSelectPickup()">
+            <div class="ed-radio__body">
+              <div class="fw-semibold">Retiro en tienda</div>
+              <div class="text-muted small">Recoge en tienda de inmediato y de forma segura.</div>
+              <div class="ed-price">S/ 0</div>
+            </div>
+          </label>
+
+          <!-- Envío Express -->
+          <label class="ed-radio">
+            <input type="radio" name="ship" [checked]="selected==='EXPRESS'" (change)="onSelectExpress()">
+            <div class="ed-radio__body">
+              <div class="fw-semibold">Envío a dirección</div>
+              <div class="text-muted small">Envío a tu dirección de 1 a 2 días de acuerdo a tu ubicación y horarios de reparto.</div>
+              <div class="ed-price">S/ 20</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen derecha -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold">Resumen de la compra</h5>
+          <div class="d-flex justify-content-between my-2">
+            <span>Productos</span><span>S/ {{ subtotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between my-2">
+            <span>Descuentos</span><span class="text-success">- S/ {{ discount | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between my-2">
+            <span>Entregas</span><span>S/ {{ fee | number:'1.2-2' }}</span>
+          </div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between fw-bold mb-3">
+            <span>Total:</span><span>S/ {{ subtotal + fee - discount | number:'1.2-2' }}</span>
+          </div>
+          <button class="btn btn-dark w-100" [disabled]="!resumenOk" (click)="irAPagar()">Ir a pagar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

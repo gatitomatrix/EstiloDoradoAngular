@@ -1,0 +1,83 @@
+.ed-panel-filtros {
+  width: 280px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 12px rgba(0,0,0,.03);
+  position: sticky;
+  top: 16px; /* se mantiene visible al hacer scroll */
+}
+
+.ed-panel-filtros__header h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* Grupos */
+.ed-filter-group {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f0f0;
+}
+.ed-filter-group:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+.ed-filter-group__title {
+  margin: 0 0 8px;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #222;
+}
+.ed-filter-group__content {
+  display: grid;
+  gap: 8px;
+}
+
+/* Checkbox simple */
+.ed-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  cursor: pointer;
+}
+.ed-checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+/* Precio */
+.ed-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ed-price-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.ed-price-input:focus {
+  border-color: #c9a227;
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.15);
+}
+
+/* Slider placeholder */
+.ed-price-slider {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c9a227 0%, #f0e3b5 100%);
+  margin-top: 10px;
+}
+
+/* Responsive: ocultar o expandir en móviles (opcional más tarde) */
+@media (max-width: 992px) {
+  .ed-panel-filtros {
+    position: static;
+    width: 100%;
+  }
+}

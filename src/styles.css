@@ -1,0 +1,152 @@
+/* Leaflet core */
+@import "leaflet/dist/leaflet.css";
+
+/* Opcional: ajusta el cursor del pin */
+.leaflet-container { cursor: grab; }
+
+html { scroll-behavior: smooth; }
+
+body, html {
+  background-color: #ffffff !important;
+  color: #000000;
+}
+
+/* =========  LAYOUT BASE SOLO ADMIN  ========= */
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; } /* + ancho sidebar */
+.app-aside { position: sticky; top: 0; height: 100vh; overflow: auto; }
+.content   { padding: 1rem; }
+
+/* =========  PALETA MARCA (marrón + dorado)  ========= */
+.admin-gold-theme {
+  --gold-500: #D4AF37;
+  --gold-600: #BE9830;
+  --gold-700: #A6822A;
+
+  --brown-900: #20160B;   /* sidebar fondo */
+  --brown-800: #2C1E0F;   /* sidebar hover */
+  --brown-700: #3A2916;
+
+  --bg-page:   #FBF8F2;   /* fondo general claro */
+  --card-bg:   #FFFDF9;   /* cards, paneles */
+  --border:    #E7DAC6;
+  --text:      #2D2418;
+  --muted:     #8A7B65;
+}
+
+.admin-gold-theme body,
+.admin-gold-theme html { background: var(--bg-page); color: var(--text); }
+
+/* =========  SIDEBAR  ========= */
+.admin-gold-theme .sidebar {
+  background: var(--brown-900);
+  color: #F1E6D0;
+  border-right: 1px solid #00000020;
+  padding: 1.25rem 1rem 2rem;              /* + aire */
+  width: 280px;                            /* consistente con grid */
+}
+.admin-gold-theme .sidebar-title {
+  font-size: 1.1rem; font-weight: 700; margin-bottom: .75rem; color: var(--gold-500);
+}
+
+/* PanelMenu limpio y aireado */
+.admin-gold-theme .p-panelmenu .p-panelmenu-panel {
+  margin-bottom: .5rem; background: transparent; border: 0;
+}
+.admin-gold-theme .p-panelmenu .p-panelmenu-header { margin-bottom: .35rem; }
+.admin-gold-theme .p-panelmenu .p-panelmenu-header > a {
+  background: transparent !important;
+  color: #F1E6D0;
+  border: 0 !important;                    /* quita ese borde blanco */
+  padding: .9rem .75rem;                   /* + aire */
+  border-radius: .5rem;
+  outline: none; box-shadow: none;
+}
+.admin-gold-theme .p-panelmenu .p-panelmenu-header > a:hover {
+  background: var(--brown-800); color: var(--gold-500);
+}
+.admin-gold-theme .p-panelmenu .p-panelmenu-content {
+  padding: .25rem 0 .5rem 0; background: transparent; border: none;
+}
+.admin-gold-theme .p-menuitem-link {
+  display: block;
+  color: #E8DCC6;
+  padding: .6rem .9rem;                    /* + aire */
+  margin: .2rem 0;
+  border-radius: .5rem;
+  border: 0;                               /* sin caja */
+}
+.admin-gold-theme .p-menuitem-link:hover,
+.admin-gold-theme .p-menuitem-link.p-menuitem-link-active {
+  background: var(--brown-800); color: var(--gold-500);
+}
+
+/* =========  TOPBAR  ========= */
+.admin-gold-theme .topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+}
+
+/* =========  BOTONES / ENFASIS  ========= */
+.admin-gold-theme .p-button:not(.p-button-text):not(.p-button-outlined) {
+  background: var(--gold-500); border-color: var(--gold-600);
+  color: #1d1406;
+}
+.admin-gold-theme .p-button:not(.p-button-text):hover { filter: brightness(0.98); }
+.admin-gold-theme .p-button.p-button-text { color: var(--gold-600); }
+
+/* =========  TABLES / CARDS / DIALOGS  ========= */
+.admin-gold-theme .p-card,
+.admin-gold-theme .kpi,
+.admin-gold-theme .p-dialog .p-dialog-content,
+.admin-gold-theme .p-dialog .p-dialog-header,
+.admin-gold-theme .p-panel .p-panel-content {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+}
+.admin-gold-theme .p-dialog .p-dialog-header { font-weight: 600; }
+
+/* thead y celdas con buen padding */
+.admin-gold-theme .p-table thead th {
+  background: #F5EBDB;
+  color: var(--text);
+  border-color: var(--border);
+  font-weight: 600;
+  padding: .85rem 1rem;                    /* + aire */
+}
+.admin-gold-theme .p-table tbody > tr > td {
+  border-color: var(--border);
+  padding: .8rem 1rem;                     /* + aire */
+}
+/* hover suave en filas */
+.admin-gold-theme .p-table tbody tr:hover { background: #faf3e6; }
+/* paginador limpio */
+.admin-gold-theme .p-table .p-paginator {
+  padding: .5rem; border: 0; background: transparent;
+}
+
+.admin-gold-theme .p-badge.p-badge-success,
+.admin-gold-theme .p-tag.p-tag-success {
+  background: var(--gold-500); border: 1px solid var(--gold-600); color:#1d1406;
+}
+
+/* =========  INPUTS  ========= */
+.admin-gold-theme .p-inputtext,
+.admin-gold-theme .p-dropdown,
+.admin-gold-theme .p-multiselect {
+  background: #FFFEFC;
+  border-color: var(--border);
+  color: var(--text);
+}
+.admin-gold-theme .p-inputtext:focus,
+.admin-gold-theme .p-dropdown:focus,
+.admin-gold-theme .p-multiselect:focus {
+  box-shadow: 0 0 0 .15rem color-mix(in srgb, var(--gold-500) 25%, transparent);
+  border-color: var(--gold-600);
+}
+
+/* =========  TOASTS / CONFIRM  ========= */
+.admin-gold-theme .p-toast-message.p-toast-message-success { border-left: 4px solid var(--gold-500); }
+.admin-gold-theme .p-confirm-dialog .p-dialog-header { border-bottom: 1px solid var(--border); }

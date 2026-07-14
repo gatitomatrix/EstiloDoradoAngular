@@ -1,0 +1,39 @@
+/* Grid responsiva */
+.ed-grid {
+  display: grid;
+  gap: 20px;
+  align-items: stretch;   
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 1024px) {
+  .ed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .ed-grid { grid-template-columns: 1fr; }
+}
+
+/* Placeholders */
+.ed-card-ph {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  padding: 12px;
+  box-shadow: 0 1px 10px rgba(0,0,0,.03);
+  display: grid;
+  gap: 10px;
+}
+.ed-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eee, #f7f7f7, #eee);
+  background-size: 200% 100%;
+  animation: edShimmer 1.4s linear infinite;
+}
+.ed-skeleton--img { width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; }
+.ed-skeleton--text { height: 14px; }
+.ed-skeleton--btn  { height: 36px; width: 140px; border-radius: 8px; }
+
+@keyframes edShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

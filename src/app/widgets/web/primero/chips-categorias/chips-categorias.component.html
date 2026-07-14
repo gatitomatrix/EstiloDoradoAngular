@@ -1,0 +1,13 @@
+<div class="ed-chips">
+  <div class="ed-chips__scroll">
+    <button
+      *ngFor="let cat of categorias"
+      type="button"
+      class="ed-chip"
+      [class.ed-chip--active]="isActive(cat)"
+      (click)="onSelect(cat)">
+      {{ cat }}
+    </button>
+  </div>
+</div>
+

@@ -1,0 +1,154 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<div class="container my-3">
+    <!-- Header superior -->
+    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+        <div>
+            <img src="https://i.imgur.com/hixFJ0L.jpeg"
+                style="height: 50px; width: 50px; margin-left: 30px; border-radius: 15px;" alt="logo">
+        </div>
+        <div>¿Necesitas ayuda para comprar? Llámanos al <strong>+51 904 811 627</strong></div>
+    </div>
+    <br>
+    <!-- Timeline -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="ed-step ed-step--active">1</div><span>Carro</span>
+        <div class="ed-line"></div>
+        <div class="ed-step">2</div><span class="text-muted">Entrega</span>
+        <div class="ed-line"></div>
+        <div class="ed-step ed-step--mute">3</div><span class="text-muted">Pago</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Izquierda -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Elige un tipo de entrega</h4>
+
+                    <!-- Retira tu pedido -->
+                    <div class="ed-option" (click)="openPickup()">
+                        <div class="ed-icon">🏠</div>
+                        <div class="ed-body">
+                            <div class="fw-semibold">Retira tu pedido en tienda</div>
+                            <div class="text-muted small">Haz tu retiro en tienda de forma rápida, solo adicional de
+                                empaque</div>
+                            <div class="text-muted small">Recuerda que si pagas por Culqui puedes obtener tu comprobante electrónico.</div>
+                        </div>
+                    </div>
+
+                    <!-- Envío express -->
+                    <div class="ed-option" (click)="openExpress()">
+                        <div class="ed-icon">🚚</div>
+                        <div class="ed-body">
+                            <div class="fw-semibold">Envío Express</div>
+                            <div class="text-muted small">Ingresa tu dirección para conocer disponibilidad</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen derecha -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold">Resumen de la compra</h5>
+                    <div class="d-flex justify-content-between my-2">
+                        <span>Productos</span><span>S/ {{ subtotal | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between my-2">
+                        <span>Descuentos</span><span class="text-success">- S/ {{ discount | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between my-2">
+                        <span>Entregas</span><span>S/ {{ fee | number:'1.2-2' }}</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span>Total:</span><span>S/ {{ total | number:'1.2-2' }}</span>
+                    </div>
+                    <button class="btn btn-dark w-100" [disabled]="!enablePay" routerLink="/pago">Ir a pagar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL Direccion -->
+<div class="modal fade show d-block" *ngIf="showAddressModal" (click)="closeModal()">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" (click)="$event.stopPropagation()">
+        <div class="modal-content" style="border-radius:16px;">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span class="me-2">📍</span>{{ !stepMap ? 'Ingresa tu dirección' : 'Confirma tu dirección' }}
+                </h5>
+                <button type="button" class="btn-close" (click)="closeModal()"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- ...dentro del modal, Paso 1 (form) -->
+                <form *ngIf="!stepMap" [formGroup]="addrForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Departamento</label>
+                        <select class="form-select" formControlName="departamento">
+                            <option value="">Selecciona un Departamento</option>
+                            <option *ngFor="let d of departamentos" [value]="d">{{ d }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Provincia</label>
+                        <select class="form-select" formControlName="provincia">
+                            <option value="">Selecciona una Provincia</option>
+                            <option *ngFor="let p of provincias" [value]="p">{{ p }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Distrito</label>
+                        <select class="form-select" formControlName="distrito">
+                            <option value="">Selecciona un Distrito</option>
+                            <option *ngFor="let d of distritos" [value]="d">{{ d }}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label">Avenida / Calle / Jirón</label>
+                        <input class="form-control" formControlName="via" placeholder="Ingresa el nombre de la vía">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Número</label>
+                        <input class="form-control" formControlName="numero" placeholder="Número">
+                    </div>
+                </form>
+
+                <!-- Paso 2: MAPA -->
+                <div *ngIf="stepMap">
+                    <div class="alert alert-warning py-2">Fija la ubicación exacta en el mapa.</div>
+
+                    <!-- Contenedor del mapa (Leaflet necesita tamaño fijo) -->
+                    <div id="edMap" style="height:320px;border:1px solid #dde;border-radius:8px" class="mb-3"></div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small text-muted">Dirección</div>
+                            <div class="fw-semibold">
+                                {{ addrForm.value.via }} {{ addrForm.value.numero }},
+                                {{ addrForm.value.distrito }}, {{ addrForm.value.provincia }},
+                                {{ addrForm.value.departamento }}
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary" (click)="stepMap=false">✏️ Editar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button *ngIf="!stepMap" class="btn btn-primary" (click)="continuarDireccion()">Confirmar
+                    dirección</button>
+                <button *ngIf="stepMap" class="btn btn-dark" (click)="confirmarYGuardar()">Confirmar y Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

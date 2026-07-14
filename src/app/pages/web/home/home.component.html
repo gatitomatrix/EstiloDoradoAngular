@@ -1,0 +1,40 @@
+<ed-web-franja-marca></ed-web-franja-marca>
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-carrusel-hero></ed-web-carrusel-hero>
+<ed-web-cinta-promocion texto="¡35% de descuento en arreglos florales por primavera!" textoBoton="Ver Productos"
+  url="#productos" [mostrarBoton]="true">
+</ed-web-cinta-promocion>
+
+<!-- MISMA LÍNEA: chips + búsqueda secundaria -->
+<div class="ed-chips-busqueda-row">
+  <div class="ed-chips-busqueda-row__chips">
+    <ed-web-chips-categorias
+      [categorias]="['Amor','Para Él','Para Ella','Cumpleaños','Ocasiones','Tendencias','Ofertas', 'Promociones']">
+    </ed-web-chips-categorias>
+  </div>
+
+  <div class="ed-chips-busqueda-row__search">
+    <ed-web-barra-busqueda></ed-web-barra-busqueda>
+  </div>
+</div>
+
+<!-- CONTENIDO: columnas -->
+<section id="productos" class="ed-content-row">
+  <!-- Columna izquierda: Filtros -->
+  <div class="ed-content-row__left">
+    <ed-web-panel-filtros (changeCategoria)="onCategoriaChange($event)" [precioMinDisponible]="precioMinDisponible"
+      [precioMaxDisponible]="precioMaxDisponible" [precioMinSel]="precioMinSel" [precioMaxSel]="precioMaxSel"
+      (precioChange)="onPrecioChange($event)">
+
+    </ed-web-panel-filtros>
+  </div>
+
+  <!-- Columna derecha: Grilla -->
+  <div class="ed-content-row__right">
+    <div *ngIf="loading" class="ed-loading">Cargando productos…</div>
+    <div *ngIf="error" class="ed-error">{{ error }}</div>
+    <ed-web-grilla-productos [productos]="productos" (addToCart)="onAddToCart($event)"
+      (openDetail)="onOpenDetail($event)">
+    </ed-web-grilla-productos>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+<aside class="ed-panel-filtros">
+  <div class="ed-panel-filtros__header">
+    <h3>Filtros</h3>
+  </div>
+
+  <!-- Grupo: Categorías -->
+  <div class="card p-3">
+  <h5>Filtros</h5>
+
+  <div class="fw-semibold mt-3 mb-2">Categorías</div>
+  <div *ngFor="let c of categorias" class="form-check mb-2">
+    <input class="form-check-input" type="radio" name="cat"
+           [value]="c.id_categoria"
+           [checked]="c.id_categoria===selectedId"
+           (change)="onSelect(c.id_categoria)">
+    <label class="form-check-label">{{ c.nombre }}</label>
+  </div>
+
+  <button class="btn btn-outline-secondary w-100 mt-2" (click)="limpiar()">Limpiar</button>
+</div>
+
+  <!-- Grupo: Precio -->
+  <section class="ed-filter-group">
+    <h4 class="ed-filter-group__title">Precio</h4>
+    <div class="ed-filter-group__content">
+      <div class="ed-price-row">
+        <input
+          type="number"
+          class="ed-price-input"
+          placeholder="Mín."
+          [min]="precioMinDisponible"
+          [max]="precioMaxDisponible"
+          [(ngModel)]="precioMinSel"
+          (change)="onChangePrecio()"
+        />
+        <span>—</span>
+        <input
+          type="number"
+          class="ed-price-input"
+          placeholder="Máx."
+          [min]="precioMinDisponible"
+          [max]="precioMaxDisponible"
+          [(ngModel)]="precioMaxSel"
+          (change)="onChangePrecio()"
+        />
+      </div>
+      <small class="ed-help">
+        Rango disponible: S/ {{ precioMinDisponible | number:'1.2-2' }} — S/ {{ precioMaxDisponible | number:'1.2-2' }}
+      </small>
+
+      <!-- Slider visual placeholder por ahora -->
+      <div class="ed-price-slider"></div>
+
+      <button type="button" class="ed-btn-clear" (click)="limpiarPrecios()">Limpiar</button>
+    </div>
+  </section>
+</aside>

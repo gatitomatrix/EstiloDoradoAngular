@@ -1,0 +1,108 @@
+<header class="ed-topbar">
+  <!-- Logo -->
+  <a routerLink="/" class="ed-logo">
+    <img src="https://i.imgur.com/hixFJ0L.jpeg" alt="Estilo Dorado"
+      style="height: 100px; width: 100px; margin-left: 10px; border-radius: 15px;">
+  </a>
+
+  <!-- Buscador -->
+  <div class="ed-search">
+    <input [(ngModel)]="search" name="q" type="text" placeholder="Buscar productos..." />
+    <button aria-label="Buscar" (click)="doSearch()">
+      <img src="https://i.imgur.com/McBogzU.png" alt="">
+    </button>
+  </div> 
+
+  <!-- Acciones -->
+  <div class="ed-actions">
+    <!-- Mis compras -->
+    <button class="ed-link-btn" (click)="onClickMisCompras()">Mis compras</button>
+
+    <!-- Perfil -->
+    <div class="ed-profile" (click)="toggleProfileMenu()" tabindex="0">
+      <img src="https://i.imgur.com/iRqChgz.png" alt="Perfil" class="ed-profile__icon">
+      <div class="ed-profile__menu" *ngIf="showProfileMenu" (click)="$event.stopPropagation()">
+
+        <ng-container *ngIf="user; else notLogged">
+          <div class="ed-profile__hello">Hola, {{ user!.nombre }}</div>
+
+          <a routerLink="/mi-cuenta" (click)="showProfileMenu=false">Mi cuenta</a> <!-- 👈 -->
+          <a routerLink="/mis-compras" (click)="showProfileMenu=false">Mis compras</a>
+          <hr>
+          <button class="ed-menu-btn" (click)="onLogout()">Cerrar sesión</button> <!-- 👈 -->
+        </ng-container>
+
+        <ng-template #notLogged>
+          <button class="ed-menu-btn" (click)="openLogin()">Inicia sesión</button>
+          <a routerLink="/registro" (click)="showProfileMenu=false">Regístrate</a>
+        </ng-template>
+
+      </div>
+    </div>
+
+
+    <!-- Carrito -->
+    <a class="ed-cart-link" (click)="goCart()" aria-label="Ir al carrito">
+      <img src="https://i.imgur.com/6Lu4tAG.png" class="ed-cart-icon" alt="">
+      <span class="ed-cart-badge" *ngIf="totalQty > 0">{{ totalQty }}</span>
+    </a>
+
+    <!-- Ayuda (decorativo) -->
+    <a class="ed-help" routerLink="/ayuda"><img src="https://i.imgur.com/N8DFlUV.png" alt="Ayuda"
+        style="height: 30px; width: 30px"></a>
+  </div>
+</header>
+
+<!-- Modal Login -->
+<div class="modal fade show d-block" *ngIf="showLogin" (click)="closeLogin()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content p-2" style="border-radius:16px;">
+      <div class="modal-header border-0">
+        <div class="d-flex align-items-center gap-2">
+          <img src="https://i.imgur.com/hixFJ0L.jpeg" alt="Estilo Dorado" style="height:28px;border-radius:6px;">
+          <h5 class="modal-title fw-bold mb-0">Inicia sesión</h5>
+        </div>
+        <button type="button" class="btn-close" (click)="closeLogin()"></button>
+      </div>
+
+      <div class="modal-body pt-0">
+        <form [formGroup]="loginForm" (ngSubmit)="submitLogin()" class="d-grid gap-3">
+
+          <div>
+            <label class="form-label mb-1">Correo electrónico</label>
+            <input type="email" class="form-control" placeholder="tu@correo.com" formControlName="email">
+          </div>
+
+          <div>
+            <label class="form-label mb-1">Contraseña</label>
+            <div class="input-group">
+              <input [type]="hideLoginPassword ? 'password' : 'text'" class="form-control"
+                placeholder="Ingresa tu contraseña" formControlName="password">
+              <button class="btn btn-outline-secondary" type="button" (click)="hideLoginPassword=!hideLoginPassword"
+                aria-label="Ver contraseña">👁</button>
+            </div>
+          </div>
+
+          <div class="text-danger small" *ngIf="loginError">{{ loginError }}</div>
+
+          <div class="text-muted small">
+            ¿Olvidaste tu contraseña?
+            Recupérala por
+            <a (click)="toRecuperarPrefilled()">correo</a>
+            o
+            <a (click)="toRecuperarPrefilled()">SMS</a>.
+          </div>
+
+          <button class="btn btn-dark fw-bold py-2" type="submit" [disabled]="submitting || loginForm.invalid">
+            {{ submitting ? 'Ingresando...' : 'Ingresar' }}
+          </button>
+
+          <div class="text-center text-muted small">
+            ¿Aún no tienes cuenta?
+            <a (click)="closeLogin(); toRegistro()">Regístrate</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

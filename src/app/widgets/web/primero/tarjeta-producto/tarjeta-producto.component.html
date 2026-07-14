@@ -1,0 +1,20 @@
+<article class="ed-card" (click)="onOpen()">
+  <!-- MEDIA -->
+<div class="ed-card__media">
+  <img [src]="producto.imagen || '/images/productos/placeholder.jpg'" [alt]="producto.nombre" loading="lazy" />
+</div>
+
+<!-- BODY -->
+<div class="ed-card__body">
+  <h3 class="ed-card__title">{{ producto.nombre }}</h3>
+
+  <div class="ed-card__price">
+    S/ {{ producto.precio | number:'1.2-2' }}
+  </div>
+
+  <div class="ed-card__actions">
+    <button class="btn btn-outline-secondary" (click)="openDetail.emit(producto)">Ver detalle</button>
+    <button class="btn btn-warning" (click)="addToCart.emit(producto)">Agregar al carrito</button>
+  </div>
+</div>
+</article>

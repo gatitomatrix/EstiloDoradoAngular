@@ -1,0 +1,48 @@
+<div class="ed-det">
+    <h1 class="ed-det__title">{{ titulo }}</h1>
+    <p class="ed-det__desc" *ngIf="descripcion">{{ descripcion }}</p>
+
+    <h3 class="ed-det__block-title">Información adicional</h3>
+    <ul class="ed-det__list">
+        <li *ngFor="let f of features">- {{ f }}</li>
+    </ul>
+
+    <p class="ed-det__stock">Stock {{ stock }} Uni.</p>
+
+    <div class="ed-det__rating" aria-label="Valoración">
+        <ng-container *ngFor="let _ of [1,2,3,4,5]; index as i">
+            <img [src]="i < rating ? 'https://i.imgur.com/fKrBl0C.png' : '/images/iconos/estrella.png'" alt="" />
+        </ng-container>
+    </div>
+
+    <!-- Precio (unitario) -->
+    <div class="ed-det__price">
+        <small>Precio unitario:</small>
+        <strong>S/. {{ precio | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="ed-det__actions">
+        <div class="ed-det__qty">
+            <div class="ed-qty-group">
+                <button type="button" class="ed-qty-btn" (click)="dec()" aria-label="Menos" style="font-weight: bold; color: black;">−</button>
+<input type="number" class="ed-qty-input" [value]="qty" readonly style="font-weight: bold; color: black;" />
+<button type="button" class="ed-qty-btn" (click)="inc()" aria-label="Más" style="font-weight: bold; color: black;">+</button>
+            </div>
+            <small>Máximo {{ maxLimit }} unidades</small>
+        </div>
+
+        <!-- Total dinámico -->
+        <div class="ed-det__total">
+            <span>Total:</span>
+            <strong>S/. {{ total | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="ed-det__btns">
+            <button type="button" class="ed-btn ed-btn--primary" (click)="agregarCarrito.emit(qty)">
+                Agregar al carrito
+            </button>
+            <button type="button" class="ed-btn ed-btn--ghost" routerLink="/" (click)="seguirComprando.emit()">
+                Seguir comprando
+            </button>
+        </div>
+    </div>

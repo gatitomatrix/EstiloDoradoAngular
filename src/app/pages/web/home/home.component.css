@@ -1,0 +1,56 @@
+/* Franja que contiene: chips (izq) + búsqueda (der) en la MISMA LÍNEA */
+.ed-chips-busqueda-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 10px 16px;
+  flex-wrap: wrap;              /* en móvil puede bajar a 2da línea */
+}
+
+/* El bloque de chips debe poder contraerse sin romper scroll interno */
+.ed-chips-busqueda-row__chips {
+  flex: 1 1 auto;
+  min-width: 0;                 /* clave para que el scroll horizontal de chips funcione */
+}
+
+/* El bloque de búsqueda mantiene un ancho razonable */
+.ed-chips-busqueda-row__search {
+  flex: 0 0 auto;
+}
+
+/* Fila principal: filtros (izq) + contenido (der) */
+.ed-content-row {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Columna izquierda con ancho fijo (se ajusta al ancho del panel) */
+.ed-content-row__left {
+  flex: 0 0 auto;
+}
+
+/* Columna derecha ocupa el resto del ancho */
+.ed-content-row__right {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Caja placeholder para ver la estructura */
+.ed-placeholder-box {
+  border: 1px dashed #ddd;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 300px;
+}
+
+/* Responsive: columnas apiladas en móvil */
+@media (max-width: 992px) {
+  .ed-content-row {
+    flex-direction: column;
+  }
+}
+

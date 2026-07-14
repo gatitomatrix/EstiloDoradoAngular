@@ -1,0 +1,99 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<div class="container my-4">
+    <h3 class="mb-3">Resumen de compra</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div><strong>ID PEDIDO:</strong> #{{ data?.id_pedido }}</div>
+                <div><strong>Fecha:</strong> {{ data?.fecha_pedido | date:'short' }}</div>
+            </div>
+            <div class="d-flex justify-content-between mt-1">
+                <div><strong>Estado:</strong> {{ data?.estado }}</div>
+                <div><strong>Forma de pago:</strong> {{ data?.forma_pago }}</div>
+            </div>
+            <div class="mt-1"><strong>Dirección:</strong> {{ data?.direccion_entrega }}</div>
+
+            <div class="table-responsive mt-3">
+                <table class="table table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item</th>
+                            <th>Id_Producto</th>
+                            <th>Producto</th>
+                            <th class="text-end">Cant</th>
+                            <th class="text-end">P. Unit</th>
+                            <th class="text-end">Sub Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let d of data?.detalles; let i=index">
+                            <td>{{ i+1 | number:'2.0-0' }}</td>
+                            <td>{{ d.producto?.nombre || ('#'+d.id_producto) }}</td>
+                            <td>{{ d.producto || (d.id_producto) }}</td>
+                            <td class="text-end">{{ d.cantidad }}</td>
+                            <td class="text-end">S/ {{ d.precio_unitario | number:'1.2-2' }}</td>
+                            <td class="text-end">S/ {{ (d.cantidad*d.precio_unitario) | number:'1.2-2' }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th colspan="4" class="text-end">TOTAL</th>
+                            <th class="text-end">S/ {{ data?.total | number:'1.2-2' }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Si hay comprobante FA/BO => título y descargas -->
+            <ng-container
+                *ngIf="data?.comprobante && (data?.comprobante?.tipo==='FA' || data?.comprobante?.tipo==='BO'); else sinComprobante">
+                <div class="mt-3 p-2 border rounded bg-light d-flex justify-content-between align-items-center">
+                    <div class="fw-bold">
+                        {{ (data?.comprobante?.tipo === 'FA' ? 'FACTURA ELECTRÓNICA' : 'BOLETA ELECTRÓNICA') }}
+                    </div>
+                    <div class="text-muted">
+                        {{ data?.comprobante?.serie }}-{{ (data?.comprobante?.numero | number:'2.0-0') | slice:-8 }}
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <button class="btn btn-outline-dark" (click)="abrirArchivo(data?.sunat_pdf || files?.pdf, 'PDF')">📄
+                        Descargar PDF</button>
+                    <button class="btn btn-outline-secondary"
+                        (click)="abrirArchivo(data?.sunat_xml || files?.xml, 'XML')">📦 Descargar XML</button>
+                    <button class="btn btn-outline-secondary"
+                        (click)="abrirArchivo(data?.sunat_cdr || files?.cdr, 'CDR')">📨 Descargar CDR</button>
+                </div>
+            </ng-container>
+
+            <ng-template #sinComprobante>
+                <div class="alert alert-warning mt-3">
+                    <strong>Pago en efectivo (retiro en tienda).</strong> No se generó comprobante electrónico para este
+                    pedido.
+                </div>
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button class="btn btn-danger" (click)="seguirComprando()">Seguir comprando</button>
+    </div>
+</div>
+
+<!-- Modal Bootstrap éxito -->
+<div #okModal class="modal fade" tabindex="-1" aria-labelledby="okLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-5">
+                <div class="display-4 text-success mb-3"><i class="bi bi-check-circle-fill"></i></div>
+                <h4 class="mb-2" id="okLabel">¡Venta exitosa!</h4>
+                <p class="text-muted mb-3">Gracias por tu compra. Puedes descargar tu comprobante aquí mismo.</p>
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>

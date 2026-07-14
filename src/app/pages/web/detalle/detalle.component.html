@@ -1,0 +1,27 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+<br>
+<br>
+
+<section class="ed-detalle">
+  <div class="ed-detalle__left">
+    <ed-web-galeria-producto [imagenes]="imagenes"></ed-web-galeria-producto>
+  </div>
+
+  <div class="ed-detalle__right">
+    <div *ngIf="loading">Cargando…</div>
+    <div *ngIf="error" class="ed-error">{{ error }}</div>
+
+    <ed-web-panel-datos-producto 
+    *ngIf="prod" [titulo]="prod.nombre || ''" 
+    [subtitulo]="prod.slug || ''"
+    [descripcion]="prod.descripcion || ''" 
+    [features]="[]" 
+    [stock]="prod.stock ?? 0" 
+    [precio]="prod.precio"
+    [rating]="4" 
+    (agregarCarrito)="onAddToCart($event)" 
+    (seguirComprando)="irHome()">
+    </ed-web-panel-datos-producto>
+  </div>
+</section>

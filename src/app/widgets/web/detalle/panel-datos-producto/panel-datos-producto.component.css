@@ -1,0 +1,79 @@
+.ed-det { display: grid; gap: 14px; }
+.ed-det__title { margin: 0; font-size: 1.6rem; font-weight: 800; }
+.ed-det__subtitle { margin: 0; color: #555; }
+
+.ed-det__desc { margin: 6px 0 2px; color: #444; line-height: 1.5; }
+
+
+.ed-det__block-title { margin: 10px 0 6px; font-size: 1.05rem; font-weight: 800; }
+.ed-det__list { margin: 0; padding-left: 0; list-style: none; color: #333; }
+.ed-det__list li { margin: 4px 0; }
+
+.ed-det__stock { margin-top: 8px; font-weight: 700; }
+
+.ed-det__rating img { width: 20px; height: 20px; margin-right: 4px; }
+
+.ed-det__price {
+  color: #d32f2f; font-size: 1.6rem; font-weight: 900;
+}
+
+.ed-det__actions { display: grid; gap: 12px; align-items: start; flex-direction: column;}
+.ed-det__qty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ed-qty-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;              /* bordes unidos */
+}
+.ed-qty-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.ed-qty-btn:hover { background: #f6f6f6; }
+.ed-qty-input {
+  width: 50px;
+  height: 30px;
+  border: 0;
+  text-align: center;
+  background: #fff;
+  font-weight: 600;
+}
+.ed-qty-input:focus { outline: none; }
+.ed-det__qty button {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer;
+}
+.ed-det__qty input {
+  height: 32px; text-align: center; border: 1px solid #ddd; border-radius: 6px; background: #fff;
+}
+.ed-det__qty small { font-size: 0.85rem;
+  color: #777; }
+
+.ed-det__total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #111;
+  margin-top: 4px;
+}
+.ed-det__price small { color: #777; margin-right: 6px; }
+
+/* Botones de acción */
+.ed-det__btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ed-btn { height: 42px; border-radius: 8px; cursor: pointer; font-weight: 800; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; }
+.ed-btn--primary { background: #c9a227; color: #111; border-color: #c9a227; }
+.ed-btn--primary:hover { filter: brightness(0.95); }
+.ed-btn--ghost { background: #fff; color: #333; border-color: #c9a227; }
+.ed-btn--ghost:hover { background: #f7f2e0; }

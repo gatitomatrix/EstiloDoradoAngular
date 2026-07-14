@@ -1,0 +1,29 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<section class="container" style="max-width: 760px;">
+    <div class="card shadow-sm my-4">
+        <div class="card-body p-4">
+            <h3 class="fw-bold mb-3"><span class="me-2">🔒</span>Recuperar contraseña</h3>
+            <p class="text-muted">Ingresa tu correo electrónico y te enviaremos las instrucciones para una nueva
+                contraseña.</p>
+
+            <form [formGroup]="form" class="d-grid gap-3" (ngSubmit)="continuar()">
+                <div>
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" placeholder="nombre@ejemplo.com" formControlName="email">
+                    <div class="form-text text-danger" *ngIf="emailCtrl.hasError('notfound')">
+                        Ingresa un correo electrónico válido (nombre&#64;ejemplo.com)
+                    </div>
+                </div>
+
+                <button class="btn btn-dark fw-bold py-2" type="submit" [disabled]="form.invalid">Continuar</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a class="link-primary text-decoration-underline" (click)="toRestablecer()">Ya tengo el código
+                    verificador</a>
+            </div>
+        </div>
+    </div>
+</section>

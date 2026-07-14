@@ -1,0 +1,45 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<section class="ed-account">
+  <h1>Hola, {{ (user$ | async)?.nombre || 'Cliente' }}</h1>
+
+  <div class="ed-card">
+    <div class="ed-card__header">
+      <h2>Datos personales</h2>
+      <button class="ed-link" *ngIf="!edit" (click)="edit = true">Editar</button>
+    </div>
+
+    <form [formGroup]="form" class="ed-grid">
+      <div>
+        <label>Nombre</label>
+        <input type="text" formControlName="nombre" [readonly]="!edit">
+      </div>
+
+      <div>
+        <label>Apellido</label>
+        <input type="text" formControlName="apellido" [readonly]="!edit">
+      </div>
+
+      <div>
+        <label>Teléfono</label>
+        <input type="tel" formControlName="telefono" [readonly]="!edit" placeholder="+51 ...">
+      </div>
+
+      <div>
+        <label>Dirección</label>
+        <input type="text" formControlName="direccion" [readonly]="!edit">
+      </div>
+
+      <div>
+        <label>Correo</label>
+        <input type="email" formControlName="email" readonly>
+      </div>
+    </form>
+
+    <div class="ed-actions" *ngIf="edit">
+      <button class="ed-btn ed-btn--ghost" (click)="cancelar()">Cancelar</button>
+      <button class="ed-btn ed-btn--primary" (click)="guardar()" [disabled]="form.invalid">Guardar cambios</button>
+    </div>
+  </div>
+</section>

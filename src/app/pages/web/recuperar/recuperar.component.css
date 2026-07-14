@@ -1,0 +1,8 @@
+.ed-form-wrap { max-width: 700px; margin: 16px auto 24px; padding: 0 12px; }
+h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 12px; }
+.ed-form { display: grid; gap: 12px; }
+.ed-form input { height: 40px; border:1px solid #ddd; border-radius:8px; padding:0 10px; width:100%; }
+.ed-pass { position: relative; }
+.ed-eye { position: absolute; right: 8px; top: 6px; border:0; background:none; cursor:pointer; font-size: 18px; }
+.ed-btn { height:44px; border-radius:10px; border:1px solid transparent; cursor:pointer; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.ed-btn--primary { background:#1f2937; color:#fff; border-color:#1f2937; }

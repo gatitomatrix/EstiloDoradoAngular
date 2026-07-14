@@ -1,0 +1,15 @@
+<form class="ed-busqueda" (submit)="onSubmit($event)">
+  <input
+    type="text"
+    class="ed-busqueda__input"
+    placeholder="Buscar en Estilo Dorado..."
+    [(ngModel)]="query"
+    name="q"
+  />
+  <button class="ed-busqueda__btn" type="submit" aria-label="Buscar">
+    <!-- Si quieres un ícono propio, colócalo en /images/iconos/search.svg -->
+    <img src="/images/iconos/lupa.png" alt="" />
+    <span>Buscar</span>
+  </button>
+</form>
+

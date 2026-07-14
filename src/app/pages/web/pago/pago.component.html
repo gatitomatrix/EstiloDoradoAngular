@@ -1,0 +1,295 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<div class="container my-4">
+  <div class="row g-4">
+
+    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+      <img src="https://i.imgur.com/hixFJ0L.jpeg" style="height: 50px; width: 50px; margin-left: 30px; border-radius: 15px;" alt="logo">
+      <div>¿Necesitas ayuda para comprar? Llámanos al <strong>+51 904 811 627</strong></div>
+    </div>
+
+    <!-- Timeline clickable con restricciones -->
+    <div class="ed-timeline">
+      <button class="step done" (click)="goToCart()">1</button><span>Carro</span>
+      <div class="line done"></div>
+      <button class="step done" (click)="goToEntrega()">2</button><span>Entrega</span>
+      <div class="line"></div>
+      <div class="step">3</div><span class="text-muted">Pago</span>
+    </div>
+
+    <!-- Columna izquierda -->
+    <div class="col-12 col-lg-8">
+
+      <!-- Mensaje Culqi -->
+      <div class="alert alert-dark d-flex align-items-start gap-3">
+        <i class="bi bi-shield-lock fs-4"></i>
+        <div>
+          <div class="fw-semibold">Pagos con Culqi</div>
+          <small>Contamos con la pasarela de pagos Culqi para que tu experiencia sea más efectiva y segura. 
+          Solo presiona <strong>Pagar con Culqui</strong> y completa el proceso en la ventana segura.</small>
+        </div>
+      </div>
+
+      <!-- Mensaje Reparto Express -->
+      <div class="alert alert-dark d-flex align-items-start gap-3">
+        <i class="bi bi-shield-lock fs-4"></i>
+        <div>
+          <div class="fw-semibold">Envío Express</div>
+          <small>Recuerda que al aceptar el Envío Express, tu pedido llegará en un plazo de 1 a 2 días a tu direccion. 
+          La unica opción de pago es con <strong>Culqui.</strong> Para un envío y pago seguro para tu tranquilidad.</small>
+        </div>
+      </div>
+
+      <!-- Opción EFECTIVO -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <h5 class="mb-2">¿Efectivo (retiro en tienda)?</h5>
+          <p class="text-muted mb-3">
+            Si tu opción es retiro en tienda puedes pagar en efectivo al recoger. 
+            <strong>No se emiten comprobantes electrónicos (PDF/XML/CDR) en esta modalidad, si lo necesitas lo puedes solicitar en tienda.</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Resumen de la compra</h5>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Productos</span><span>S/ {{ subtotal | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Descuentos</span><span class="text-success">- S/ {{ discount | number:'1.2-2' }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Entregas</span><span>S/ {{ fee | number:'1.2-2' }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold mb-3">
+            <span>Total:</span><span>S/ {{ total | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- Botón Culqi -->
+          <button class="btn btn-dark w-100 mb-2" [disabled]="!(pay.hasMethod$ | async)" (click)="pagarConCulqi()">
+            Pagar con Culqi
+          </button>
+
+          <!-- Botón Efectivo -->
+          <button class="btn btn-outline-dark w-100" (click)="pagarEnEfectivo()">
+            Confirma tu pedido (efectivo en tienda)
+          </button>
+        </div>
+      </div>
+
+      <!-- Solicitudes de comprobante (solo para Culqi; efectivo no emite) -->
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>¿Necesitas factura electrónica?</div>
+            <button class="btn btn-outline-primary btn-sm" (click)="openFactura()">Solicitar</button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>¿Necesitas boleta electrónica?</div>
+            <button class="btn btn-outline-primary btn-sm" (click)="openBoleta()">Solicitar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos guardados -->
+      <div *ngIf="pay.invoice$ | async as inv" class="card shadow-sm mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Datos de Factura Electrónica</div>
+          <div class="small text-muted mb-2">RUC: {{ inv.ruc }}</div>
+          <div>{{ inv.razonSocial }}</div>
+          <div class="small text-muted">{{ inv.direccion }}, {{ inv.distrito }}, {{ inv.provincia }}, {{ inv.departamento }}</div>
+          <button class="btn btn-link p-0 mt-2" (click)="openFactura()"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+        </div>
+      </div>
+
+      <div *ngIf="pay.boleta$ | async as bol" class="card shadow-sm mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-1">Datos de Boleta Electrónica</div>
+          <div>{{ bol.nombres }}</div>
+          <div class="small text-muted">DNI: {{ bol.dni }}</div>
+          <div class="small text-muted">{{ bol.direccion }}, {{ bol.distrito }}, {{ bol.provincia }}, {{ bol.departamento }}</div>
+          <button class="btn btn-link p-0 mt-2" (click)="openBoleta()"><i class="bi bi-pencil-square me-1"></i>Editar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFCANVAS Tarjeta -->
+<div class="offcanvas offcanvas-end show" tabindex="-1" *ngIf="showCardDrawer" (click)="closeDrawers()">
+  <div class="offcanvas-body" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-credit-card-2-front fs-4"></i>
+      <h5 class="m-0">Tarjeta de {{ showCardDrawer }}</h5>
+    </div>
+    <form [formGroup]="cardForm" (ngSubmit)="addCard()">
+      <div class="mb-3">
+        <label class="form-label">Número de tarjeta</label>
+        <div class="input-group">
+          <input class="form-control" placeholder="0000 0000 0000 0000" formControlName="numero" (input)="onCardInput($event)">
+          <button type="button" class="btn btn-outline-secondary" (click)="cardForm.patchValue({ ver: !cardForm.value.ver })">
+            <i class="bi" [ngClass]="cardForm.value.ver ? 'bi-eye-slash' : 'bi-eye'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="cardForm.controls['numero'].invalid && cardForm.touched">
+          La tarjeta es requerida
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col">
+          <label class="form-label">Expiración</label>
+          <input class="form-control" placeholder="MM/AA" formControlName="exp" (input)="onExpInput($event)">
+          <div class="invalid-feedback d-block" *ngIf="cardForm.controls['exp'].invalid && cardForm.touched">
+            La fecha de expiración es requerida
+          </div>
+        </div>
+        <div class="col">
+          <label class="form-label">Código de seguridad</label>
+          <input class="form-control" placeholder="CVV" maxlength="3" formControlName="cvv" (input)="onCvvInput($event)">
+          <div class="invalid-feedback d-block" *ngIf="cardForm.controls['cvv'].invalid && cardForm.touched">
+            El CVV no es válido
+          </div>
+        </div>
+      </div>
+      <div class="d-grid gap-2 mt-3">
+        <button class="btn btn-dark w-100 mt-3" [disabled]="cardForm.invalid">Agregar</button>
+        <button type="button" class="btn btn-outline-danger" (click)="closeDrawers()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- OFFCANVAS Factura -->
+<div class="offcanvas offcanvas-end show" *ngIf="showFactura" (click)="closeDrawers()">
+  <div class="offcanvas-body" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-file-text fs-4"></i>
+      <h5 class="m-0">Datos de Facturación</h5>
+    </div>
+    <form [formGroup]="facturaForm" (ngSubmit)="guardarFactura()">
+      <div class="mb-2"><label class="form-label">RUC</label>
+        <input class="form-control" maxlength="11" formControlName="ruc" (input)="onRucInput($event)">
+        <div class="invalid-feedback d-block" *ngIf="facturaForm.controls['ruc'].invalid && facturaForm.touched">Ingresa RUC</div>
+      </div>
+      <div class="mb-2"><label class="form-label">Razón Social</label>
+        <input class="form-control" formControlName="razonSocial">
+      </div>
+      <div class="mb-2"><label class="form-label">Dirección</label>
+        <input class="form-control" formControlName="direccion">
+      </div>
+
+      <div class="row g-2">
+        <div class="col">
+          <label class="form-label">Departamento</label>
+          <select class="form-select" formControlName="departamento">
+            <option value="">Selecciona</option>
+            <option *ngFor="let d of deps" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label">Provincia</label>
+          <select class="form-select" formControlName="provincia">
+            <option value="">Selecciona</option>
+            <option *ngFor="let p of provs" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label">Distrito</label>
+          <select class="form-select" formControlName="distrito">
+            <option value="">Selecciona</option>
+            <option *ngFor="let d of dists" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 mt-3">
+        <button class="btn btn-dark" [disabled]="facturaForm.invalid">Guardar</button>
+        <button type="button" class="btn btn-outline-danger" (click)="closeDrawers()">Cancelar</button>
+        <button *ngIf="pay.currentInvoice()" type="button" class="btn btn-outline-secondary" (click)="eliminarFactura()">
+          Eliminar datos de facturación
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- OFFCANVAS Boleta -->
+<div class="offcanvas offcanvas-end show" *ngIf="showBoleta" (click)="closeDrawers()">
+  <div class="offcanvas-body" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-file-text fs-4"></i>
+      <h5 class="m-0">Datos de Boleta Electrónica</h5>
+    </div>
+    <form [formGroup]="boletaForm" (ngSubmit)="guardarBoleta()">
+      <div class="mb-2"><label class="form-label">Nombres y Apellidos</label>
+        <input class="form-control" formControlName="nombres">
+      </div>
+      <div class="mb-2"><label class="form-label">DNI</label>
+        <input class="form-control" maxlength="8" formControlName="dni" (input)="onDniInput($event)">
+      </div>
+      <div class="mb-2"><label class="form-label">Dirección</label>
+        <input class="form-control" formControlName="direccion">
+      </div>
+
+      <div class="row g-2">
+        <div class="col">
+          <label class="form-label">Departamento</label>
+          <select class="form-select" formControlName="departamento">
+            <option value="">Selecciona</option>
+            <option *ngFor="let d of deps" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label">Provincia</label>
+          <select class="form-select" formControlName="provincia">
+            <option value="">Selecciona</option>
+            <option *ngFor="let p of provs" [value]="p">{{ p }}</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="form-label">Distrito</label>
+          <select class="form-select" formControlName="distrito">
+            <option value="">Selecciona</option>
+            <option *ngFor="let d of dists" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 mt-3">
+        <button class="btn btn-dark" [disabled]="boletaForm.invalid">Guardar</button>
+        <button type="button" class="btn btn-outline-danger" (click)="closeDrawers()">Cancelar</button>
+        <button *ngIf="pay.currentBoleta()" type="button" class="btn btn-outline-secondary" (click)="eliminarBoleta()">
+          Eliminar datos de boleta electrónica
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Modal Bootstrap: selector de comprobante -->
+<div #docModal class="modal fade" tabindex="-1" aria-labelledby="docLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="docLabel" class="modal-title">¿Qué deseas emitir?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Elige el tipo de comprobante para continuar.</p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-dark w-100" (click)="pickDoc('BO')">Boleta electrónica</button>
+          <button type="button" class="btn btn-outline-dark w-100" (click)="pickDoc('FA')">Factura electrónica</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

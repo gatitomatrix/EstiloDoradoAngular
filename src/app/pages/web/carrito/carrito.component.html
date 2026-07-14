@@ -1,0 +1,64 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<section class="ed-cart">
+  <!-- Lista de productos -->
+  <div class="ed-cart__left">
+    <h1 class="ed-cart__title">Carrito</h1>
+
+    <div *ngIf="!items.length" class="ed-empty">
+      Tu carrito está vacío.
+      <a (click)="seguirComprando()">Seguir comprando</a>
+    </div>
+
+    <div *ngFor="let it of items" class="ed-item">
+      <div class="ed-item__img">
+        <img [src]="it.imagen || '/images/productos/placeholder.jpg'" [alt]="it.nombre">
+      </div>
+
+      <div class="ed-item__info">
+        <div class="ed-item__name">{{ it.nombre }}</div>
+        <div class="ed-item__controls">
+          <div class="ed-qty-group">
+            <button class="ed-qty-btn" (click)="dec(it)" [disabled]="it.qty<=1"
+              style="font-weight: bold; color: black;">−</button>
+            <input class="ed-qty-input" [value]="it.qty" readonly style="font-weight: bold; color: black;" />
+            <button class="ed-qty-btn" (click)="inc(it)" [disabled]="it.qty>=it.stockMax"
+              style="font-weight: bold; color: black;">+</button>
+          </div>
+          <small>Máx {{ it.stockMax }} unidades</small>
+        </div>
+      </div>
+
+      <div class="ed-item__price">
+        <div class="ed-item__unit">S/ {{ it.precio | number:'1.2-2' }}</div>
+        <div class="ed-item__subtotal">S/ {{ (it.precio * it.qty) | number:'1.2-2' }}</div>
+        <button class="ed-link" (click)="remove(it)">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen -->
+  <aside class="ed-cart__right">
+    <div class="ed-summary">
+      <h2>Resumen de la orden</h2>
+      <div class="ed-summary__row">
+        <span>Productos ({{ items.length }})</span>
+        <strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
+      </div>
+      <div class="ed-summary__row">
+        <span>Descuentos * Promoción</span>
+        <strong class="ed-green">− S/ {{ descuentos | number:'1.2-2' }}</strong>
+      </div>
+      <div class="ed-summary__total">
+        <span>Total:</span>
+        <strong>S/ {{ total | number:'1.2-2' }}</strong>
+      </div>
+
+      <button class="ed-btn ed-btn--primary" (click)="continuarCompra()">Continuar Compra</button>
+      <button class="ed-btn ed-btn--ghost" (click)="seguirComprando()">Seguir comprando</button>
+
+      <p class="ed-note">Los descuentos solo se aplican en temporadas de promoción.</p>
+    </div>
+  </aside>
+</section>

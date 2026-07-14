@@ -1,0 +1,9 @@
+.ed-step{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #2e3a46;color:#2e3a46;font-weight:700}
+.ed-step--active{background:#2e3a46;color:#fff}
+.ed-step--mute{opacity:.35}
+.ed-line{flex:1;height:2px;background:#e5e7eb}
+
+.ed-option{display:flex;gap:12px;border:1px solid #eee;border-radius:12px;padding:14px 16px;margin-bottom:12px;cursor:pointer}
+.ed-option:hover{border-color:#d6d6d6;background:#fafafa}
+.ed-icon{font-size:22px;line-height:1}
+.ed-body{flex:1}

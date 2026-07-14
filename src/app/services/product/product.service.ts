@@ -1,0 +1,73 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { ProductPreview } from '../../models/product/preview';
+import { ProductDetail } from '../../models/product/detail';
+
+type ApiProducto = {
+  id_producto: number;
+  nombre: string;
+  descripcion?: string;
+  precio_compra?: string;
+  precio_venta: string;
+  stock?: number;
+  id_categoria?: number;
+  imagen_url?: string;
+  estado?: string;
+  slug?: string;
+};
+
+@Injectable({ providedIn: 'root' })
+export class ProductoService {
+  private http = inject(HttpClient);
+  private base = `${environment.apiBaseUrl}/productos`;
+
+  /** Adaptadores */
+  private toPreview = (a: ApiProducto): ProductPreview => ({
+    id: a.id_producto,
+    nombre: a.nombre,
+    descripcion: a.descripcion ?? '',
+    precio: Number(a.precio_venta),
+    stock: a.stock ?? 0,
+    imagen: a.imagen_url ?? '',
+    categoriaId: a.id_categoria ?? null,
+    slug: a.slug ?? ''
+  });
+
+  private toDetail = (a: ApiProducto): ProductDetail => ({
+    id: a.id_producto,
+    nombre: a.nombre,
+    descripcion: a.descripcion ?? '',
+    precio: Number(a.precio_venta),
+    stock: a.stock ?? 0,
+    imagen: a.imagen_url ?? '',
+    slug: a.slug ?? '',
+  });
+
+  getAll(): Observable<ProductPreview[]> {
+    return this.http.get<ApiProducto[]>(this.base).pipe(
+      map(list => (list ?? []).map(this.toPreview))
+    );
+  }
+
+  listByCategory(categoriaId: number): Observable<ProductPreview[]> {
+    // si tienes endpoint por categoría cámbialo; de momento filtro en front
+    return this.getAll().pipe(
+      map(list => list.filter(p => p.categoriaId === categoriaId))
+    );
+  }
+
+  getById(id: number): Observable<ProductDetail> {
+    return this.http.get<ApiProducto>(`${this.base}/${id}`).pipe(
+      map(this.toDetail)
+    );
+  }
+
+  /** Buscar por nombre (para la lupa) */
+  searchByName(q: string): Observable<ProductPreview[]> {
+    return this.getAll().pipe(
+      map(list => list.filter(p => p.nombre.toLowerCase().includes(q.toLowerCase())))
+    );
+  }
+}

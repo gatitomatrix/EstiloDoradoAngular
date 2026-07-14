@@ -1,0 +1,13 @@
+{
+  "Junín": {
+    "Huancayo": ["El Tambo", "Huancayo", "Chilca", "San Agustín de Cajas"],
+    "Tarma": ["Tarma", "Palca", "Huasahuasi"]
+  },
+  "Lima": {
+    "Lima": ["Miraflores", "Surco", "San Isidro", "Lince"],
+    "Huaral": ["Aucallama", "Chancay", "Lampian"]
+  },
+  "Cusco": {
+    "Cusco": ["Santiago", "San Sebastián", "San Jerónimo"]
+  }
+}

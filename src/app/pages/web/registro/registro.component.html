@@ -1,0 +1,41 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<!-- ...barra y franja... -->
+<section class="ed-form-wrap">
+  <h1>Regístrate</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="ed-form">
+    <label>Correo</label>
+    <input type="email" formControlName="email">
+
+    <label>Nombre</label>
+    <input type="text" formControlName="nombre">
+
+    <label>Apellido</label>
+    <input type="text" formControlName="apellido">
+
+    <label>Teléfono</label>
+    <input type="tel" formControlName="telefono" placeholder="+51 ...">
+
+    <label>Dirección</label>
+    <input type="text" formControlName="direccion">
+
+    <label>Contraseña</label>
+    <div class="ed-pass">
+      <input [type]="hide ? 'password' : 'text'" formControlName="password">
+      <button type="button" class="ed-eye" (click)="toggle()">👁</button>
+    </div>
+
+    <!-- requisitos (como dejaste) -->
+    <ul class="ed-reqs" [class.ok]="p.touched && p.valid">
+      <li [class.ok]="reqLen">Mín. 8 caracteres</li>
+      <li [class.ok]="reqLower">1 minúscula</li>
+      <li [class.ok]="reqUpper">1 mayúscula</li>
+      <li [class.ok]="reqNumber">1 número</li>
+      <li [class.ok]="reqNoSpace">Sin espacios</li>
+    </ul>
+
+    <button class="ed-btn ed-btn--primary" type="submit" [disabled]="form.invalid">Crear cuenta</button>
+  </form>
+</section>

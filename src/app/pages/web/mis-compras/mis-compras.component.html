@@ -1,0 +1,66 @@
+<ed-web-barra-superior></ed-web-barra-superior>
+<ed-web-franja-marca></ed-web-franja-marca>
+
+<h1 class="ed-mc-title">Mis compras</h1>
+
+<div class="ed-mc-banner">
+  El estado del pedido cambiará en tiempo real de acuerdo al proceso de compra realizado y el tiempo de entrega o recojo
+  en tienda.
+</div>
+
+<div class="ed-mc-filters">
+  <input class="form-control" type="number" placeholder="Buscar por N° de pedido" [(ngModel)]="filtroId">
+
+  <select class="form-select" [(ngModel)]="rango">
+    <option value="1y">Último año</option>
+    <option value="3m">Últimos 3 meses</option>
+    <option value="last">Última compra</option>
+  </select>
+
+  <button class="btn btn-outline-secondary" (click)="limpiar()">Limpiar</button>
+</div>
+
+<div *ngIf="loading" class="ed-mc-loading">Cargando…</div>
+<div *ngIf="!loading && error" class="ed-mc-error">{{ error }}</div>
+
+<div *ngIf="!loading && !error && filtered.length === 0" class="ed-mc-empty">
+  ¡Oh! Aún no tienes compras online.
+</div>
+
+<div *ngIf="!loading && !error && filtered.length > 0" class="ed-mc-list">
+  <article class="ed-mc-card" *ngFor="let p of filtered">
+    <header class="ed-mc-head">
+      <div class="ed-mc-head__left">
+        <span class="ed-mc-badge">Pedido: #{{ p.id_pedido }}</span>
+        <span class="ed-mc-badge">Producto: {{ p.producto_label }}</span>
+      </div>
+      <div class="ed-mc-head__mid">
+        <span class="ed-mc-label"><b>Fecha:</b> {{ p.fecha_pedido | date:'short' }}</span>
+        <span class="ed-mc-chip" [class.ok]="p.estado==='entregado'" [class.warn]="p.estado==='pendiente'"
+          [class.cancel]="p.estado==='cancelado'">
+          {{ p.estado }}
+        </span>
+      </div>
+      <div class="ed-mc-head__right">
+        <div class="ed-mc-total">Total: <b>S/ {{ p.total | number:'1.2-2' }}</b></div>
+      </div>
+    </header>
+
+    <div class="ed-mc-body">
+      <div class="ed-mc-row">
+        <div class="ed-mc-item"><b>Entrega:</b> {{ p.direccion_entrega || '—' }}</div>
+        <div class="ed-mc-item"><b>Pago:</b> {{ p.forma_pago || '—' }}</div>
+        <div class="px-3 pb-3">
+          <button class="btn btn-outline-dark btn-sm" [routerLink]="['/resumen', p.id_pedido]">Resumen</button>
+        </div>
+      </div>
+
+    </div>
+
+
+  </article>
+
+  <footer class="ed-mc-note">
+    Para cualquier reclamo siempre es con el N° de pedido. ¡Gracias por comprar con nosotros!
+  </footer>
+</div>
