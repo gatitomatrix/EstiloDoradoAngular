@@ -2,6 +2,9 @@
 <ed-web-franja-marca></ed-web-franja-marca>
 
 <section class="ed-account">
+  <button type="button" class="ed-link" (click)="logout()" style="float:right;border:none;background:none;cursor:pointer;color:#c00;">
+    Cerrar sesión
+  </button>
   <h1>Hola, {{ (user$ | async)?.nombre || 'Cliente' }}</h1>
 
   <div class="ed-card">
@@ -13,17 +16,20 @@
     <form [formGroup]="form" class="ed-grid">
       <div>
         <label>Nombre</label>
-        <input type="text" formControlName="nombre" [readonly]="!edit">
+        <input type="text" formControlName="nombre" [readonly]="!edit"
+          (input)="onNameInput('nombre', $event)" placeholder="Solo letras">
       </div>
 
       <div>
         <label>Apellido</label>
-        <input type="text" formControlName="apellido" [readonly]="!edit">
+        <input type="text" formControlName="apellido" [readonly]="!edit"
+          (input)="onNameInput('apellido', $event)" placeholder="Solo letras">
       </div>
 
       <div>
         <label>Teléfono</label>
-        <input type="tel" formControlName="telefono" [readonly]="!edit" placeholder="+51 ...">
+        <input type="tel" formControlName="telefono" [readonly]="!edit"
+          (input)="onPhoneInput($event)" inputmode="numeric" maxlength="9" placeholder="9xxxxxxxx">
       </div>
 
       <div>
@@ -36,6 +42,9 @@
         <input type="email" formControlName="email" readonly>
       </div>
     </form>
+
+    <p class="text-success" *ngIf="saveMsg">{{ saveMsg }}</p>
+    <p class="text-danger" *ngIf="saveErr">{{ saveErr }}</p>
 
     <div class="ed-actions" *ngIf="edit">
       <button class="ed-btn ed-btn--ghost" (click)="cancelar()">Cancelar</button>

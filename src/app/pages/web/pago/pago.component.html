@@ -17,6 +17,9 @@
       <div class="line"></div>
       <div class="step">3</div><span class="text-muted">Pago</span>
     </div>
+    <div class="mb-3">
+      <a href="javascript:void(0)" (click)="goToEntrega()" class="small text-decoration-none" style="color:#8a6d1d;">← Volver a entrega</a>
+    </div>
 
     <!-- Columna izquierda -->
     <div class="col-12 col-lg-8">
@@ -230,7 +233,8 @@
     </div>
     <form [formGroup]="boletaForm" (ngSubmit)="guardarBoleta()">
       <div class="mb-2"><label class="form-label">Nombres y Apellidos</label>
-        <input class="form-control" formControlName="nombres">
+        <input class="form-control" formControlName="nombres" (input)="onPersonNameInput($event)"
+          placeholder="Solo letras">
       </div>
       <div class="mb-2"><label class="form-label">DNI</label>
         <input class="form-control" maxlength="8" formControlName="dni" (input)="onDniInput($event)">

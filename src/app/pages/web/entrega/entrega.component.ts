@@ -60,6 +60,10 @@ export class EntregaComponent {
 
   // ---------- INIT ----------
   ngOnInit() {
+    if (!this.cart.items.length) {
+      this.router.navigateByUrl('/carrito');
+      return;
+    }
     this.checkout.setCosts(0, 0);
 
     this.ubigeo.getDepartamentos().subscribe(d => this.departamentos = d);

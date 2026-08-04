@@ -1,13 +1,23 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
+import { ReturnUrlService } from '../services/return-url.service';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (
+  _route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
   const auth = inject(AuthService);
   const router = inject(Router);
+  const returnUrl = inject(ReturnUrlService);
 
   if (auth.isLoggedIn) return true;
-  router.navigateByUrl('/'); // o mostrar modal; por ahora al Home
+
+  returnUrl.set(state.url);
+  // Home + modal de login (la barra superior escucha el evento)
+  queueMicrotask(() => {
+    window.dispatchEvent(new CustomEvent('ed-open-login'));
+  });
+  router.navigateByUrl('/');
   return false;
 };
-  

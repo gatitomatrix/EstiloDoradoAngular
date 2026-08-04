@@ -1,21 +1,20 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, fromEvent } from 'rxjs';
 import { CartService } from '../../../../services/cart/cart.service';
 import { AuthService, AuthUser } from '../../../../services/auth/auth.service';
-import { ReactiveFormsModule, FormBuilder, Validators} from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ProductoService } from '../../../../services/product/product.service';
 import { FormsModule } from '@angular/forms';
-
-
+import { ReturnUrlService } from '../../../../core/services/return-url.service';
 
 @Component({
   selector: 'ed-web-barra-superior',
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule],
   templateUrl: './barra-superior.component.html',
-  styleUrls: ['./barra-superior.component.css']
+  styleUrls: ['./barra-superior.component.css'],
 })
 export class BarraSuperiorComponent implements OnInit, OnDestroy {
   private cart = inject(CartService);
@@ -23,6 +22,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private productos = inject(ProductoService);
+  private returnUrl = inject(ReturnUrlService);
 
   search = '';
 
@@ -41,25 +41,44 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     password: ['', Validators.required],
   });
 
-  sub?: Subscription; sub2?: Subscription;
+  sub?: Subscription;
+  sub2?: Subscription;
+  subOpenLogin?: Subscription;
 
   ngOnInit(): void {
-    this.sub = this.cart.items$.subscribe(items => this.totalQty = items.reduce((a, i) => a + i.qty, 0));
-    this.sub2 = this.auth.user$.subscribe(u => this.user = u);
+    this.sub = this.cart.items$.subscribe(
+      (items) => (this.totalQty = items.reduce((a, i) => a + i.qty, 0)),
+    );
+    this.sub2 = this.auth.user$.subscribe((u) => (this.user = u));
     if (this.auth.isLoggedIn && !this.user) this.auth.me().subscribe();
+
+    // Carrito / guards pueden pedir abrir el modal
+    this.subOpenLogin = fromEvent(window, 'ed-open-login').subscribe(() => {
+      this.openLogin();
+    });
   }
-  ngOnDestroy(): void { this.sub?.unsubscribe(); this.sub2?.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+    this.sub2?.unsubscribe();
+    this.subOpenLogin?.unsubscribe();
+  }
 
-  toggleProfileMenu() { this.showProfileMenu = !this.showProfileMenu; }
+  toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
 
-  goCart() { this.router.navigateByUrl('/carrito'); }
+  goCart() {
+    this.router.navigateByUrl('/carrito');
+  }
 
   onClickMisCompras() {
     if (this.auth.isLoggedIn) this.router.navigateByUrl('/mis-compras');
-    else this.openLogin();
+    else {
+      this.returnUrl.set('/mis-compras');
+      this.openLogin();
+    }
   }
 
-  // Abrir / cerrar modal
   openLogin() {
     this.showLogin = true;
     this.loginError = '';
@@ -72,8 +91,14 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     this.hideLoginPassword = true;
   }
 
-  toRegistro() { this.closeLogin(); this.router.navigateByUrl('/registro'); }
-  toRecuperar() { this.closeLogin(); this.router.navigateByUrl('/recuperar'); }
+  toRegistro() {
+    this.closeLogin();
+    this.router.navigateByUrl('/registro');
+  }
+  toRecuperar() {
+    this.closeLogin();
+    this.router.navigateByUrl('/recuperar');
+  }
 
   toRecuperarPrefilled() {
     const email = this.loginForm.value.email || '';
@@ -90,15 +115,14 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.closeLogin();
         this.loginError = '';
-        // opcional: refresh perfil por si abres la app con token previo
-        this.auth.me().subscribe();
-        this.router.navigateByUrl('/mis-compras');
+        this.auth.me().subscribe({ error: () => {} });
+        const dest = this.returnUrl.consume('/mis-compras');
+        this.router.navigateByUrl(dest);
       },
-      error: (e) => {
+      error: () => {
         this.submitting = false;
         this.loginError = 'Correo o contraseña incorrectos.';
-        // TODO: muestra un mensaje con el error del backend (401 etc.)
-      }
+      },
     });
   }
 
@@ -106,19 +130,25 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     this.auth.logout().subscribe({
       next: () => {
         this.showProfileMenu = false;
-        this.router.navigateByUrl('/');   // vuelve al Home
+        this.returnUrl.clear();
+        this.router.navigateByUrl('/');
       },
-      error: (e) => console.error(e)
+      error: (e) => console.error(e),
     });
   }
-  logout() { this.auth.logout(); this.showProfileMenu = false; }
+  logout() {
+    this.auth.logout();
+    this.showProfileMenu = false;
+  }
 
-   async doSearch() {
+  async doSearch() {
     const q = this.search.trim();
     if (!q) return;
-    this.productos.searchByName(q).subscribe(list => {
+    this.productos.searchByName(q).subscribe((list) => {
       if (list.length) {
-        this.router.navigate(['/producto', list[0].id]); // abre el 1º match
+        this.router.navigate(['/producto', list[0].id]);
+      } else {
+        alert('No se encontraron productos con ese nombre.');
       }
     });
   }

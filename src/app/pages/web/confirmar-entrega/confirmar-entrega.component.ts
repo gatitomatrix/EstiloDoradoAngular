@@ -34,6 +34,12 @@ export class ConfirmarEntregaComponent {
   get resumenOk(): boolean {
     return this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.value.mode === 'EXPRESS';
   }
+
+  ngOnInit() {
+    if (!this.cart.items.length) {
+      this.router.navigateByUrl('/carrito');
+    }
+  }
   
   onSelectPickup() {
     this.selected = 'STORE_PICKUP';

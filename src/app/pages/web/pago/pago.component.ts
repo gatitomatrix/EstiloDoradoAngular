@@ -98,6 +98,10 @@ export class PagoComponent implements AfterViewInit {
   });
 
   ngOnInit() {
+    if (!this.cart.items.length) {
+      this.router.navigateByUrl('/carrito');
+      return;
+    }
     this.pay.setHasMethod(true);
     // limpiar selección de doc en esta pantalla
     this.pay.clearInvoice();
@@ -349,6 +353,14 @@ export class PagoComponent implements AfterViewInit {
     const el = e.target as HTMLInputElement;
     const v = el.value.replace(/\D/g, '').slice(0, 8);
     this.boletaForm.patchValue({ dni: v }, { emitEvent: false }); el.value = v;
+  }
+
+  /** Solo letras y espacios (nombres de persona) */
+  onPersonNameInput(e: Event) {
+    const el = e.target as HTMLInputElement;
+    const cleaned = el.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g, '');
+    el.value = cleaned;
+    this.boletaForm.patchValue({ nombres: cleaned }, { emitEvent: false });
   }
 
   openCard(t: 'credito' | 'debito') { this.cardForm.reset({ ver: false }); this.showCardDrawer = t; }

@@ -4,11 +4,16 @@
 <section class="ed-cart">
   <!-- Lista de productos -->
   <div class="ed-cart__left">
+    <div class="ed-cart__header-row" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+      <button type="button" class="ed-link" (click)="seguirComprando()" style="border:none;background:none;cursor:pointer;font-size:15px;">
+        ← Seguir comprando
+      </button>
+    </div>
     <h1 class="ed-cart__title">Carrito</h1>
 
     <div *ngIf="!items.length" class="ed-empty">
       Tu carrito está vacío.
-      <a (click)="seguirComprando()">Seguir comprando</a>
+      <a (click)="seguirComprando()" style="cursor:pointer">Seguir comprando</a>
     </div>
 
     <div *ngFor="let it of items" class="ed-item">
@@ -55,9 +60,18 @@
         <strong>S/ {{ total | number:'1.2-2' }}</strong>
       </div>
 
-      <button class="ed-btn ed-btn--primary" (click)="continuarCompra()">Continuar Compra</button>
+      <button
+        class="ed-btn ed-btn--primary"
+        (click)="continuarCompra()"
+        [disabled]="!canContinue"
+        [style.opacity]="canContinue ? 1 : 0.5"
+        [style.cursor]="canContinue ? 'pointer' : 'not-allowed'"
+      >
+        Continuar Compra
+      </button>
       <button class="ed-btn ed-btn--ghost" (click)="seguirComprando()">Seguir comprando</button>
 
+      <p class="ed-note" *ngIf="!canContinue">Agrega productos para continuar.</p>
       <p class="ed-note">Los descuentos solo se aplican en temporadas de promoción.</p>
     </div>
   </aside>

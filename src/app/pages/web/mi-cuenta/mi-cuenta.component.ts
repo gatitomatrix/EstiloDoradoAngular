@@ -1,92 +1,118 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
+
+const NAME_RE = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/;
+const NAME_OPT_RE = /^(?:[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*)?$/;
+const PHONE_OPT_RE = /^(?:9\d{8})?$/;
 
 @Component({
   selector: 'ed-web-mi-cuenta',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, BarraSuperiorComponent, FranjaMarcaComponent],
   templateUrl: './mi-cuenta.component.html',
-  styleUrls: ['./mi-cuenta.component.css']
+  styleUrls: ['./mi-cuenta.component.css'],
 })
-export class MiCuentaComponent {
+export class MiCuentaComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
-  public user$ = this.auth.user$; 
+  private router = inject(Router);
+  public user$ = this.auth.user$;
 
-  // Simulamos datos del usuario logueado; al conectar backend, precarga con tu API
   user = this.auth.user;
-
   edit = false;
+  saveMsg = '';
+  saveErr = '';
 
   form = this.fb.group({
-    nombre: ['', Validators.required],
-    apellido: [''],
-    telefono: [''],
+    nombre: ['', [Validators.required, Validators.pattern(NAME_RE)]],
+    apellido: ['', [Validators.pattern(NAME_OPT_RE)]],
+    telefono: ['', [Validators.pattern(PHONE_OPT_RE)]],
     direccion: [''],
-    email: [{ value: '', disabled: true }, [Validators.required, Validators.email]]
+    email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
   });
 
   ngOnInit() {
-    // trae datos frescos del backend
     this.auth.me().subscribe({
       next: (u) => {
-        this.form.patchValue({
-          nombre: u.nombre || '',
-          apellido: u.apellido || '',
-          telefono: u.telefono || '',
-          direccion: u.direccion || '',
-          email: u.email || ''
-        });
-        this.form.get('email')?.disable();
-      }
+        this.user = u;
+        this.resetForm();
+      },
+      error: () => {},
     });
   }
+
+  onNameInput(ctrl: 'nombre' | 'apellido', ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    const cleaned = el.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g, '');
+    if (cleaned !== el.value) {
+      el.value = cleaned;
+      this.form.get(ctrl)?.setValue(cleaned, { emitEvent: false });
+    }
+  }
+
+  onPhoneInput(ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    let d = el.value.replace(/\D/g, '');
+    if (d.length > 9) d = d.slice(0, 9);
+    if (d !== el.value) {
+      el.value = d;
+      this.form.get('telefono')?.setValue(d, { emitEvent: false });
+    }
+  }
+
   guardar() {
-    if (this.form.invalid) return;
-    const v = this.form.getRawValue(); // email sigue deshabilitado
-    this.auth.updateMe({
-      nombre: v.nombre!, apellido: v.apellido || '',
-      telefono: v.telefono || '', direccion: v.direccion || ''
-    }).subscribe({
-      next: () => { this.edit = false; },
-      error: (e) => console.error(e)
-    });
+    this.saveMsg = '';
+    this.saveErr = '';
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const v = this.form.getRawValue();
+    this.auth
+      .updateMe({
+        nombre: (v.nombre || '').trim(),
+        apellido: (v.apellido || '').trim(),
+        telefono: v.telefono || '',
+        direccion: v.direccion || '',
+      })
+      .subscribe({
+        next: (u) => {
+          this.user = u;
+          this.edit = false;
+          this.saveMsg = 'Datos actualizados';
+        },
+        error: () => {
+          this.saveErr = 'No se pudo guardar. Intenta de nuevo.';
+        },
+      });
   }
 
   cancelar() {
     this.edit = false;
-    // recarga desde el servicio (user guardado) para resetear
-    const u = this.auth.user;
-    this.form.reset({
-      nombre: u?.nombre || '', apellido: u?.apellido || '',
-      telefono: u?.telefono || '', direccion: u?.direccion || '',
-      email: u?.email || ''
-    });
-    this.form.get('email')?.disable();
-  }
-
-  constructor() {
-    // Si entras directo con token, asegura datos frescos
-    if (!this.user) this.auth.me().subscribe(u => { this.user = u; this.resetForm(); });
+    this.saveErr = '';
+    this.resetForm();
   }
 
   logout() {
-    this.auth.logout().subscribe(() => {
-      // redirige y/o muestra toast
+    this.auth.logout().subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: () => this.router.navigateByUrl('/'),
     });
   }
 
   private resetForm() {
+    const u = this.user || this.auth.user;
     this.form.reset({
-      nombre: this.user?.nombre || '',
-      apellido: this.user?.apellido || '',
-      telefono: this.user?.telefono || '',
-      direccion: this.user?.direccion || '',
-      email: this.user?.email || ''
+      nombre: u?.nombre || '',
+      apellido: u?.apellido || '',
+      telefono: u?.telefono || '',
+      direccion: u?.direccion || '',
+      email: u?.email || '',
     });
     this.form.get('email')?.disable();
   }

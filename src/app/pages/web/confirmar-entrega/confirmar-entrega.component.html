@@ -12,11 +12,18 @@
 
   <!-- Timeline (estás en Entrega) -->
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="ed-step ed-step--active">1</div><span>Carro</span>
+    <a routerLink="/carrito" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+      <div class="ed-step ed-step--active">1</div><span>Carro</span>
+    </a>
     <div class="ed-line"></div>
-    <div class="ed-step ed-step--active">2</div><span>Entrega</span>
+    <a routerLink="/entrega" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+      <div class="ed-step ed-step--active">2</div><span>Entrega</span>
+    </a>
     <div class="ed-line"></div>
     <div class="ed-step ed-step--mute">3</div><span class="text-muted">Pago</span>
+  </div>
+  <div class="mb-3">
+    <a routerLink="/entrega" class="small text-decoration-none" style="color:#8a6d1d;">← Volver a entrega</a>
   </div>
 
   <div class="row g-4">
