@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { AdminPedidosService } from '../services/admin-pedidos.service';
 import { AdminClientesService } from '../../clientes/services/admin-clientes.service';
@@ -86,6 +87,11 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
           </tr>
         </thead>
         <tbody>
+          <tr *ngIf="!rows().length">
+            <td colspan="10" class="text-center text-muted py-4">
+              No hay pedidos con estos filtros.
+            </td>
+          </tr>
           <tr *ngFor="let p of rows()">
             <td>#{{p.id_pedido}}</td>
             <td>{{ toDDMMYYYY(p.fecha_pedido) }}</td>
@@ -338,7 +344,8 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
 export class PedidosListPage implements OnInit {
   private api = inject(AdminPedidosService);
   private clientesApi = inject(AdminClientesService);
-  private prodsApi = inject(AdminProductosService); // ✅
+  private prodsApi = inject(AdminProductosService);
+  private route = inject(ActivatedRoute);
 
   // Filtros
   q: any = {
@@ -376,21 +383,27 @@ export class PedidosListPage implements OnInit {
   detalles: Array<{ id_producto:number; nombre:string; cantidad:number; precio_unitario:number; }> = [];
 
   ngOnInit() {
-    this.buscar();
+    // Deep-link desde KPIs del dashboard: ?estado=&fecha_desde=&fecha_hasta=
+    this.route.queryParamMap.subscribe((qp) => {
+      const estado = qp.get('estado');
+      const fd = qp.get('fecha_desde');
+      const fh = qp.get('fecha_hasta');
+      if (estado) this.q.estado = estado;
+      if (fd) this.q.fecha_desde = fd;
+      if (fh) this.q.fecha_hasta = fh;
+      this.q.page = 1;
+      this.buscar();
+    });
 
-    // Clientes (ahora accesible también para VENTAS)
-    this.clientesApi.list({ per_page: 1000, page: 1 })
-      .subscribe({
-        next: (res) => this.clientes.set(res?.data ?? res ?? []),
-        error: (e) => this.alertHttp(e, 'No se pudieron cargar los clientes')
-      });
+    this.clientesApi.list({ per_page: 1000, page: 1 }).subscribe({
+      next: (res) => this.clientes.set(res?.data ?? res ?? []),
+      error: (e) => this.alertHttp(e, 'No se pudieron cargar los clientes'),
+    });
 
-    // Productos para el combo (traer todos)
-    this.prodsApi.list({ per_page: -1, page: 1, sort: 'nombre', order: 'asc' })
-      .subscribe({
-        next: (res) => this.productos.set(res?.data ?? res ?? []),
-        error: (e) => this.alertHttp(e, 'No se pudieron cargar los productos')
-      });
+    this.prodsApi.list({ per_page: -1, page: 1, sort: 'nombre', order: 'asc' }).subscribe({
+      next: (res) => this.productos.set(res?.data ?? res ?? []),
+      error: (e) => this.alertHttp(e, 'No se pudieron cargar los productos'),
+    });
   }
 
   // === Tabla / Paginación ===

@@ -5,9 +5,13 @@ import { Subscription, fromEvent } from 'rxjs';
 import { CartService } from '../../../../services/cart/cart.service';
 import { AuthService, AuthUser } from '../../../../services/auth/auth.service';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ProductoService } from '../../../../services/product/product.service';
 import { FormsModule } from '@angular/forms';
 import { ReturnUrlService } from '../../../../core/services/return-url.service';
+import { UiService } from '../../../../core/services/ui.service';
+import { environment } from '../../../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+
+declare const google: any;
 
 @Component({
   selector: 'ed-web-barra-superior',
@@ -21,20 +25,20 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private productos = inject(ProductoService);
   private returnUrl = inject(ReturnUrlService);
+  private ui = inject(UiService);
+  private http = inject(HttpClient);
 
   search = '';
-
   totalQty = 0;
   user: AuthUser | null = null;
-
   showProfileMenu = false;
-  showLoginModal = false;
   showLogin = false;
   submitting = false;
+  googleLoading = false;
   hideLoginPassword = true;
   loginError = '';
+  googleClientId = (environment as any).googleClientId || '';
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -52,7 +56,6 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     this.sub2 = this.auth.user$.subscribe((u) => (this.user = u));
     if (this.auth.isLoggedIn && !this.user) this.auth.me().subscribe();
 
-    // Carrito / guards pueden pedir abrir el modal
     this.subOpenLogin = fromEvent(window, 'ed-open-login').subscribe(() => {
       this.openLogin();
     });
@@ -115,6 +118,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
         this.submitting = false;
         this.closeLogin();
         this.loginError = '';
+        this.ui.ok('Sesión iniciada');
         this.auth.me().subscribe({ error: () => {} });
         const dest = this.returnUrl.consume('/mis-compras');
         this.router.navigateByUrl(dest);
@@ -122,7 +126,110 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
       error: () => {
         this.submitting = false;
         this.loginError = 'Correo o contraseña incorrectos.';
+        this.ui.err('Correo o contraseña incorrectos.');
       },
+    });
+  }
+
+  /** Login Google: GIS si hay clientId; si no, demo local (solo desarrollo). */
+  loginWithGoogle() {
+    if (this.googleClientId) {
+      this.googleLoading = true;
+      this.loadGis().then(() => {
+        try {
+          google.accounts.id.initialize({
+            client_id: this.googleClientId,
+            callback: (resp: any) => this.handleGoogleCredential(resp?.credential),
+          });
+          google.accounts.id.prompt((notification: any) => {
+            if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+              // Fallback: botón one-tap no disponible → usar token demo si backend lo permite
+              this.googleLoading = false;
+              this.ui.warn('No se pudo abrir Google. Usa el botón de correo o revisa el Client ID.');
+            }
+          });
+        } catch (e) {
+          console.error(e);
+          this.googleLoading = false;
+          this.ui.err('Error al iniciar Google Sign-In');
+        }
+      });
+      return;
+    }
+
+    // Demo local sin Client ID de Google (solo para pruebas en casa)
+    this.googleLoading = true;
+    this.http
+      .post<any>(`${environment.apiBaseUrl}/auth/google`, {
+        demo: true,
+        email: 'demo.google@estilodorado.local',
+        nombre: 'Cliente',
+        apellido: 'Google Demo',
+      })
+      .subscribe({
+        next: (res) => {
+          this.googleLoading = false;
+          if (res?.token) {
+            this.auth.applyExternalLogin(res);
+            this.closeLogin();
+            this.ui.ok('Entraste con Google (demo local)');
+            const dest = this.returnUrl.consume('/mis-compras');
+            this.router.navigateByUrl(dest);
+          } else {
+            this.ui.err(res?.message || 'No se pudo iniciar con Google demo');
+          }
+        },
+        error: (err) => {
+          this.googleLoading = false;
+          this.ui.err(
+            err?.error?.message ||
+              'Google demo no disponible. Revisa Laravel (auth/google) y .env',
+          );
+        },
+      });
+  }
+
+  private handleGoogleCredential(idToken: string) {
+    if (!idToken) {
+      this.googleLoading = false;
+      return;
+    }
+    this.http.post<any>(`${environment.apiBaseUrl}/auth/google`, { id_token: idToken }).subscribe({
+      next: (res) => {
+        this.googleLoading = false;
+        if (res?.token) {
+          this.auth.applyExternalLogin(res);
+          this.closeLogin();
+          this.ui.ok('Sesión con Google iniciada');
+          const dest = this.returnUrl.consume('/mis-compras');
+          this.router.navigateByUrl(dest);
+        }
+      },
+      error: (err) => {
+        this.googleLoading = false;
+        this.ui.err(err?.error?.message || 'No se pudo validar Google');
+      },
+    });
+  }
+
+  private loadGis(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (typeof google !== 'undefined' && google?.accounts?.id) {
+        resolve();
+        return;
+      }
+      const existing = document.getElementById('gis-script');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        return;
+      }
+      const s = document.createElement('script');
+      s.id = 'gis-script';
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => reject();
+      document.head.appendChild(s);
     });
   }
 
@@ -131,6 +238,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
       next: () => {
         this.showProfileMenu = false;
         this.returnUrl.clear();
+        this.ui.ok('Sesión cerrada');
         this.router.navigateByUrl('/');
       },
       error: (e) => console.error(e),
@@ -141,15 +249,12 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     this.showProfileMenu = false;
   }
 
-  async doSearch() {
+  doSearch() {
     const q = this.search.trim();
-    if (!q) return;
-    this.productos.searchByName(q).subscribe((list) => {
-      if (list.length) {
-        this.router.navigate(['/producto', list[0].id]);
-      } else {
-        alert('No se encontraron productos con ese nombre.');
-      }
-    });
+    if (!q) {
+      this.router.navigate(['/']);
+      return;
+    }
+    this.router.navigate(['/'], { queryParams: { q } });
   }
 }

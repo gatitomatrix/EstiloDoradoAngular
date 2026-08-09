@@ -1,21 +1,31 @@
 <div class="ed-grid">
-  <!-- Si hay productos -->
-  <ng-container *ngIf="(productos?.length || 0) > 0; else edPlaceholders">
-    <ed-web-tarjeta-producto
-      *ngFor="let p of productos"
-      [producto]="p"
-      (openDetail)="openDetail.emit(p)"
-      (addToCart)="addToCart.emit(p)">
-    </ed-web-tarjeta-producto>
-  </ng-container>
-
-  <!-- Placeholders si no hay datos -->
-  <ng-template #edPlaceholders>
+  <ng-container *ngIf="loading; else content">
     <div class="ed-card-ph" *ngFor="let _ of [1,2,3,4,5,6,7,8]">
       <div class="ed-skeleton ed-skeleton--img"></div>
       <div class="ed-skeleton ed-skeleton--text" style="width: 85%"></div>
       <div class="ed-skeleton ed-skeleton--text" style="width: 60%"></div>
       <div class="ed-skeleton ed-skeleton--btn"></div>
+    </div>
+  </ng-container>
+
+  <ng-template #content>
+    <ng-container *ngIf="(productos?.length || 0) > 0; else empty">
+      <ed-web-tarjeta-producto
+        *ngFor="let p of productos"
+        [producto]="p"
+        (openDetail)="openDetail.emit(p)"
+        (addToCart)="addToCart.emit(p)"
+      >
+      </ed-web-tarjeta-producto>
+    </ng-container>
+  </ng-template>
+
+  <ng-template #empty>
+    <div class="ed-empty-catalog" style="grid-column:1/-1;text-align:center;padding:2.5rem 1rem;background:#FFFEFA;border:1px dashed #E7DAC6;border-radius:1rem;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🔍</div>
+      <h3 style="margin:0 0 .35rem;color:#2D2418;">No encontramos productos</h3>
+      <p style="color:#8A7B65;margin:0 0 1rem;">Prueba otro nombre o limpia los filtros.</p>
+      <a routerLink="/" class="btn btn-dark btn-sm">Ver todo el catálogo</a>
     </div>
   </ng-template>
 </div>

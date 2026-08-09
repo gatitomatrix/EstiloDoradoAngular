@@ -103,6 +103,14 @@ export class AuthService {
     localStorage.removeItem(KEYU);
     this._user$.next(null);
   }
+
+  /** Aplica token/cliente de login externo (Google u OAuth). */
+  applyExternalLogin(res: { token?: string; cliente?: AuthUser; user?: AuthUser }) {
+    const token = res.token || '';
+    const user = (res.cliente || res.user) as AuthUser;
+    if (!token || !user) return;
+    persist(user, token, this._user$);
+  }
 }
 
 /* ===== Helpers internos ===== */

@@ -2,9 +2,13 @@
 <ed-web-franja-marca></ed-web-franja-marca>
 
 <section class="ed-account">
-  <button type="button" class="ed-link" (click)="logout()" style="float:right;border:none;background:none;cursor:pointer;color:#c00;">
-    Cerrar sesión
-  </button>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+    <a routerLink="/" class="btn btn-link text-decoration-none" style="color:#2D2418;padding-left:0;">← Volver al inicio</a>
+    <div style="display:flex;gap:8px;">
+      <a routerLink="/mis-compras" class="btn btn-outline-dark btn-sm">Mis compras</a>
+      <button type="button" class="btn btn-outline-danger btn-sm" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </div>
   <h1>Hola, {{ (user$ | async)?.nombre || 'Cliente' }}</h1>
 
   <div class="ed-card">

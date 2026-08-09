@@ -1,11 +1,14 @@
 <ed-web-barra-superior></ed-web-barra-superior>
 <ed-web-franja-marca></ed-web-franja-marca>
 
+<div style="max-width:1100px;margin:12px auto 0;padding:0 1rem;">
+  <a routerLink="/" class="btn btn-link text-decoration-none" style="color:#2D2418;padding-left:0;">← Volver al inicio</a>
+</div>
+
 <h1 class="ed-mc-title">Mis compras</h1>
 
 <div class="ed-mc-banner">
-  El estado del pedido cambiará en tiempo real de acuerdo al proceso de compra realizado y el tiempo de entrega o recojo
-  en tienda.
+  El estado del pedido se actualiza según el proceso de compra y el tiempo de entrega o recojo en tienda.
 </div>
 
 <div class="ed-mc-filters">
@@ -23,8 +26,11 @@
 <div *ngIf="loading" class="ed-mc-loading">Cargando…</div>
 <div *ngIf="!loading && error" class="ed-mc-error">{{ error }}</div>
 
-<div *ngIf="!loading && !error && filtered.length === 0" class="ed-mc-empty">
-  ¡Oh! Aún no tienes compras online.
+<div *ngIf="!loading && !error && filtered.length === 0" class="ed-mc-empty" style="text-align:center;padding:2rem;border:1px dashed #E7DAC6;border-radius:1rem;margin:1rem auto;max-width:480px;background:#FFFEFA;">
+  <div style="font-size:2rem;margin-bottom:.5rem;">🛍️</div>
+  <p style="margin:0 0 .75rem;color:#2D2418;font-weight:600;">Aún no tienes compras online</p>
+  <p style="margin:0 0 1rem;color:#8A7B65;font-size:.9rem;">Cuando compres, verás aquí el estado y el detalle de cada pedido.</p>
+  <a routerLink="/" class="btn btn-dark btn-sm">Ir a comprar</a>
 </div>
 
 <div *ngIf="!loading && !error && filtered.length > 0" class="ed-mc-list">
@@ -36,7 +42,9 @@
       </div>
       <div class="ed-mc-head__mid">
         <span class="ed-mc-label"><b>Fecha:</b> {{ p.fecha_pedido | date:'short' }}</span>
-        <span class="ed-mc-chip" [class.ok]="p.estado==='entregado'" [class.warn]="p.estado==='pendiente'"
+        <span class="ed-mc-chip"
+          [class.ok]="p.estado==='entregado' || p.estado==='pagado'"
+          [class.warn]="p.estado==='pendiente'"
           [class.cancel]="p.estado==='cancelado'">
           {{ p.estado }}
         </span>
@@ -51,16 +59,9 @@
         <div class="ed-mc-item"><b>Entrega:</b> {{ p.direccion_entrega || '—' }}</div>
         <div class="ed-mc-item"><b>Pago:</b> {{ p.forma_pago || '—' }}</div>
         <div class="px-3 pb-3">
-          <button class="btn btn-outline-dark btn-sm" [routerLink]="['/resumen', p.id_pedido]">Resumen</button>
+          <button class="btn btn-outline-dark btn-sm" [routerLink]="['/resumen', p.id_pedido]">Ver detalle</button>
         </div>
       </div>
-
     </div>
-
-
   </article>
-
-  <footer class="ed-mc-note">
-    Para cualquier reclamo siempre es con el N° de pedido. ¡Gracias por comprar con nosotros!
-  </footer>
 </div>

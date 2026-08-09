@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { CarruselHeroComponent } from '../../../widgets/web/primero/carrusel-hero/carrusel-hero.component';
@@ -13,44 +13,55 @@ import { GrillaProductosComponent } from '../../../widgets/web/primero/grilla-pr
 import { ProductPreview } from '../../../models/product/preview';
 import { CartService } from '../../../services/cart/cart.service';
 import { ProductoService } from '../../../services/product/product.service';
+import { UiService } from '../../../core/services/ui.service';
 
 @Component({
   selector: 'ed-web-home',
   standalone: true,
-  imports: [CommonModule, BarraSuperiorComponent, FranjaMarcaComponent, CarruselHeroComponent,
-    CintaPromocionComponent, ChipsCategoriasComponent, BarraBusquedaComponent,
-    PanelFiltrosComponent, GrillaProductosComponent
+  imports: [
+    CommonModule,
+    BarraSuperiorComponent,
+    FranjaMarcaComponent,
+    CarruselHeroComponent,
+    CintaPromocionComponent,
+    ChipsCategoriasComponent,
+    BarraBusquedaComponent,
+    PanelFiltrosComponent,
+    GrillaProductosComponent,
   ],
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
   private productService = inject(ProductoService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private cart = inject(CartService);
+  private ui = inject(UiService);
+
   productos: ProductPreview[] = [];
   categoriaId: number | null = null;
-
-  // Datos crudos y filtrados
   allProductos: ProductPreview[] = [];
-
-  // Estado UI
   loading = false;
   error: string | null = null;
+  searchQuery = '';
+  chipActivo: string | null = null;
 
-  // Filtros
-  categoriaSeleccionada = 'Detalles Personalizados';
   precioMinDisponible = 0;
   precioMaxDisponible = 0;
   precioMinSel: number | null = null;
   precioMaxSel: number | null = null;
 
+  chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Ocasiones', 'Tendencias', 'Ofertas'];
+
   ngOnInit() {
-    this.cargarProductos();
+    this.route.queryParamMap.subscribe((qp) => {
+      this.searchQuery = (qp.get('q') || '').trim();
+      this.cargarProductos();
+    });
   }
 
-
-  private cargarProductos(): void {
+  cargarProductos(): void {
     this.loading = true;
     this.error = null;
 
@@ -59,17 +70,17 @@ export class HomeComponent implements OnInit {
       : this.productService.getAll();
 
     src$.subscribe({
-      next: data => {
+      next: (data) => {
         this.allProductos = data ?? [];
         this.calcularRangoPrecioDisponible();
-        this.aplicarFiltros();     // respeta rango precio
+        this.aplicarFiltros();
         this.loading = false;
       },
-      error: err => {
+      error: (err) => {
         console.error(err);
-        this.error = 'No se pudieron cargar los productos.';
+        this.error = 'No se pudieron cargar los productos. Revisa que Laravel esté en marcha.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -79,40 +90,41 @@ export class HomeComponent implements OnInit {
       this.precioMaxDisponible = 0;
       return;
     }
-    const precios = this.allProductos.map(p => p.precio);
+    const precios = this.allProductos.map((p) => p.precio);
     this.precioMinDisponible = Math.min(...precios);
     this.precioMaxDisponible = Math.max(...precios);
-
-    // Si no hay selección previa, inicializamos a null (sin filtrar)
-    if (this.precioMinSel === null) this.precioMinSel = null;
-    if (this.precioMaxSel === null) this.precioMaxSel = null;
   }
 
-  /** Filtros de categoría + precio */
   private aplicarFiltros() {
-    // 1) Categoría: solo 'Detalles Personalizados' muestra; otras vacía
-    if (this.categoriaSeleccionada !== 'Detalles Personalizados') {
-      this.productos = [];
-      return;
-    }
-
-    // 2) Precio: si min/max están definidos, filtramos por rango
     let lista = [...this.allProductos];
 
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase();
+      lista = lista.filter(
+        (p) =>
+          (p.nombre || '').toLowerCase().includes(q) ||
+          String(p.id).includes(q),
+      );
+    }
+
+    if (this.chipActivo && this.chipActivo !== 'Todos') {
+      const chip = this.chipActivo.toLowerCase();
+      lista = lista.filter((p) => (p.nombre || '').toLowerCase().includes(chip));
+    }
+
     if (this.precioMinSel !== null) {
-      lista = lista.filter(p => p.precio >= (this.precioMinSel as number));
+      lista = lista.filter((p) => p.precio >= (this.precioMinSel as number));
     }
     if (this.precioMaxSel !== null) {
-      lista = lista.filter(p => p.precio <= (this.precioMaxSel as number));
+      lista = lista.filter((p) => p.precio <= (this.precioMaxSel as number));
     }
 
     this.productos = lista;
   }
 
-  // Handlers provenientes del panel
   onCategoriaChange(id: number | null) {
     this.categoriaId = id;
-    this.cargarProductos();   // recarga desde API y vuelve a filtrar por precio
+    this.cargarProductos();
   }
 
   onPrecioChange(r: { min: number | null; max: number | null }) {
@@ -121,20 +133,38 @@ export class HomeComponent implements OnInit {
     this.aplicarFiltros();
   }
 
+  onChip(cat: string) {
+    this.chipActivo = cat === 'Todos' ? null : cat;
+    this.aplicarFiltros();
+  }
+
+  onBuscarSecundario(q: string) {
+    const term = (q || '').trim();
+    this.router.navigate(['/'], { queryParams: term ? { q: term } : {} });
+  }
+
+  clearSearch() {
+    this.router.navigate(['/'], { queryParams: {} });
+  }
+
   onAddToCart(p: ProductPreview) {
-    const stockMax = Math.max(1, (p.stock ?? 1) - 1); // misma regla stock-1
+    const stockMax = Math.max(0, p.stock ?? 0);
+    if (stockMax <= 0) {
+      this.ui.warn('Este producto no tiene stock disponible.');
+      return;
+    }
     this.cart.add({
       id: p.id,
       nombre: p.nombre,
       imagen: p.imagen,
       precio: p.precio,
-      qty: 1,                                         // agrega 1 por clic
-      stockMax
+      qty: 1,
+      stockMax: Math.max(1, stockMax),
     });
+    this.ui.ok(`${p.nombre} agregado al carrito`);
   }
 
   onOpenDetail(p: ProductPreview) {
     this.router.navigate(['/producto', p.id]);
   }
 }
-

@@ -87,15 +87,31 @@
 
           <div class="text-muted small">
             ¿Olvidaste tu contraseña?
-            Recupérala por
-            <a (click)="toRecuperarPrefilled()">correo</a>
-            o
-            <a (click)="toRecuperarPrefilled()">SMS</a>.
+            <a (click)="toRecuperarPrefilled()" style="cursor:pointer">Recupérala por correo</a>.
           </div>
 
           <button class="btn btn-dark fw-bold py-2" type="submit" [disabled]="submitting || loginForm.invalid">
             {{ submitting ? 'Ingresando...' : 'Ingresar' }}
           </button>
+
+          <div class="d-flex align-items-center gap-2 my-1">
+            <hr class="flex-grow-1">
+            <span class="text-muted small">o</span>
+            <hr class="flex-grow-1">
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-outline-dark fw-semibold py-2 d-flex align-items-center justify-content-center gap-2"
+            (click)="loginWithGoogle()"
+            [disabled]="googleLoading || submitting"
+          >
+            <span style="font-weight:700;color:#4285F4">G</span>
+            {{ googleLoading ? 'Conectando con Google…' : 'Continuar con Google' }}
+          </button>
+          <p class="text-muted small text-center mb-0" *ngIf="!googleClientId">
+            En local usa modo demo (sin Client ID). Para Google real, configura <code>googleClientId</code>.
+          </p>
 
           <div class="text-center text-muted small">
             ¿Aún no tienes cuenta?

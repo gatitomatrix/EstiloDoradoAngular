@@ -11,9 +11,11 @@
     </div>
     <h1 class="ed-cart__title">Carrito</h1>
 
-    <div *ngIf="!items.length" class="ed-empty">
-      Tu carrito está vacío.
-      <a (click)="seguirComprando()" style="cursor:pointer">Seguir comprando</a>
+    <div *ngIf="!items.length" class="ed-empty" style="text-align:center;padding:2rem 1rem;border:1px dashed #E7DAC6;border-radius:1rem;background:#FFFEFA;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🛒</div>
+      <p style="margin:0 0 .5rem;font-weight:700;color:#2D2418;">Tu carrito está vacío</p>
+      <p style="margin:0 0 1rem;color:#8A7B65;font-size:.9rem;">Agrega productos del catálogo para continuar la compra.</p>
+      <button type="button" class="btn btn-dark btn-sm" (click)="seguirComprando()">Ver productos</button>
     </div>
 
     <div *ngFor="let it of items" class="ed-item">
