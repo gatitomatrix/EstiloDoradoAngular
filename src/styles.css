@@ -60,14 +60,18 @@ body, html {
 
 /* =========  SIDEBAR  ========= */
 .admin-gold-theme .sidebar {
-  background: linear-gradient(180deg, var(--brown-900) 0%, #24180c 100%);
-  color: #F1E6D0;
-  border-right: 1px solid #00000030;
+  background: linear-gradient(180deg, #120c06 0%, #1f150a 55%, #2a1c0d 100%);
+  color: #FFF8EA;
+  border-right: 1px solid rgba(212, 175, 55, 0.35);
   padding: 1.25rem 1rem 1.5rem;
   width: 280px;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 0 24px rgba(0,0,0,.12);
+  box-shadow: 4px 0 28px rgba(0,0,0,.25);
+}
+.admin-gold-theme .sidebar a {
+  text-decoration: none !important;
+  color: inherit;
 }
 .admin-gold-theme .sidebar-brand {
   display: flex;
@@ -75,92 +79,152 @@ body, html {
   gap: .75rem;
   margin-bottom: 1.25rem;
   padding: .35rem .25rem 1rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
 }
 .admin-gold-theme .sidebar-logo {
   width: 48px;
   height: 48px;
   border-radius: 12px;
   object-fit: cover;
-  border: 2px solid var(--gold-500);
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+  border: 2px solid #E8C547;
+  box-shadow: 0 2px 10px rgba(232, 197, 71, 0.45);
+  background: #1a1208;
 }
 .admin-gold-theme .sidebar-title {
   font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--gold-500);
+  font-weight: 800;
+  color: #F0D060;
   letter-spacing: 0.02em;
   line-height: 1.2;
+  text-shadow: 0 1px 0 rgba(0,0,0,.4);
 }
 .admin-gold-theme .sidebar-subtitle {
   font-size: .72rem;
-  color: #C9B896;
+  color: #D8C9A4;
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  font-weight: 600;
 }
 .admin-gold-theme .sidebar-footer {
   margin-top: auto;
   padding-top: 1rem;
-  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  border-top: 1px solid rgba(212, 175, 55, 0.22);
 }
 .admin-gold-theme .sidebar-footer-hint {
   font-size: .75rem;
-  color: #9a8b72;
+  color: #B8A888;
 }
 
-/* PanelMenu limpio y aireado */
+/* PanelMenu: alto contraste (texto claro + activo dorado) */
 .admin-gold-theme .p-panelmenu {
   border: none !important;
   background: transparent !important;
 }
 .admin-gold-theme .p-panelmenu .p-panelmenu-panel {
-  margin-bottom: .4rem;
+  margin-bottom: .45rem;
   background: transparent;
   border: 0;
 }
 .admin-gold-theme .p-panelmenu .p-panelmenu-header { margin-bottom: .25rem; }
+
+/* Headers (Dashboard, Ventas, Catálogo…) */
 .admin-gold-theme .p-panelmenu .p-panelmenu-header > a,
 .admin-gold-theme .p-panelmenu .p-panelmenu-header-content,
-.admin-gold-theme .p-panelmenu .p-panelmenu-header-link {
+.admin-gold-theme .p-panelmenu .p-panelmenu-header-link,
+.admin-gold-theme .p-panelmenu .p-panelmenu-header-action {
   background: transparent !important;
-  color: #F1E6D0 !important;
+  color: #FFF6E0 !important;
   border: 0 !important;
-  padding: .75rem .7rem !important;
-  border-radius: .6rem !important;
+  padding: .8rem .75rem !important;
+  border-radius: .65rem !important;
   outline: none !important;
   box-shadow: none !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
 }
 .admin-gold-theme .p-panelmenu .p-panelmenu-header > a:hover,
-.admin-gold-theme .p-panelmenu .p-panelmenu-header-link:hover {
-  background: var(--brown-800) !important;
-  color: var(--gold-500) !important;
+.admin-gold-theme .p-panelmenu .p-panelmenu-header-link:hover,
+.admin-gold-theme .p-panelmenu .p-panelmenu-header-action:hover {
+  background: rgba(212, 175, 55, 0.16) !important;
+  color: #FFE08A !important;
 }
+
+/* Subitems (Pedidos, Inventario…) */
 .admin-gold-theme .p-panelmenu .p-panelmenu-content {
-  padding: .15rem 0 .4rem .35rem;
+  padding: .15rem 0 .45rem .2rem;
   background: transparent !important;
   border: none !important;
 }
-.admin-gold-theme .p-menuitem-link {
+.admin-gold-theme .p-menuitem-link,
+.admin-gold-theme .p-panelmenu .p-menuitem > .p-menuitem-content .p-menuitem-link {
   display: flex !important;
   align-items: center;
   gap: .5rem;
-  color: #E8DCC6 !important;
-  padding: .55rem .85rem !important;
-  margin: .15rem 0;
-  border-radius: .5rem !important;
-  border: 0 !important;
-  transition: background .15s ease, color .15s ease;
+  color: #F5EBD4 !important;
+  background: transparent !important;
+  padding: .6rem .9rem !important;
+  margin: .18rem 0;
+  border-radius: .55rem !important;
+  border: 1px solid transparent !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 .admin-gold-theme .p-menuitem-link:hover,
-.admin-gold-theme .p-menuitem-link.p-menuitem-link-active,
-.admin-gold-theme .p-menuitem-link:focus {
-  background: var(--brown-800) !important;
-  color: var(--gold-500) !important;
+.admin-gold-theme .p-menuitem-link:focus,
+.admin-gold-theme .p-panelmenu .p-menuitem > .p-menuitem-content .p-menuitem-link:hover {
+  background: rgba(212, 175, 55, 0.18) !important;
+  color: #FFE9A0 !important;
+  border-color: rgba(212, 175, 55, 0.35) !important;
 }
-.admin-gold-theme .p-menuitem-icon {
-  color: var(--gold-500) !important;
-  margin-right: .35rem;
+
+/* Activo: fondo dorado + texto oscuro (máximo contraste) */
+.admin-gold-theme .p-menuitem-link.p-menuitem-link-active,
+.admin-gold-theme .p-menuitem.p-focus > .p-menuitem-content .p-menuitem-link,
+.admin-gold-theme .p-menuitem.p-menuitem-active > .p-menuitem-content .p-menuitem-link,
+.admin-gold-theme .p-panelmenu .p-menuitem-link[aria-current="page"] {
+  background: linear-gradient(180deg, #E8C547 0%, #D4AF37 100%) !important;
+  color: #1A1208 !important;
+  border-color: #BE9830 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+}
+.admin-gold-theme .p-menuitem-link.p-menuitem-link-active .p-menuitem-icon,
+.admin-gold-theme .p-menuitem.p-menuitem-active .p-menuitem-icon {
+  color: #1A1208 !important;
+}
+
+/* Iconos siempre legibles */
+.admin-gold-theme .p-menuitem-icon,
+.admin-gold-theme .p-panelmenu .p-icon,
+.admin-gold-theme .p-panelmenu .p-submenu-icon {
+  color: #E8C547 !important;
+  margin-right: .4rem;
+}
+.admin-gold-theme .p-menuitem-link:hover .p-menuitem-icon {
+  color: #FFE08A !important;
+}
+
+/* Anular estilos de enlace azul del navegador / Bootstrap en el menú */
+.admin-gold-theme .sidebar .p-menuitem-link,
+.admin-gold-theme .sidebar .p-menuitem-link:visited,
+.admin-gold-theme .sidebar a:link,
+.admin-gold-theme .sidebar a:visited {
+  color: #F5EBD4 !important;
+  text-decoration: none !important;
+}
+.admin-gold-theme .sidebar .p-menuitem-link.p-menuitem-link-active,
+.admin-gold-theme .sidebar .p-menuitem-link.p-menuitem-link-active:visited {
+  color: #1A1208 !important;
+}
+
+/* Quitar fondos blancos/celestes raros de PrimeNG focus */
+.admin-gold-theme .p-panelmenu .p-menuitem-content,
+.admin-gold-theme .p-panelmenu .p-menuitem.p-focus > .p-menuitem-content {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
 /* =========  TOPBAR  ========= */
