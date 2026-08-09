@@ -11,42 +11,39 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
   selector: 'app-admin-dashboard',
   imports: [CommonModule],
   template: `
-  <div class="p-3">
-    <h2 class="mb-3">Dashboard</h2>
+  <div>
+    <h2 class="ed-page-title">Dashboard</h2>
+    <p class="ed-page-sub">Resumen del día y alertas de inventario</p>
 
-    <div class="row g-3 mb-3">
-      <div class="col-sm-6 col-lg-3">
-        <div class="card p-3">
-          <h6 class="text-muted">Pedidos (hoy)</h6>
-          <div class="fs-3">{{kpis().pedidosHoy}}</div>
-        </div>
+    <div class="ed-kpi-grid">
+      <div class="ed-kpi">
+        <i class="pi pi-shopping-bag ed-kpi-icon"></i>
+        <div class="ed-kpi-label">Pedidos (hoy)</div>
+        <div class="ed-kpi-value">{{ kpis().pedidosHoy }}</div>
       </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card p-3">
-          <h6 class="text-muted">Pendientes</h6>
-          <div class="fs-3">{{kpis().pendientes}}</div>
-        </div>
+      <div class="ed-kpi">
+        <i class="pi pi-clock ed-kpi-icon"></i>
+        <div class="ed-kpi-label">Pendientes</div>
+        <div class="ed-kpi-value">{{ kpis().pendientes }}</div>
       </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card p-3">
-          <h6 class="text-muted">Pagados</h6>
-          <div class="fs-3">{{kpis().pagados}}</div>
-        </div>
+      <div class="ed-kpi">
+        <i class="pi pi-check-circle ed-kpi-icon"></i>
+        <div class="ed-kpi-label">Pagados</div>
+        <div class="ed-kpi-value">{{ kpis().pagados }}</div>
       </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card p-3">
-          <h6 class="text-muted">Stock bajo (≤3)</h6>
-          <div class="fs-3">{{stockBajo().length}}</div>
-        </div>
+      <div class="ed-kpi">
+        <i class="pi pi-exclamation-triangle ed-kpi-icon"></i>
+        <div class="ed-kpi-label">Stock bajo (≤3)</div>
+        <div class="ed-kpi-value">{{ stockBajo().length }}</div>
       </div>
     </div>
 
-    <div *ngIf="stockBajo().length" class="alert alert-warning">
-      <strong>Alerta:</strong>
-      Productos con stock bajo: {{ lowStockNames() }}
+    <div *ngIf="stockBajo().length" class="ed-alert-stock">
+      <strong>Alerta de stock:</strong>
+      Productos con pocas unidades: {{ lowStockNames() }}
     </div>
   </div>
-  `
+  `,
 })
 export class AdminDashboardPage implements OnInit {
   private pedidos = inject(AdminPedidosService);
@@ -57,38 +54,56 @@ export class AdminDashboardPage implements OnInit {
   stockBajo = signal<any[]>([]);
 
   lowStockNames = computed(() =>
-    (this.stockBajo() ?? []).map(p => p?.nombre).filter(Boolean).join(', ')
+    (this.stockBajo() ?? []).map((p) => p?.nombre).filter(Boolean).join(', '),
   );
 
   ngOnInit() {
-    // KPIs rápidos desde listing (puedes cambiar por endpoints dedicados)
-    this.pedidos.list({ fecha_desde: this.hoyISO(), fecha_hasta: this.hoyISO() })
-      .subscribe((res: any) => this.kpis.update(v => ({ ...v, pedidosHoy: res?.meta?.total ?? 0 })));
+    this.pedidos
+      .list({ fecha_desde: this.hoyISO(), fecha_hasta: this.hoyISO() })
+      .subscribe((res: any) =>
+        this.kpis.update((v) => ({ ...v, pedidosHoy: res?.meta?.total ?? 0 })),
+      );
 
-    this.pedidos.list({ estado: 'pendiente' })
-      .subscribe((res: any) => this.kpis.update(v => ({ ...v, pendientes: res?.meta?.total ?? 0 })));
+    this.pedidos
+      .list({ estado: 'pendiente' })
+      .subscribe((res: any) =>
+        this.kpis.update((v) => ({ ...v, pendientes: res?.meta?.total ?? 0 })),
+      );
 
-    this.pedidos.list({ estado: 'pagado' })
-      .subscribe((res: any) => this.kpis.update(v => ({ ...v, pagados: res?.meta?.total ?? 0 })));
+    this.pedidos
+      .list({ estado: 'pagado' })
+      .subscribe((res: any) =>
+        this.kpis.update((v) => ({ ...v, pagados: res?.meta?.total ?? 0 })),
+      );
 
-    // 🔧 Stock bajo (tipado local para evitar "implicit any")
-    this.productos.stockBajo(3).subscribe((res: StockBajoResp) => this.stockBajo.set(res?.data ?? []));
+    this.productos
+      .stockBajo(3)
+      .subscribe((res: StockBajoResp) => this.stockBajo.set(res?.data ?? []));
 
-    // Realtime (conecta SSE si está disponible en backend)
-    // this.realtime.connectSSE();
     this.realtime.onPedidoCreated().subscribe(() => this.refrescarKPIs());
     this.realtime.onPedidoUpdated().subscribe(() => this.refrescarKPIs());
     this.realtime.onStockAlertLow().subscribe(() => {
-      this.productos.stockBajo(3).subscribe((r: StockBajoResp) => this.stockBajo.set(r?.data ?? []));
+      this.productos
+        .stockBajo(3)
+        .subscribe((r: StockBajoResp) => this.stockBajo.set(r?.data ?? []));
     });
   }
 
   refrescarKPIs() {
-    this.pedidos.list({ estado: 'pendiente' })
-      .subscribe((res: any) => this.kpis.update(v => ({ ...v, pendientes: res?.meta?.total ?? 0 })));
-    this.pedidos.list({ estado: 'pagado' })
-      .subscribe((res: any) => this.kpis.update(v => ({ ...v, pagados: res?.meta?.total ?? 0 })));
+    this.pedidos
+      .list({ estado: 'pendiente' })
+      .subscribe((res: any) =>
+        this.kpis.update((v) => ({ ...v, pendientes: res?.meta?.total ?? 0 })),
+      );
+    this.pedidos
+      .list({ estado: 'pagado' })
+      .subscribe((res: any) =>
+        this.kpis.update((v) => ({ ...v, pagados: res?.meta?.total ?? 0 })),
+      );
   }
 
-  hoyISO() { const d = new Date(); return d.toISOString().split('T')[0]; }
+  hoyISO() {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  }
 }

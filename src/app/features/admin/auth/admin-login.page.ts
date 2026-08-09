@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { AdminAuthService } from '../../../core/services/admin-auth.service';
 import { UiService } from '../../../core/services/ui.service';
 
-// PrimeNG (para Toast/Confirm en login)
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -16,33 +15,59 @@ import { MessageService, ConfirmationService } from 'primeng/api';
   standalone: true,
   selector: 'app-admin-login',
   imports: [CommonModule, FormsModule, ToastModule, ConfirmDialogModule],
-  providers: [MessageService, ConfirmationService], // 👈 evita NullInjector en UiService
+  providers: [MessageService, ConfirmationService],
   template: `
-  <div class="container py-5" style="max-width:420px">
+  <div class="admin-login-page">
     <p-toast position="top-right"></p-toast>
     <p-confirmDialog></p-confirmDialog>
 
-    <h2 class="mb-3">Panel de Administración</h2>
-
-    <form (ngSubmit)="onSubmit()" novalidate>
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input [(ngModel)]="email" name="email" type="email" class="form-control" required/>
+    <div class="admin-login-card">
+      <div class="admin-login-brand">
+        <img src="/images/logo_empresa.jpeg" alt="Estilo Dorado" />
+        <h1>Estilo Dorado</h1>
+        <p>Panel de administración</p>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Contraseña</label>
-        <input [(ngModel)]="password" name="password" type="password" class="form-control" required/>
+      <form (ngSubmit)="onSubmit()" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Email de empleado</label>
+          <input
+            [(ngModel)]="email"
+            name="email"
+            type="email"
+            class="form-control"
+            placeholder="empleado@estilodorado.com"
+            autocomplete="username"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Contraseña</label>
+          <input
+            [(ngModel)]="password"
+            name="password"
+            type="password"
+            class="form-control"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="admin-login-submit" [disabled]="loading()">
+          {{ loading() ? 'Ingresando…' : 'Ingresar al panel' }}
+        </button>
+
+        <div class="admin-login-error" *ngIf="error()">{{ error() }}</div>
+      </form>
+
+      <div class="admin-login-foot">
+        Acceso solo para personal autorizado
       </div>
-
-      <button class="btn btn-dark w-100" [disabled]="loading()">
-        {{ loading() ? 'Ingresando…' : 'Ingresar' }}
-      </button>
-
-      <div class="text-danger mt-2" *ngIf="error()">{{ error() }}</div>
-    </form>
+    </div>
   </div>
-  `
+  `,
 })
 export class AdminLoginPage {
   private auth = inject(AdminAuthService);
@@ -62,19 +87,18 @@ export class AdminLoginPage {
     this.loading.set(true);
     this.error.set(undefined);
 
-    // 🔑 Flow recomendado: login → set token temporal → /me → persistir user+roles → navegar
     this.auth.loginAndBootstrap({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading.set(false);
         this.ui.ok('Bienvenido');
-        this.router.navigateByUrl('/admin'); // el shell redirige a /admin/dashboard
+        this.router.navigateByUrl('/admin');
       },
       error: (err) => {
         this.loading.set(false);
         console.error('[LOGIN ERROR]', err);
         this.error.set('Credenciales inválidas o error de conexión.');
         this.ui.err('Credenciales inválidas');
-      }
+      },
     });
   }
 }
