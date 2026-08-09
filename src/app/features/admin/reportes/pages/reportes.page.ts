@@ -23,8 +23,8 @@ interface ReportGroup {
       <div>
         <h2 class="ed-page-title">Reportes</h2>
         <p class="ed-page-sub">
-          Descarga listados del negocio en CSV, Excel (XLSX) o PDF.
-          Úsalos para contabilidad, inventario o sustentación.
+          Descarga listados del negocio en CSV, Excel (XLSX) o PDF
+          para control de clientes, inventario, ventas y respaldo de información.
         </p>
       </div>
     </header>
