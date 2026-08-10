@@ -6,6 +6,8 @@ export interface Producto {
   id_producto: number;
   nombre: string;
   descripcion?: string;
+  /** Palabras clave para búsqueda / chatbot, separadas por coma */
+  etiquetas?: string | null;
   precio_compra: number;
   precio_venta: number;
   stock: number;

@@ -50,14 +50,20 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
     <div class="table-responsive">
       <table class="table table-sm align-middle">
         <thead><tr>
-          <th>Imagen</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Estado</th><th style="width:120px"></th>
+          <th>Imagen</th><th>Nombre</th><th>Etiquetas</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Estado</th><th style="width:120px"></th>
         </tr></thead>
         <tbody>
           <tr *ngFor="let p of rows()">
             <td>
               <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee">
             </td>
-            <td>{{p.nombre}}</td>
+            <td>
+              <div class="fw-semibold">{{p.nombre}}</div>
+              <div class="small text-muted text-truncate" style="max-width:220px" [title]="p.descripcion || ''">{{ p.descripcion || '—' }}</div>
+            </td>
+            <td style="max-width:160px">
+              <span class="small text-muted">{{ p.etiquetas || '—' }}</span>
+            </td>
             <td>S/ {{p.precio_venta | number:'1.2-2'}}</td>
             <td>
               <span class="badge" [class.text-bg-danger]="p.stock<=3" [class.text-bg-success]="p.stock>3">{{p.stock}}</span>
@@ -105,7 +111,23 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
                 <input pInputText [(ngModel)]="form.nombre" name="c_nombre" required class="form-control"/>
 
                 <label class="form-label mt-2">Descripción</label>
-                <input pInputText [(ngModel)]="form.descripcion" name="c_descripcion" class="form-control"/>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  [(ngModel)]="form.descripcion"
+                  name="c_descripcion"
+                  placeholder="Qué es el producto, para quién, ocasión..."
+                ></textarea>
+
+                <label class="form-label mt-2">Etiquetas (chatbot / búsqueda)</label>
+                <input
+                  pInputText
+                  [(ngModel)]="form.etiquetas"
+                  name="c_etiquetas"
+                  class="form-control"
+                  placeholder="peluche,regalo,infantil,stich"
+                />
+                <small class="text-muted">Palabras en minúscula separadas por coma. Ayudan al asistente IA.</small>
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
@@ -200,7 +222,23 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
                 <input pInputText [(ngModel)]="form.nombre" name="e_nombre" required class="form-control"/>
 
                 <label class="form-label mt-2">Descripción</label>
-                <input pInputText [(ngModel)]="form.descripcion" name="e_descripcion" class="form-control"/>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  [(ngModel)]="form.descripcion"
+                  name="e_descripcion"
+                  placeholder="Qué es el producto, para quién, ocasión..."
+                ></textarea>
+
+                <label class="form-label mt-2">Etiquetas (chatbot / búsqueda)</label>
+                <input
+                  pInputText
+                  [(ngModel)]="form.etiquetas"
+                  name="e_etiquetas"
+                  class="form-control"
+                  placeholder="peluche,regalo,infantil,stich"
+                />
+                <small class="text-muted">Palabras en minúscula separadas por coma. Ayudan al asistente IA.</small>
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
@@ -350,7 +388,7 @@ export class ProductosListPage implements OnInit {
 
   openCreate() {
     this.form = {
-      nombre:'', descripcion:'', precio_compra:0, precio_venta:0, stock:0,
+      nombre:'', descripcion:'', etiquetas:'', precio_compra:0, precio_venta:0, stock:0,
       id_categoria: this.categorias()[0]?.id_categoria ?? undefined,
       id_proveedor: this.proveedores()[0]?.id_proveedor ?? undefined,
       estado:'activo', imagen_url:'', slug:'',
