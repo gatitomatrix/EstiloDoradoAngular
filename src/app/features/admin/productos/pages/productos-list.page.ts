@@ -17,6 +17,69 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
   standalone: true,
   selector: 'app-productos-list',
   imports: [CommonModule, FormsModule, InputTextModule, DropdownModule, ButtonModule],
+  styles: [`
+    .ed-prod-table-wrap {
+      overflow-x: auto;
+    }
+    .ed-prod-table {
+      width: 100%;
+      table-layout: fixed;
+    }
+    .ed-prod-table th,
+    .ed-prod-table td {
+      vertical-align: top;
+      padding: 0.65rem 0.5rem;
+    }
+    .ed-prod-table .col-img { width: 64px; }
+    .ed-prod-table .col-name { width: 26%; }
+    .ed-prod-table .col-tags { width: 22%; }
+    .ed-prod-table .col-price { width: 90px; }
+    .ed-prod-table .col-stock { width: 64px; }
+    .ed-prod-table .col-cat { width: 100px; }
+    .ed-prod-table .col-state { width: 80px; }
+    .ed-prod-table .col-actions { width: 96px; }
+
+    .ed-prod-thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      display: block;
+    }
+    .ed-prod-title {
+      font-weight: 600;
+      line-height: 1.3;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .ed-prod-desc {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: #6c757d;
+      line-height: 1.35;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      /* varias líneas hacia abajo, sin invadir otras columnas */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+    }
+    .ed-prod-tags {
+      font-size: 0.78rem;
+      color: #6c757d;
+      line-height: 1.4;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+    }
+  `],
   template: `
   <div class="p-3">
     <h2 class="mb-3">Productos</h2>
@@ -47,32 +110,39 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
       </div>
     </form>
 
-    <div class="table-responsive">
-      <table class="table table-sm align-middle">
+    <div class="table-responsive ed-prod-table-wrap">
+      <table class="table table-sm align-middle ed-prod-table">
         <thead><tr>
-          <th>Imagen</th><th>Nombre</th><th>Etiquetas</th><th>Precio</th><th>Stock</th><th>Categoría</th><th>Estado</th><th style="width:120px"></th>
+          <th class="col-img">Imagen</th>
+          <th class="col-name">Nombre</th>
+          <th class="col-tags">Etiquetas</th>
+          <th class="col-price">Precio</th>
+          <th class="col-stock">Stock</th>
+          <th class="col-cat">Categoría</th>
+          <th class="col-state">Estado</th>
+          <th class="col-actions"></th>
         </tr></thead>
         <tbody>
           <tr *ngFor="let p of rows()">
-            <td>
-              <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee">
+            <td class="col-img">
+              <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb">
             </td>
-            <td>
-              <div class="fw-semibold">{{p.nombre}}</div>
-              <div class="small text-muted text-truncate" style="max-width:220px" [title]="p.descripcion || ''">{{ p.descripcion || '—' }}</div>
+            <td class="col-name">
+              <div class="ed-prod-title">{{p.nombre}}</div>
+              <div class="ed-prod-desc" [title]="p.descripcion || ''">{{ p.descripcion || '—' }}</div>
             </td>
-            <td style="max-width:160px">
-              <span class="small text-muted">{{ p.etiquetas || '—' }}</span>
+            <td class="col-tags">
+              <div class="ed-prod-tags">{{ p.etiquetas || '—' }}</div>
             </td>
-            <td>S/ {{p.precio_venta | number:'1.2-2'}}</td>
-            <td>
+            <td class="col-price text-nowrap">S/ {{p.precio_venta | number:'1.2-2'}}</td>
+            <td class="col-stock">
               <span class="badge" [class.text-bg-danger]="p.stock<=3" [class.text-bg-success]="p.stock>3">{{p.stock}}</span>
             </td>
-            <td>{{ catName(p.id_categoria) }}</td>
-            <td>
+            <td class="col-cat">{{ catName(p.id_categoria) }}</td>
+            <td class="col-state">
               <span class="badge" [class.text-bg-success]="p.estado==='activo'" [class.text-bg-secondary]="p.estado!=='activo'">{{p.estado}}</span>
             </td>
-            <td class="text-end">
+            <td class="col-actions text-end text-nowrap">
               <button class="btn btn-sm btn-outline-secondary me-1" (click)="openEdit(p)"><i class="pi pi-pencil"></i></button>
               <button class="btn btn-sm btn-outline-danger" *ngIf="isAdmin()" (click)="remove(p)"><i class="pi pi-trash"></i></button>
             </td>
