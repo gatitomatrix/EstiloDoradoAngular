@@ -1,13 +1,14 @@
 // src/app/layout/admin-shell/admin-shell.component.ts
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { PanelMenuModule } from 'primeng/panelmenu';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { AdminAuthService } from '../../core/services/admin-auth.service';
+import { RealtimeService } from '../../core/services/realtime.service';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { filter } from 'rxjs/operators';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -46,6 +47,15 @@ import { filter } from 'rxjs/operators';
           </div>
         </div>
         <div class="topbar-right">
+          <button
+            type="button"
+            class="btn-logout"
+            (click)="enableBrowserAlerts()"
+            [title]="notifyOn() ? 'Avisos del navegador activos' : 'Activar avisos aunque la pestaña esté atrás'"
+          >
+            <i class="pi" [ngClass]="notifyOn() ? 'pi-bell' : 'pi-bell-slash'"></i>
+            <span>{{ notifyOn() ? 'Avisos on' : 'Avisos' }}</span>
+          </button>
           <span class="role-chip" *ngIf="rolesJoined()" title="Roles del empleado">
             <i class="pi pi-shield"></i>
             {{ rolesJoined() }}
@@ -61,16 +71,21 @@ import { filter } from 'rxjs/operators';
       </div>
     </section>
 
-    <p-toast position="top-right"></p-toast>
+    <p-toast position="top-right" (onClick)="goPendientes()"></p-toast>
     <p-confirmDialog />
   </div>
   `,
 })
-export class AdminShellComponent implements OnInit {
+export class AdminShellComponent implements OnInit, OnDestroy {
   private auth = inject(AdminAuthService);
   private router = inject(Router);
+  private realtime = inject(RealtimeService);
+  private toast = inject(MessageService);
+  private subs: Subscription[] = [];
 
   pageTitle = signal('Dashboard');
+  notifyOn = signal(typeof Notification !== 'undefined' && Notification.permission === 'granted');
+  pendingCount = signal(0);
 
   roles = computed<string[]>(() => {
     try {
@@ -93,34 +108,16 @@ export class AdminShellComponent implements OnInit {
     }
   };
 
-  menu: MenuItem[] = [
-    { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/admin/dashboard'] },
-    {
-      label: 'Ventas',
-      icon: 'pi pi-shopping-cart',
-      items: [
-        { label: 'Pedidos', icon: 'pi pi-list', routerLink: ['/admin/pedidos'] },
-        { label: 'Inventario', icon: 'pi pi-box', routerLink: ['/admin/inventario'] },
-      ],
-    },
-    {
-      label: 'Catálogo',
-      icon: 'pi pi-database',
-      items: [
-        { label: 'Productos', icon: 'pi pi-tags', routerLink: ['/admin/productos'] },
-        { label: 'Categorías', icon: 'pi pi-sitemap', routerLink: ['/admin/categorias'] },
-        { label: 'Proveedores', icon: 'pi pi-truck', routerLink: ['/admin/proveedores'] },
-      ],
-    },
-    { label: 'Clientes', icon: 'pi pi-users', routerLink: ['/admin/clientes'] },
-    { label: 'Reportes', icon: 'pi pi-chart-bar', routerLink: ['/admin/reportes'] },
-  ];
+  menu: MenuItem[] = [];
 
   ngOnInit() {
+    this.rebuildMenu(0);
     this.updateTitle(this.router.url);
-    this.router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe((e) => this.updateTitle(e.urlAfterRedirects));
+    this.subs.push(
+      this.router.events
+        .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+        .subscribe((e) => this.updateTitle(e.urlAfterRedirects)),
+    );
 
     if (!this.roles().length) {
       this.auth.me().subscribe({
@@ -128,6 +125,83 @@ export class AdminShellComponent implements OnInit {
         error: () => {},
       });
     }
+
+    this.realtime.start();
+    this.subs.push(
+      this.realtime.onPendientesCount().subscribe((n) => {
+        this.pendingCount.set(n);
+        this.rebuildMenu(n);
+      }),
+      this.realtime.onPedidoCreated().subscribe((p) => this.announcePedido(p)),
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach((s) => s.unsubscribe());
+    this.realtime.stop();
+  }
+
+  enableBrowserAlerts() {
+    if (typeof Notification === 'undefined') return;
+    Notification.requestPermission().then((perm) => {
+      this.notifyOn.set(perm === 'granted');
+    });
+  }
+
+  goPendientes() {
+    this.router.navigate(['/admin/pedidos'], { queryParams: { estado: 'pendiente' } });
+  }
+
+  private announcePedido(p: { id_pedido?: number; total?: number; estado?: string; cliente_nombre?: string }) {
+    const id = p?.id_pedido ?? '—';
+    const total = Number(p?.total ?? 0).toFixed(2);
+    const cli = (p?.cliente_nombre || 'Cliente').trim();
+    const estado = p?.estado || 'pendiente';
+    this.toast.add({
+      severity: estado === 'pendiente' ? 'warn' : 'success',
+      summary: `Nuevo pedido #${id}`,
+      detail: `${cli} · S/ ${total} · ${estado}. Clic para ver pendientes.`,
+      life: 9000,
+    });
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try {
+        new Notification(`Estilo Dorado · Pedido #${id}`, {
+          body: `${cli} · S/ ${total} (${estado})`,
+          icon: '/images/logo_empresa.jpeg',
+        });
+      } catch { /* ignore */ }
+    }
+  }
+
+  private rebuildMenu(pending: number) {
+    this.menu = [
+      { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/admin/dashboard'] },
+      {
+        label: 'Ventas',
+        icon: 'pi pi-shopping-cart',
+        items: [
+          {
+            label: 'Pedidos',
+            icon: 'pi pi-list',
+            routerLink: ['/admin/pedidos'],
+            badge: pending > 0 ? String(pending) : undefined,
+            badgeStyleClass: 'p-badge-warn',
+          },
+          { label: 'Inventario', icon: 'pi pi-box', routerLink: ['/admin/inventario'] },
+        ],
+      },
+      {
+        label: 'Catálogo',
+        icon: 'pi pi-database',
+        items: [
+          { label: 'Productos', icon: 'pi pi-tags', routerLink: ['/admin/productos'] },
+          { label: 'Categorías', icon: 'pi pi-sitemap', routerLink: ['/admin/categorias'] },
+          { label: 'Proveedores', icon: 'pi pi-truck', routerLink: ['/admin/proveedores'] },
+        ],
+      },
+      { label: 'Clientes', icon: 'pi pi-users', routerLink: ['/admin/clientes'] },
+      { label: 'Reportes', icon: 'pi pi-chart-bar', routerLink: ['/admin/reportes'] },
+    ];
   }
 
   private updateTitle(url: string) {
@@ -143,12 +217,12 @@ export class AdminShellComponent implements OnInit {
       auditoria: 'Auditoría',
     };
     const seg = url.split('/').filter(Boolean);
-    // /admin/xxx
     const key = seg[1] || 'dashboard';
     this.pageTitle.set(map[key] || 'Panel');
   }
 
   logout() {
+    this.realtime.stop();
     this.auth.logout().subscribe({
       next: () => this.router.navigateByUrl('/admin/login'),
       error: () => this.router.navigateByUrl('/admin/login'),

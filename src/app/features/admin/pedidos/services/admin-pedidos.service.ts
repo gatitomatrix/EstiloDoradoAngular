@@ -9,6 +9,12 @@ const API = `${environment.apiBaseUrl}/admin`;
 export class AdminPedidosService {
   private http = inject(HttpClient);
 
+  novedades(afterId = 0): Observable<any> {
+    let hp = new HttpParams();
+    if (afterId > 0) hp = hp.set('after_id', String(afterId));
+    return this.http.get(`${API}/pedidos/novedades`, { params: hp });
+  }
+
   list(params: any): Observable<any> {
     let hp = new HttpParams();
     Object.entries(params || {}).forEach(([k, v]) => {
