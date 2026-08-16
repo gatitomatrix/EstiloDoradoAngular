@@ -47,9 +47,10 @@
       <span class="ed-cart-badge" *ngIf="totalQty > 0">{{ totalQty }}</span>
     </a>
 
-    <!-- Ayuda (decorativo) -->
-    <a class="ed-help" routerLink="/ayuda"><img src="https://i.imgur.com/N8DFlUV.png" alt="Ayuda"
-        style="height: 30px; width: 30px"></a>
+    <!-- Asistente -->
+    <button type="button" class="ed-help" (click)="openAsistente()" aria-label="Abrir asistente">
+      <img src="https://i.imgur.com/N8DFlUV.png" alt="Asistente" style="height: 30px; width: 30px">
+    </button>
   </div>
 </header>
 

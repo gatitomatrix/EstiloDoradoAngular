@@ -74,6 +74,10 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/carrito');
   }
 
+  openAsistente() {
+    window.dispatchEvent(new CustomEvent('ed-open-asistente'));
+  }
+
   onClickMisCompras() {
     if (this.auth.isLoggedIn) this.router.navigateByUrl('/mis-compras');
     else {

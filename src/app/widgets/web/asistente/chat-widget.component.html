@@ -1,0 +1,101 @@
+@if (visible) {
+  <div class="ed-chat" [class.ed-chat--open]="open">
+    @if (open) {
+      <section class="ed-chat__panel" role="dialog" aria-label="Asistente Estilo Dorado">
+        <header class="ed-chat__head">
+          <div class="ed-chat__brand">
+            <img src="https://i.imgur.com/hixFJ0L.jpeg" alt="" />
+            <div>
+              <strong>Asistente Estilo Dorado</strong>
+              <span>Productos, precios y cómo comprar</span>
+            </div>
+          </div>
+          <button type="button" class="ed-chat__iconbtn" (click)="toggle(false)" aria-label="Cerrar">×</button>
+        </header>
+
+        <div class="ed-chat__body" #scroller>
+          @for (m of msgs; track $index) {
+            <div class="ed-bubble" [class.ed-bubble--me]="m.from === 'user'">
+              <p>{{ m.text }}</p>
+
+              @if (m.products?.length) {
+                <div class="ed-cards">
+                  @for (p of m.products; track p.id) {
+                    <article class="ed-card">
+                      <button type="button" class="ed-card__main" (click)="goProduct(p.id)">
+                        <div>
+                          <b>{{ p.nombre }}</b>
+                          <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
+                        </div>
+                      </button>
+                      <div class="ed-card__actions">
+                        <button type="button" class="ed-ghost" (click)="goProduct(p.id)">Ver</button>
+                        <button
+                          type="button"
+                          class="ed-gold"
+                          [disabled]="(p.stock || 0) < 1"
+                          (click)="askConfirm(p)"
+                        >
+                          {{ (p.stock || 0) < 1 ? 'Agotado' : 'Agregar' }}
+                        </button>
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+
+              @if (m.action?.type === 'confirm_add') {
+                <div class="ed-confirm">
+                  <button type="button" class="ed-gold" (click)="confirmAdd(m.action!)">Sí, agregar</button>
+                  <button type="button" class="ed-ghost" (click)="decline()">No</button>
+                  <button type="button" class="ed-link" (click)="goCart()">Ver carrito</button>
+                </div>
+              }
+            </div>
+          }
+
+          @if (sending) {
+            <div class="ed-bubble">
+              <p class="ed-typing">Pensando… Ollama puede tardar unos segundos</p>
+            </div>
+          }
+        </div>
+
+        @if (suggestions.length) {
+          <div class="ed-chips">
+            @for (s of suggestions; track s) {
+              <button type="button" (click)="send(s)" [disabled]="sending">{{ s }}</button>
+            }
+          </div>
+        }
+
+        <footer class="ed-chat__foot">
+          <input
+            [(ngModel)]="draft"
+            (keydown.enter)="send()"
+            [disabled]="sending"
+            placeholder="Ej. osito  ·  quiero la cerdita"
+            maxlength="1000"
+          />
+          <button type="button" class="ed-gold" (click)="send()" [disabled]="sending || !draft.trim()">
+            Enviar
+          </button>
+        </footer>
+      </section>
+    }
+
+    <button
+      type="button"
+      class="ed-chat__fab"
+      (click)="toggle()"
+      [attr.aria-expanded]="open"
+      aria-label="Abrir asistente"
+    >
+      @if (open) {
+        <span>Cerrar</span>
+      } @else {
+        <span>¿Te ayudo?</span>
+      }
+    </button>
+  </div>
+}

@@ -1,0 +1,171 @@
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
+import { AsistenteService, AsistenteProducto, AsistenteAction } from '../../../services/asistente/asistente.service';
+import { CartService } from '../../../services/cart/cart.service';
+import { UiService } from '../../../core/services/ui.service';
+
+interface ChatMsg {
+  from: 'user' | 'bot';
+  text: string;
+  products?: AsistenteProducto[];
+  action?: AsistenteAction | null;
+}
+
+@Component({
+  selector: 'ed-chat-widget',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './chat-widget.component.html',
+  styleUrls: ['./chat-widget.component.css'],
+})
+export class ChatWidgetComponent implements OnInit, OnDestroy {
+  private api = inject(AsistenteService);
+  private cart = inject(CartService);
+  private ui = inject(UiService);
+  private router = inject(Router);
+
+  @ViewChild('scroller') scroller?: ElementRef<HTMLDivElement>;
+
+  visible = true;
+  open = false;
+  sending = false;
+  draft = '';
+  msgs: ChatMsg[] = [];
+  suggestions = ['¿Qué productos tienen?', 'Cerdita tiburón', 'Quiero la cerdita', '¿Cómo compro?'];
+  offered: AsistenteProducto[] = [];
+  private sub?: Subscription;
+
+  ngOnInit() {
+    this.syncRoute(this.router.url);
+    this.sub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.syncRoute(e.urlAfterRedirects));
+
+    window.addEventListener('ed-open-asistente', this.openFromEvent);
+    this.msgs = [
+      {
+        from: 'bot',
+        text: 'Hola, soy el asistente de Estilo Dorado. Pregúntame por un producto o cómo comprar. Puedes tocar Agregar o escribir «quiero la cerdita» si ya te la mostré.',
+      },
+    ];
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+    window.removeEventListener('ed-open-asistente', this.openFromEvent);
+  }
+
+  private openFromEvent = () => this.toggle(true);
+
+  private syncRoute(url: string) {
+    this.visible = !url.startsWith('/admin');
+    if (!this.visible) this.open = false;
+  }
+
+  toggle(force?: boolean) {
+    this.open = force ?? !this.open;
+    if (this.open) setTimeout(() => this.scroll(), 50);
+  }
+
+  send(preset?: string) {
+    const text = (preset ?? this.draft).trim();
+    if (!text || this.sending) return;
+    this.draft = '';
+    this.msgs.push({ from: 'user', text });
+    this.sending = true;
+    this.scroll();
+
+    const ids = this.offered.map((p) => p.id).filter(Boolean);
+    this.api.send(text, ids).subscribe({
+      next: (res) => {
+        if (res.products?.length) this.offered = res.products;
+        if (res.suggestions?.length) this.suggestions = res.suggestions;
+        this.msgs.push({
+          from: 'bot',
+          text: res.reply || '…',
+          products: res.products || [],
+          action: res.action,
+        });
+        this.sending = false;
+        this.scroll();
+      },
+      error: (err) => {
+        const msg =
+          err?.error?.reply ||
+          err?.error?.message ||
+          'No pude consultar el asistente. ¿Laravel y Ollama están en marcha?';
+        this.msgs.push({ from: 'bot', text: msg });
+        this.sending = false;
+        this.scroll();
+      },
+    });
+  }
+
+  askConfirm(p: AsistenteProducto) {
+    if ((p.stock ?? 0) < 1) {
+      this.ui.warn(`${p.nombre} está agotado`);
+      return;
+    }
+    this.msgs.push({
+      from: 'bot',
+      text: `¿Agrego ${p.nombre} × 1 (S/ ${Number(p.precio).toFixed(2)}) al carrito?`,
+      action: {
+        type: 'confirm_add',
+        id: p.id,
+        qty: 1,
+        nombre: p.nombre,
+        precio: Number(p.precio),
+        stock: p.stock,
+        imagen_url: p.imagen_url,
+      },
+    });
+    this.scroll();
+  }
+
+  confirmAdd(a: AsistenteAction) {
+    if (!a?.id) return;
+    const stock = a.stock ?? 0;
+    if (stock < 1) {
+      this.ui.warn('Producto agotado');
+      return;
+    }
+    this.cart.add({
+      id: a.id,
+      nombre: a.nombre || 'Producto',
+      imagen: a.imagen_url || null,
+      precio: Number(a.precio || 0),
+      qty: Math.min(a.qty || 1, stock),
+      stockMax: stock,
+    });
+    this.msgs.push({
+      from: 'bot',
+      text: `${a.nombre} se agregó al carrito. Puedes seguir comprando o ir al carrito.`,
+    });
+    this.ui.ok(`${a.nombre} agregado al carrito`);
+    this.scroll();
+  }
+
+  decline() {
+    this.msgs.push({ from: 'bot', text: 'Listo, no lo agregué. Elige otra opción cuando quieras.' });
+    this.scroll();
+  }
+
+  goProduct(id: number) {
+    this.router.navigate(['/producto', id]);
+  }
+
+  goCart() {
+    this.open = false;
+    this.router.navigateByUrl('/carrito');
+  }
+
+  private scroll() {
+    setTimeout(() => {
+      const el = this.scroller?.nativeElement;
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 40);
+  }
+}
