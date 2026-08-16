@@ -86,10 +86,14 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     }
   }
 
+  checkoutPending = false;
+
   openLogin() {
     this.showLogin = true;
     this.loginError = '';
     this.hideLoginPassword = true;
+    const dest = this.returnUrl.peek() || '';
+    this.checkoutPending = dest.startsWith('/entrega') || dest.startsWith('/pago') || dest.startsWith('/carrito');
   }
   closeLogin() {
     this.showLogin = false;

@@ -74,6 +74,9 @@
       </div>
 
       <div class="modal-body pt-0">
+        <p class="small text-muted" *ngIf="checkoutPending">
+          Al entrar o crear tu cuenta seguirás con la compra. Tu carrito se conserva.
+        </p>
         <form [formGroup]="loginForm" (ngSubmit)="submitLogin()" class="d-grid gap-3">
 
           <div>

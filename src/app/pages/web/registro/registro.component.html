@@ -6,7 +6,11 @@
     ← Volver al inicio
   </button>
   <h1>Regístrate</h1>
-  <p class="text-muted" style="margin-top:-8px;margin-bottom:16px;">Crea tu cuenta para comprar en Estilo Dorado.</p>
+  <p class="text-muted" style="margin-top:-8px;margin-bottom:16px;">
+    {{ checkoutPending
+      ? 'Crea tu cuenta y seguirás con la compra. Tu carrito se conserva.'
+      : 'Crea tu cuenta para comprar en Estilo Dorado.' }}
+  </p>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="ed-form" autocomplete="on">
     <label>Correo *</label>

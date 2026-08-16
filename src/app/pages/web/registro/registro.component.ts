@@ -36,6 +36,13 @@ export class RegistroComponent {
   hide = true;
   submitting = false;
   formError = '';
+  checkoutPending = false;
+
+  constructor() {
+    const dest = this.returnUrl.peek() || '';
+    this.checkoutPending =
+      dest.startsWith('/entrega') || dest.startsWith('/pago') || dest.startsWith('/carrito');
+  }
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
