@@ -24,8 +24,16 @@ export class PanelFiltrosComponent {
     this.cats.getAll().subscribe(cs => this.categorias = cs);
   }
 
+  labelOf(c: Categoria): string {
+    return c.nombre.toLowerCase().trim() === 'detalles' ? 'Cajas' : c.nombre;
+  }
+
   onSelect(id: number, nombre: string) {
     this.selectedId = id;
+    if (nombre.toLowerCase().trim() === 'detalles') {
+      this.changeCategoria.emit({ id: null, nombre: 'Cajas' });
+      return;
+    }
     this.changeCategoria.emit({ id, nombre });
   }
 

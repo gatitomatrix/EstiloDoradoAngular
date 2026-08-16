@@ -17,7 +17,7 @@
              [value]="c.id_categoria"
              [checked]="c.id_categoria===selectedId"
              (change)="onSelect(c.id_categoria, c.nombre)">
-      <label class="form-check-label" [for]="'cat-'+c.id_categoria">{{ c.nombre }}</label>
+      <label class="form-check-label" [for]="'cat-'+c.id_categoria">{{ labelOf(c) }}</label>
     </div>
   </section>
 

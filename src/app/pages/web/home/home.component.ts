@@ -107,12 +107,15 @@ export class HomeComponent implements OnInit {
     let lista = [...this.allProductos];
 
     if (this.categoriaId || this.categoriaNombre) {
+      const onlyTags = (this.categoriaNombre || '').toLowerCase() === 'cajas';
       const keys = this.categoryKeys(this.categoriaNombre);
-      lista = lista.filter(
-        (p) =>
-          (this.categoriaId != null && p.categoriaId === this.categoriaId) ||
-          keys.some((k) => this.productService.matchesQuery(p, k)),
-      );
+      lista = lista.filter((p) => {
+        if (onlyTags) {
+          return keys.some((k) => this.productService.matchesQuery(p, k));
+        }
+        const byId = this.categoriaId != null && p.categoriaId === this.categoriaId;
+        return byId || keys.some((k) => this.productService.matchesQuery(p, k));
+      });
     }
 
     if (this.searchQuery) {
@@ -156,12 +159,11 @@ export class HomeComponent implements OnInit {
     const extra: Record<string, string[]> = {
       carteles: ['cartel', 'mensaje'],
       cartel: ['carteles', 'mensaje'],
-      detalles: ['detalle', 'personalizado', 'regalo'],
-      detalle: ['detalles', 'personalizado'],
+      cajas: ['caja', 'cajita'],
+      caja: ['cajita'],
       florales: ['flores', 'arreglo', 'floral'],
       flores: ['florales', 'arreglo'],
       perfumeria: ['perfume', 'fragancia', 'perfumería'],
-      variados: ['variado', 'varios'],
     };
     for (const k of [...keys]) {
       (extra[k] || []).forEach((x) => keys.add(x));
@@ -193,12 +195,15 @@ export class HomeComponent implements OnInit {
   private listaSinChip(): ProductPreview[] {
     let lista = [...this.allProductos];
     if (this.categoriaId || this.categoriaNombre) {
+      const onlyTags = (this.categoriaNombre || '').toLowerCase() === 'cajas';
       const keys = this.categoryKeys(this.categoriaNombre);
-      lista = lista.filter(
-        (p) =>
-          (this.categoriaId != null && p.categoriaId === this.categoriaId) ||
-          keys.some((k) => this.productService.matchesQuery(p, k)),
-      );
+      lista = lista.filter((p) => {
+        if (onlyTags) {
+          return keys.some((k) => this.productService.matchesQuery(p, k));
+        }
+        const byId = this.categoriaId != null && p.categoriaId === this.categoriaId;
+        return byId || keys.some((k) => this.productService.matchesQuery(p, k));
+      });
     }
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase().trim();
