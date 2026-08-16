@@ -17,11 +17,13 @@ export class ReturnUrlService {
     return sessionStorage.getItem(KEY);
   }
 
-  /** Lee y limpia. Default: /mis-compras si no hay destino de compra. */
-  consume(fallback = '/mis-compras'): string {
+  /** Lee y limpia. Por defecto vuelve a la tienda (como en la app). */
+  consume(fallback = '/'): string {
     const u = sessionStorage.getItem(KEY);
     sessionStorage.removeItem(KEY);
-    if (!u || u.startsWith('/admin')) return fallback;
+    if (!u || u.startsWith('/admin') || u === '/login' || u === '/registro') {
+      return fallback;
+    }
     return u;
   }
 

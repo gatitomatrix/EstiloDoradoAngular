@@ -124,7 +124,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
         this.loginError = '';
         this.ui.ok('Sesión iniciada');
         this.auth.me().subscribe({ error: () => {} });
-        const dest = this.returnUrl.consume('/mis-compras');
+        const dest = this.returnUrl.consume('/');
         this.router.navigateByUrl(dest);
       },
       error: () => {
@@ -177,7 +177,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
             this.auth.applyExternalLogin(res);
             this.closeLogin();
             this.ui.ok('Entraste con Google (demo local)');
-            const dest = this.returnUrl.consume('/mis-compras');
+            const dest = this.returnUrl.consume('/');
             this.router.navigateByUrl(dest);
           } else {
             this.ui.err(res?.message || 'No se pudo iniciar con Google demo');
@@ -205,7 +205,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
           this.auth.applyExternalLogin(res);
           this.closeLogin();
           this.ui.ok('Sesión con Google iniciada');
-          const dest = this.returnUrl.consume('/mis-compras');
+          const dest = this.returnUrl.consume('/');
           this.router.navigateByUrl(dest);
         }
       },

@@ -119,7 +119,7 @@ export class RegistroComponent {
       .subscribe({
         next: () => {
           this.submitting = false;
-          const dest = this.returnUrl.consume('/mis-compras');
+          const dest = this.returnUrl.consume('/');
           this.router.navigateByUrl(dest);
         },
         error: (e) => {
