@@ -18,20 +18,28 @@ export class PanelFiltrosComponent {
   categorias: Categoria[] = [];
   selectedId?: number;
 
-  @Output() changeCategoria = new EventEmitter<number | null>();
+  @Output() changeCategoria = new EventEmitter<{ id: number | null; nombre: string | null }>();
 
   ngOnInit() {
     this.cats.getAll().subscribe(cs => this.categorias = cs);
   }
 
-  onSelect(id: number) {
+  onSelect(id: number, nombre: string) {
     this.selectedId = id;
-    this.changeCategoria.emit(id);
+    this.changeCategoria.emit({ id, nombre });
   }
 
   limpiar() {
     this.selectedId = undefined;
-    this.changeCategoria.emit(null);
+    this.changeCategoria.emit({ id: null, nombre: null });
+  }
+
+  limpiarTodo() {
+    this.selectedId = undefined;
+    this.precioMinSel = null;
+    this.precioMaxSel = null;
+    this.changeCategoria.emit({ id: null, nombre: null });
+    this.onChangePrecio();
   }
 
   /** Rango de precios disponible (calculado en Home) */

@@ -41,6 +41,7 @@ export class HomeComponent implements OnInit {
 
   productos: ProductPreview[] = [];
   categoriaId: number | null = null;
+  categoriaNombre: string | null = null;
   allProductos: ProductPreview[] = [];
   loading = false;
   error: string | null = null;
@@ -75,9 +76,7 @@ export class HomeComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    const src$ = this.categoriaId
-      ? this.productService.listByCategory(this.categoriaId)
-      : this.productService.getAll();
+    const src$ = this.productService.getAll();
 
     src$.subscribe({
       next: (data) => {
@@ -108,6 +107,15 @@ export class HomeComponent implements OnInit {
   private aplicarFiltros() {
     let lista = [...this.allProductos];
 
+    if (this.categoriaId || this.categoriaNombre) {
+      const keys = this.categoryKeys(this.categoriaNombre);
+      lista = lista.filter(
+        (p) =>
+          (this.categoriaId != null && p.categoriaId === this.categoriaId) ||
+          keys.some((k) => this.productService.matchesQuery(p, k)),
+      );
+    }
+
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase().trim();
       lista = lista.filter((p) => this.productService.matchesQuery(p, q));
@@ -128,9 +136,38 @@ export class HomeComponent implements OnInit {
     this.productos = lista;
   }
 
-  onCategoriaChange(id: number | null) {
-    this.categoriaId = id;
-    this.cargarProductos();
+  onCategoriaChange(ev: { id: number | null; nombre: string | null } | number | null) {
+    if (ev && typeof ev === 'object') {
+      this.categoriaId = ev.id;
+      this.categoriaNombre = ev.nombre;
+    } else {
+      this.categoriaId = ev;
+      this.categoriaNombre = null;
+    }
+    this.aplicarFiltros();
+  }
+
+  /** Misma idea que el chat: categoría + etiquetas (carteles → cartel, etc.). */
+  private categoryKeys(nombre: string | null): string[] {
+    if (!nombre) return [];
+    const n = nombre.toLowerCase().trim();
+    const keys = new Set<string>([n]);
+    if (n.endsWith('es') && n.length > 4) keys.add(n.slice(0, -2));
+    else if (n.endsWith('s') && n.length > 3) keys.add(n.slice(0, -1));
+    const extra: Record<string, string[]> = {
+      carteles: ['cartel', 'mensaje'],
+      cartel: ['carteles', 'mensaje'],
+      detalles: ['detalle', 'personalizado', 'regalo'],
+      detalle: ['detalles', 'personalizado'],
+      florales: ['flores', 'arreglo', 'floral'],
+      flores: ['florales', 'arreglo'],
+      perfumeria: ['perfume', 'fragancia', 'perfumería'],
+      variados: ['variado', 'varios'],
+    };
+    for (const k of [...keys]) {
+      (extra[k] || []).forEach((x) => keys.add(x));
+    }
+    return [...keys];
   }
 
   onPrecioChange(r: { min: number | null; max: number | null }) {

@@ -9,10 +9,26 @@
   top: 16px; /* se mantiene visible al hacer scroll */
 }
 
+.ed-panel-filtros__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .ed-panel-filtros__header h3 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
+}
+.ed-btn-clear--link {
+  border: 0;
+  background: transparent;
+  color: #8A6D1F;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
 }
 
 /* Grupos */

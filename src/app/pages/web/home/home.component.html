@@ -37,9 +37,9 @@
   </div>
 
   <div class="ed-content-row__right">
-    <div *ngIf="searchQuery" class="ed-search-banner" style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <span>Resultados para: <strong>“{{ searchQuery }}”</strong> ({{ productos.length }})</span>
-      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSearch()">Limpiar búsqueda</button>
+    <div *ngIf="categoriaNombre" class="ed-search-banner" style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <span>Categoría: <strong>{{ categoriaNombre }}</strong> ({{ productos.length }})</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onCategoriaChange({ id: null, nombre: null })">Ver todas</button>
     </div>
 
     <div *ngIf="loading" class="ed-loading">Cargando productos…</div>
