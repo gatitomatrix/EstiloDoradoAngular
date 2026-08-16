@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
-import { AsistenteService, AsistenteProducto, AsistenteAction } from '../../../services/asistente/asistente.service';
+import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply } from '../../../services/asistente/asistente.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { UiService } from '../../../core/services/ui.service';
 
@@ -80,7 +80,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
     const ids = this.offered.map((p) => p.id).filter(Boolean);
     this.api.send(text, ids).subscribe({
-      next: (res) => {
+      next: (res: AsistenteReply) => {
         if (res.products?.length) this.offered = res.products;
         if (res.suggestions?.length) this.suggestions = res.suggestions;
         this.msgs.push({
@@ -92,7 +92,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         this.sending = false;
         this.scroll();
       },
-      error: (err) => {
+      error: (err: { error?: { reply?: string; message?: string } }) => {
         const msg =
           err?.error?.reply ||
           err?.error?.message ||
