@@ -14,6 +14,7 @@
     <ed-web-chips-categorias
       [categorias]="chips"
       [seleccionada]="chipActivo || 'Todos'"
+      [conteos]="chipConteos()"
       (seleccionarCategoria)="onChip($event)"
     >
     </ed-web-chips-categorias>
@@ -37,10 +38,6 @@
     <div *ngIf="searchQuery" class="ed-search-banner" style="margin-bottom:8px;">
       <span>Búsqueda: <strong>“{{ searchQuery }}”</strong> ({{ productos.length }})</span>
       <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearSearch()">Limpiar búsqueda</button>
-    </div>
-    <div *ngIf="chipActivo" class="ed-search-banner" style="margin-bottom:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <span>Ocasión: <strong>{{ chipActivo }}</strong> ({{ productos.length }})</span>
-      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onChip('Todos')">Quitar ocasión</button>
     </div>
     <div *ngIf="categoriaNombre" class="ed-search-banner" style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <span>Categoría: <strong>{{ categoriaNombre }}</strong> ({{ productos.length }})</span>

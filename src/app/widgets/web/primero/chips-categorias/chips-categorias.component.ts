@@ -14,8 +14,7 @@ export class ChipsCategoriasComponent {
 
   /** Categoría seleccionada (opcional, control externo) */
   @Input() seleccionada: string | null = null;
-
-  /** Emite cuando el usuario selecciona una categoría */
+  @Input() conteos: Record<string, number> = {};
   @Output() seleccionarCategoria = new EventEmitter<string>();
 
   onSelect(cat: string) {

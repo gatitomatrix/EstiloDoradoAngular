@@ -6,7 +6,7 @@
       class="ed-chip"
       [class.ed-chip--active]="isActive(cat)"
       (click)="onSelect(cat)">
-      {{ cat }}
+      {{ cat }}<ng-container *ngIf="conteos[cat] != null"> ({{ conteos[cat] }})</ng-container>
     </button>
   </div>
 </div>

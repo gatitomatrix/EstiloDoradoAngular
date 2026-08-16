@@ -180,6 +180,44 @@ export class HomeComponent implements OnInit {
     this.aplicarFiltros();
   }
 
+  chipConteos(): Record<string, number> {
+    const base = this.listaSinChip();
+    const out: Record<string, number> = { Todos: base.length };
+    for (const name of this.chips) {
+      if (name === 'Todos') continue;
+      out[name] = base.filter((p) => this.productoEnChip(p, name)).length;
+    }
+    return out;
+  }
+
+  private listaSinChip(): ProductPreview[] {
+    let lista = [...this.allProductos];
+    if (this.categoriaId || this.categoriaNombre) {
+      const keys = this.categoryKeys(this.categoriaNombre);
+      lista = lista.filter(
+        (p) =>
+          (this.categoriaId != null && p.categoriaId === this.categoriaId) ||
+          keys.some((k) => this.productService.matchesQuery(p, k)),
+      );
+    }
+    if (this.searchQuery) {
+      const q = this.searchQuery.toLowerCase().trim();
+      lista = lista.filter((p) => this.productService.matchesQuery(p, q));
+    }
+    if (this.precioMinSel !== null) {
+      lista = lista.filter((p) => p.precio >= (this.precioMinSel as number));
+    }
+    if (this.precioMaxSel !== null) {
+      lista = lista.filter((p) => p.precio <= (this.precioMaxSel as number));
+    }
+    return lista;
+  }
+
+  private productoEnChip(p: ProductPreview, chip: string): boolean {
+    const keys = this.chipKeys[chip] ?? [chip.toLowerCase()];
+    return keys.some((k) => this.productService.matchesQuery(p, k));
+  }
+
   clearSearch() {
     this.router.navigate(['/'], { queryParams: {} });
   }
