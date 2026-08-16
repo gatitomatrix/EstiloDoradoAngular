@@ -51,16 +51,17 @@ export class HomeComponent implements OnInit {
   precioMinSel: number | null = null;
   precioMaxSel: number | null = null;
 
-  chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Ocasiones', 'Tendencias', 'Ofertas'];
+  chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Ocasiones', 'Tendencias', 'Peluches'];
 
+  /** Palabras reales del catálogo (etiquetas / nombre), no marketing vacío. */
   private readonly chipKeys: Record<string, string[]> = {
-    Amor: ['amor', 'enamorados', 'romance', 'pareja', 'rosa'],
-    'Para Él': ['caballero', 'hombre', 'cerveza', 'adulto', 'billetera'],
-    'Para Ella': ['ella', 'rosa', 'moda', 'bolso'],
-    Cumpleaños: ['cumpleaños', 'cumpleanos', 'fiesta', 'globos'],
-    Ocasiones: ['detalle', 'personalizado', 'regalo'],
-    Tendencias: ['stich', 'hotwheels', 'piton', 'cerdita', 'osito'],
-    Ofertas: ['oferta', 'descuento'],
+    Amor: ['romance', 'pareja', 'enamorados'],
+    'Para Él': ['caballero', 'cerveza', 'adulto', 'billetera', 'futbol', 'deporte'],
+    'Para Ella': ['bolso', 'moda', 'perfume', 'fragancia', 'rosa'],
+    Cumpleaños: ['cumpleaños', 'fiesta', 'globos'],
+    Ocasiones: ['cartel', 'mensaje', 'foto', 'fiesta'],
+    Tendencias: ['stich', 'hotwheels', 'piton', 'cerdita'],
+    Peluches: ['peluche', 'osito', 'stich', 'cerdita', 'infantil'],
   };
 
   ngOnInit() {
