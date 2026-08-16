@@ -6,7 +6,6 @@ import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/
 import { CarruselHeroComponent } from '../../../widgets/web/primero/carrusel-hero/carrusel-hero.component';
 import { CintaPromocionComponent } from '../../../widgets/web/primero/cinta-promocion/cinta-promocion.component';
 import { ChipsCategoriasComponent } from '../../../widgets/web/primero/chips-categorias/chips-categorias.component';
-import { BarraBusquedaComponent } from '../../../widgets/web/primero/barra-busqueda/barra-busqueda.component';
 import { PanelFiltrosComponent } from '../../../widgets/web/primero/panel-filtros/panel-filtros.component';
 import { GrillaProductosComponent } from '../../../widgets/web/primero/grilla-productos/grilla-productos.component';
 
@@ -25,7 +24,6 @@ import { UiService } from '../../../core/services/ui.service';
     CarruselHeroComponent,
     CintaPromocionComponent,
     ChipsCategoriasComponent,
-    BarraBusquedaComponent,
     PanelFiltrosComponent,
     GrillaProductosComponent,
   ],
@@ -179,11 +177,6 @@ export class HomeComponent implements OnInit {
   onChip(cat: string) {
     this.chipActivo = cat === 'Todos' ? null : cat;
     this.aplicarFiltros();
-  }
-
-  onBuscarSecundario(q: string) {
-    const term = (q || '').trim();
-    this.router.navigate(['/'], { queryParams: term ? { q: term } : {} });
   }
 
   clearSearch() {
