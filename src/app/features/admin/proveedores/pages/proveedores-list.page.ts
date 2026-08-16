@@ -85,11 +85,13 @@ import { MessageService } from 'primeng/api';
             </div>
             <div class="mb-3">
               <label class="form-label">Contacto</label>
-              <input class="form-control" [(ngModel)]="form.contacto" name="contacto">
+              <input class="form-control" [(ngModel)]="form.contacto" name="contacto"
+                (input)="onlyLetters($event, 'contacto')" placeholder="Solo letras">
             </div>
             <div class="mb-3">
               <label class="form-label">Teléfono</label>
-              <input class="form-control" [(ngModel)]="form.telefono" name="telefono">
+              <input class="form-control" [(ngModel)]="form.telefono" name="telefono"
+                (input)="onlyPhone($event)" inputmode="numeric" maxlength="15" placeholder="Solo números">
             </div>
             <div class="mb-3">
               <label class="form-label">Email</label>
@@ -125,6 +127,20 @@ export class ProveedoresListPage implements OnInit {
   form: any = { id_proveedor: null, nombre_empresa: '', contacto: '', telefono: '', email: '', direccion: '' };
   saving = signal(false);
   q: string = '';
+
+  onlyLetters(ev: Event, field: 'contacto') {
+    const el = ev.target as HTMLInputElement;
+    const v = el.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s']/g, '');
+    el.value = v;
+    this.form[field] = v;
+  }
+
+  onlyPhone(ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    const v = el.value.replace(/\D/g, '').slice(0, 15);
+    el.value = v;
+    this.form.telefono = v;
+  }
 
   ngOnInit() { this.load(); }
 

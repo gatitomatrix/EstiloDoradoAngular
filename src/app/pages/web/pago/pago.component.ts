@@ -89,7 +89,7 @@ export class PagoComponent implements AfterViewInit {
   });
 
   boletaForm = this.fb.group({
-    nombres: ['', Validators.required],
+    nombres: ['', [Validators.required, Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/)]],
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
     direccion: ['', Validators.required],
     departamento: ['', Validators.required],

@@ -136,7 +136,8 @@
       <div class="mb-3">
         <label class="form-label">Número de tarjeta</label>
         <div class="input-group">
-          <input class="form-control" placeholder="0000 0000 0000 0000" formControlName="numero" (input)="onCardInput($event)">
+          <input class="form-control" placeholder="0000 0000 0000 0000" formControlName="numero"
+            (input)="onCardInput($event)" inputmode="numeric" autocomplete="cc-number">
           <button type="button" class="btn btn-outline-secondary" (click)="cardForm.patchValue({ ver: !cardForm.value.ver })">
             <i class="bi" [ngClass]="cardForm.value.ver ? 'bi-eye-slash' : 'bi-eye'"></i>
           </button>
@@ -149,14 +150,16 @@
       <div class="row g-2">
         <div class="col">
           <label class="form-label">Expiración</label>
-          <input class="form-control" placeholder="MM/AA" formControlName="exp" (input)="onExpInput($event)">
+          <input class="form-control" placeholder="MM/AA" formControlName="exp" (input)="onExpInput($event)"
+            inputmode="numeric" maxlength="5" autocomplete="cc-exp">
           <div class="invalid-feedback d-block" *ngIf="cardForm.controls['exp'].invalid && cardForm.touched">
             La fecha de expiración es requerida
           </div>
         </div>
         <div class="col">
           <label class="form-label">Código de seguridad</label>
-          <input class="form-control" placeholder="CVV" maxlength="3" formControlName="cvv" (input)="onCvvInput($event)">
+          <input class="form-control" placeholder="CVV" maxlength="3" formControlName="cvv" (input)="onCvvInput($event)"
+            inputmode="numeric" autocomplete="cc-csc">
           <div class="invalid-feedback d-block" *ngIf="cardForm.controls['cvv'].invalid && cardForm.touched">
             El CVV no es válido
           </div>
@@ -179,7 +182,8 @@
     </div>
     <form [formGroup]="facturaForm" (ngSubmit)="guardarFactura()">
       <div class="mb-2"><label class="form-label">RUC</label>
-        <input class="form-control" maxlength="11" formControlName="ruc" (input)="onRucInput($event)">
+        <input class="form-control" maxlength="11" formControlName="ruc" (input)="onRucInput($event)"
+          inputmode="numeric" placeholder="11 dígitos">
         <div class="invalid-feedback d-block" *ngIf="facturaForm.controls['ruc'].invalid && facturaForm.touched">Ingresa RUC</div>
       </div>
       <div class="mb-2"><label class="form-label">Razón Social</label>
@@ -237,7 +241,8 @@
           placeholder="Solo letras">
       </div>
       <div class="mb-2"><label class="form-label">DNI</label>
-        <input class="form-control" maxlength="8" formControlName="dni" (input)="onDniInput($event)">
+        <input class="form-control" maxlength="8" formControlName="dni" (input)="onDniInput($event)"
+          inputmode="numeric" placeholder="8 dígitos">
       </div>
       <div class="mb-2"><label class="form-label">Dirección</label>
         <input class="form-control" formControlName="direccion">

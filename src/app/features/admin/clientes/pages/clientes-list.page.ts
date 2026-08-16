@@ -66,15 +66,18 @@ import { AdminClientesService } from '../services/admin-clientes.service';
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Nombre</label>
-                <input class="form-control" [(ngModel)]="nuevo.nombre" name="nombre" required>
+                <input class="form-control" [(ngModel)]="nuevo.nombre" name="nombre" required
+                  (input)="onlyLetters($event, 'nuevo', 'nombre')" placeholder="Solo letras">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Apellido</label>
-                <input class="form-control" [(ngModel)]="nuevo.apellido" name="apellido" required>
+                <input class="form-control" [(ngModel)]="nuevo.apellido" name="apellido" required
+                  (input)="onlyLetters($event, 'nuevo', 'apellido')" placeholder="Solo letras">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Teléfono</label>
-                <input class="form-control" [(ngModel)]="nuevo.telefono" name="telefono">
+                <input class="form-control" [(ngModel)]="nuevo.telefono" name="telefono"
+                  (input)="onlyPhone($event, 'nuevo')" inputmode="numeric" maxlength="9" placeholder="9xxxxxxxx">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
@@ -117,15 +120,18 @@ import { AdminClientesService } from '../services/admin-clientes.service';
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Nombre</label>
-                <input class="form-control" [(ngModel)]="edit.nombre" name="e_nombre">
+                <input class="form-control" [(ngModel)]="edit.nombre" name="e_nombre"
+                  (input)="onlyLetters($event, 'edit', 'nombre')" placeholder="Solo letras">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Apellido</label>
-                <input class="form-control" [(ngModel)]="edit.apellido" name="e_apellido">
+                <input class="form-control" [(ngModel)]="edit.apellido" name="e_apellido"
+                  (input)="onlyLetters($event, 'edit', 'apellido')" placeholder="Solo letras">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Teléfono</label>
-                <input class="form-control" [(ngModel)]="edit.telefono" name="e_telefono">
+                <input class="form-control" [(ngModel)]="edit.telefono" name="e_telefono"
+                  (input)="onlyPhone($event, 'edit')" inputmode="numeric" maxlength="9" placeholder="9xxxxxxxx">
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
@@ -167,6 +173,20 @@ export class ClientesListPage {
   nuevo: any = {};
   edit: any = {};
   fechaHoy = new Date().toISOString().split('T')[0];
+
+  onlyLetters(ev: Event, target: 'nuevo' | 'edit', field: 'nombre' | 'apellido') {
+    const el = ev.target as HTMLInputElement;
+    const v = el.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s']/g, '');
+    el.value = v;
+    this[target][field] = v;
+  }
+
+  onlyPhone(ev: Event, target: 'nuevo' | 'edit') {
+    const el = ev.target as HTMLInputElement;
+    const v = el.value.replace(/\D/g, '').slice(0, 9);
+    el.value = v;
+    this[target].telefono = v;
+  }
 
   ngOnInit() {
     this.cargar();
