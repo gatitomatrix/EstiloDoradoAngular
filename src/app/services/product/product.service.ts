@@ -9,6 +9,7 @@ type ApiProducto = {
   id_producto: number;
   nombre: string;
   descripcion?: string;
+  etiquetas?: string | null;
   precio_compra?: string;
   precio_venta: string;
   stock?: number;
@@ -28,6 +29,7 @@ export class ProductoService {
     id: a.id_producto,
     nombre: a.nombre,
     descripcion: a.descripcion ?? '',
+    etiquetas: a.etiquetas ?? '',
     precio: Number(a.precio_venta),
     stock: a.stock ?? 0,
     imagen: a.imagen_url ?? '',
@@ -64,10 +66,19 @@ export class ProductoService {
     );
   }
 
-  /** Buscar por nombre (para la lupa) */
+  /** Buscar por nombre, descripción o etiquetas (misma lógica que el admin / IA) */
   searchByName(q: string): Observable<ProductPreview[]> {
+    const needle = q.toLowerCase().trim();
     return this.getAll().pipe(
-      map(list => list.filter(p => p.nombre.toLowerCase().includes(q.toLowerCase())))
+      map((list) => list.filter((p) => this.matchesQuery(p, needle))),
     );
+  }
+
+  matchesQuery(p: ProductPreview, q: string): boolean {
+    if (!q) return true;
+    const blob = `${p.nombre} ${p.descripcion || ''} ${p.etiquetas || ''} ${p.slug || ''} ${p.id}`
+      .toLowerCase();
+    return q.split(/\s+/).filter((t) => t.length >= 2).every((t) => blob.includes(t))
+      || blob.includes(q);
   }
 }

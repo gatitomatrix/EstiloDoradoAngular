@@ -54,6 +54,16 @@ export class HomeComponent implements OnInit {
 
   chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Ocasiones', 'Tendencias', 'Ofertas'];
 
+  private readonly chipKeys: Record<string, string[]> = {
+    Amor: ['amor', 'enamorados', 'romance', 'pareja', 'rosa'],
+    'Para Él': ['caballero', 'hombre', 'cerveza', 'adulto', 'billetera'],
+    'Para Ella': ['ella', 'rosa', 'moda', 'bolso'],
+    Cumpleaños: ['cumpleaños', 'cumpleanos', 'fiesta', 'globos'],
+    Ocasiones: ['detalle', 'personalizado', 'regalo'],
+    Tendencias: ['stich', 'hotwheels', 'piton', 'cerdita', 'osito'],
+    Ofertas: ['oferta', 'descuento'],
+  };
+
   ngOnInit() {
     this.route.queryParamMap.subscribe((qp) => {
       this.searchQuery = (qp.get('q') || '').trim();
@@ -99,17 +109,13 @@ export class HomeComponent implements OnInit {
     let lista = [...this.allProductos];
 
     if (this.searchQuery) {
-      const q = this.searchQuery.toLowerCase();
-      lista = lista.filter(
-        (p) =>
-          (p.nombre || '').toLowerCase().includes(q) ||
-          String(p.id).includes(q),
-      );
+      const q = this.searchQuery.toLowerCase().trim();
+      lista = lista.filter((p) => this.productService.matchesQuery(p, q));
     }
 
     if (this.chipActivo && this.chipActivo !== 'Todos') {
-      const chip = this.chipActivo.toLowerCase();
-      lista = lista.filter((p) => (p.nombre || '').toLowerCase().includes(chip));
+      const keys = this.chipKeys[this.chipActivo] ?? [this.chipActivo.toLowerCase()];
+      lista = lista.filter((p) => keys.some((k) => this.productService.matchesQuery(p, k)));
     }
 
     if (this.precioMinSel !== null) {
