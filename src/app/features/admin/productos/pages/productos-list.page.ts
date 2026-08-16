@@ -492,6 +492,7 @@ export class ProductosListPage implements OnInit {
       payload = {
         nombre: base.nombre,
         descripcion: base.descripcion,
+        etiquetas: (base.etiquetas ?? '').toString().trim() || null,
         precio_compra: base.precio_compra,
         precio_venta: base.precio_venta,
         stock: base.stock,
@@ -506,6 +507,7 @@ export class ProductosListPage implements OnInit {
       payload = {
         nombre: base.nombre,
         descripcion: base.descripcion,
+        etiquetas: (base.etiquetas ?? '').toString().trim() || null,
         precio_compra: base.precio_compra,
         precio_venta: base.precio_venta,
         stock: base.stock,
