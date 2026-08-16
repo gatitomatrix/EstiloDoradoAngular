@@ -6,12 +6,19 @@
   </a>
 
   <!-- Buscador -->
-  <div class="ed-search">
-    <input [(ngModel)]="search" name="q" type="text" placeholder="Buscar productos..." />
-    <button aria-label="Buscar" (click)="doSearch()">
+  <form class="ed-search" (submit)="$event.preventDefault(); doSearch()">
+    <input
+      [(ngModel)]="search"
+      name="q"
+      type="search"
+      placeholder="Buscar productos..."
+      enterkeyhint="search"
+      (keydown.enter)="doSearch()"
+    />
+    <button type="submit" aria-label="Buscar">
       <img src="https://i.imgur.com/McBogzU.png" alt="">
     </button>
-  </div> 
+  </form>
 
   <!-- Acciones -->
   <div class="ed-actions">
