@@ -4,11 +4,29 @@
 /* Opcional: ajusta el cursor del pin */
 .leaflet-container { cursor: grab; }
 
+:root {
+  --ed-cream: #F7F1E6;
+  --ed-paper: #FFFEFA;
+  --ed-ink: #2D2418;
+  --ed-muted: #8A7B65;
+  --ed-gold: #D4AF37;
+  --ed-border: #E7DAC6;
+}
+
 html { scroll-behavior: smooth; }
 
 body, html {
-  background-color: #ffffff !important;
-  color: #000000;
+  background-color: var(--ed-cream) !important;
+  color: var(--ed-ink);
+}
+
+/* Formularios de tienda (registro, recuperar, cuenta) */
+.ed-form-wrap {
+  background: var(--ed-paper);
+  border: 1px solid var(--ed-border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 8px 24px rgba(32, 22, 11, 0.06);
 }
 
 /* =========  LAYOUT BASE SOLO ADMIN  ========= */

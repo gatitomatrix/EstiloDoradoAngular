@@ -1,6 +1,7 @@
 .ed-panel-filtros {
   width: 280px;
-  background: #fff;
+  background: #FFFEFA;
+  border: 1px solid #E7DAC6;
   border: 1px solid #eee;
   border-radius: 10px;
   padding: 16px;

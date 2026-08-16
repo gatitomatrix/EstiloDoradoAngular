@@ -3,8 +3,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  background: transparent;
+  border-bottom: 1px solid #E7DAC6;
   padding: 10px 16px;
   flex-wrap: wrap;              /* en móvil puede bajar a 2da línea */
 }
@@ -40,8 +40,8 @@
 
 /* Caja placeholder para ver la estructura */
 .ed-placeholder-box {
-  border: 1px dashed #ddd;
-  background: #fafafa;
+  background: #FFFEFA;
+  border: 1px dashed #E7DAC6;
   border-radius: 8px;
   padding: 20px;
   min-height: 300px;

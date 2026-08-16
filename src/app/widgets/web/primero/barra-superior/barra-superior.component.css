@@ -5,7 +5,7 @@
   align-items: center;
   gap: 16px;
   padding: 8px 12px;
-  background: #fff;
+  background: #FFFEFA;
 }
 .ed-logo img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; }
 
