@@ -21,4 +21,33 @@ export class AdminReportesService {
   downloadInventario(ext: 'xlsx'|'csv'|'pdf', params?: any): Observable<Blob> {
     return this.http.get(`${API}/reportes/inventario.${ext}`, { params, responseType: 'blob' });
   }
+
+  financiero(dias: 7 | 30 | 90) {
+    return this.http.get<FinancieroResumen>(`${API}/reportes/financiero`, { params: { dias } });
+  }
+
+  downloadFinanciero(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
+    return this.http.get(`${API}/reportes/financiero.${ext}`, { params: { dias }, responseType: 'blob' });
+  }
+}
+
+export interface FinancieroKpis {
+  ingresos: number;
+  pedidos_cobrados: number;
+  ticket_promedio: number;
+  costo_estimado: number;
+  margen_estimado: number;
+  pendientes: number;
+  cancelados: number;
+  monto_cancelado: number;
+}
+
+export interface FinancieroResumen {
+  desde: string;
+  hasta: string;
+  dias: number;
+  kpis: FinancieroKpis;
+  por_pago: { metodo: string; pedidos: number; total: number }[];
+  por_dia: { fecha: string; total: number; pedidos: number }[];
+  top_productos: { id: number; nombre: string; unidades: number; importe: number }[];
 }
