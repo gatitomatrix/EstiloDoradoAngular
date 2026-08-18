@@ -56,14 +56,6 @@ export class PagoComponent implements AfterViewInit {
   get mode() { return this.checkout.value.mode as 'STORE_PICKUP' | 'EXPRESS' | 'NONE'; }
   get canCash() { return this.mode === 'STORE_PICKUP'; }
 
-  /** Clave real de Culqi (no el placeholder del repo). Sin ella el checkout oficial falla (CCKT-400). */
-  get hasRealCulqiKey(): boolean {
-    const k = (environment.culqiPublicKey || '').trim();
-    if (!k) return false;
-    const fake = /tu_clave|TU_PUBLICA|xxxxxxxx|changeme/i.test(k);
-    return /^pk_(test|live)_[A-Za-z0-9]{10,}$/.test(k) && !fake;
-  }
-
   // Offcanvas visibles
   showCardDrawer: 'credito' | 'debito' | null = null;
   showFactura = false;
@@ -180,10 +172,6 @@ export class PagoComponent implements AfterViewInit {
   }
 
   pagarConCulqi() {
-    if (!this.hasRealCulqiKey) {
-      this.pagarDemoAcademico();
-      return;
-    }
     if (typeof (window as any).Culqi === 'undefined') {
       alert('No se cargó Culqi. Revisa que el script esté en index.html');
       return;
@@ -199,11 +187,10 @@ export class PagoComponent implements AfterViewInit {
     Culqi.open();
   }
 
-  /** Sin pk_test real (Render académico): mismo flujo que el móvil, sin cobrar. */
-  private pagarDemoAcademico() {
+  /** Pedido de prueba sin pasar por Culqi (demo académica / Render sin claves). */
+  pagarDemoAcademico() {
     const ok = confirm(
-      'Modo demostración: no hay clave Culqi configurada en este servidor, ' +
-      'así que no se cobra dinero real.\n\n¿Registrar el pedido como pagado (prueba)?'
+      'Pago de demostración: no se cobra dinero real.\n\n¿Registrar el pedido como pagado (prueba)?'
     );
     if (!ok) return;
     this.onCulqiSuccess({
