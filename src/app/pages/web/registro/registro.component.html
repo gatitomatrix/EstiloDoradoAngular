@@ -60,9 +60,24 @@
 
     <div class="alert alert-danger" *ngIf="formError" style="margin:12px 0;">{{ formError }}</div>
 
-    <button class="ed-btn ed-btn--primary" type="submit" [disabled]="form.invalid || submitting">
+    <button class="ed-btn ed-btn--primary" type="submit" [disabled]="form.invalid || submitting || googleLoading">
       {{ submitting ? 'Creando…' : 'Crear cuenta' }}
     </button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px;">
+      <hr style="flex:1;border:none;border-top:1px solid #e7dac6;margin:0;">
+      <span style="color:#8a7b65;font-size:.85rem;">o</span>
+      <hr style="flex:1;border:none;border-top:1px solid #e7dac6;margin:0;">
+    </div>
+
+    <button type="button" class="ed-btn" style="width:100%;background:#fff;border:1.5px solid #2D2418;color:#2D2418;"
+      (click)="registerGoogle()" [disabled]="submitting || googleLoading">
+      {{ googleLoading ? 'Conectando con Google…' : 'Crear cuenta con Gmail' }}
+    </button>
+    <p class="text-muted" style="font-size:.8rem;margin-top:8px;" *ngIf="!googleReady">
+      Para Gmail real pega tu Client ID OAuth (tipo Web) en <code>environment.development.ts</code>
+      y en el <code>.env</code> de Laravel (<code>GOOGLE_CLIENT_ID</code>).
+    </p>
 
     <p style="margin-top:16px;">
       ¿Ya tienes cuenta?

@@ -6,6 +6,9 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { ReturnUrlService } from '../../../core/services/return-url.service';
+import { GoogleAuthService } from '../../../core/services/google-auth.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 /** Solo letras (incl. acentos) y espacios — nombres/apellidos */
 const NAME_RE = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/;
@@ -32,11 +35,17 @@ export class RegistroComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private returnUrl = inject(ReturnUrlService);
+  private googleAuth = inject(GoogleAuthService);
+  private http = inject(HttpClient);
 
   hide = true;
   submitting = false;
+  googleLoading = false;
   formError = '';
   checkoutPending = false;
+  get googleReady() {
+    return this.googleAuth.configured;
+  }
 
   constructor() {
     const dest = this.returnUrl.peek() || '';
@@ -138,6 +147,38 @@ export class RegistroComponent {
           this.formError = typeof msg === 'string' ? msg : 'Error al registrar';
         },
       });
+  }
+
+  async registerGoogle() {
+    this.formError = '';
+    this.googleLoading = true;
+    try {
+      if (!this.googleAuth.configured) {
+        this.googleLoading = false;
+        this.formError = 'Falta googleClientId para crear cuenta con Gmail.';
+        return;
+      }
+      const tokens = await this.googleAuth.signIn();
+      this.http.post<any>(`${environment.apiBaseUrl}/auth/google`, tokens).subscribe({
+        next: (res) => {
+          this.googleLoading = false;
+          if (!res?.token) {
+            this.formError = res?.message || 'No se pudo crear la cuenta con Google';
+            return;
+          }
+          this.auth.applyExternalLogin(res);
+          const dest = this.returnUrl.consume('/');
+          this.router.navigateByUrl(dest);
+        },
+        error: (e) => {
+          this.googleLoading = false;
+          this.formError = e?.error?.message || 'Google no validó la cuenta';
+        },
+      });
+    } catch (e: any) {
+      this.googleLoading = false;
+      this.formError = e?.message || 'No se abrió Google. Revisa internet y el Client ID.';
+    }
   }
 
   goLogin(ev: Event) {

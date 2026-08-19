@@ -10,8 +10,7 @@ import { ReturnUrlService } from '../../../../core/services/return-url.service';
 import { UiService } from '../../../../core/services/ui.service';
 import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-
-declare const google: any;
+import { GoogleAuthService } from '../../../../core/services/google-auth.service';
 
 @Component({
   selector: 'ed-web-barra-superior',
@@ -28,6 +27,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
   private returnUrl = inject(ReturnUrlService);
   private ui = inject(UiService);
   private http = inject(HttpClient);
+  private googleAuth = inject(GoogleAuthService);
 
   search = '';
   totalQty = 0;
@@ -38,7 +38,9 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
   googleLoading = false;
   hideLoginPassword = true;
   loginError = '';
-  googleClientId = (environment as any).googleClientId || '';
+  get googleClientId() {
+    return this.googleAuth.clientId;
+  }
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -139,106 +141,65 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Login Google: GIS si hay clientId; si no, demo local (solo desarrollo). */
-  loginWithGoogle() {
-    if (this.googleClientId) {
-      this.googleLoading = true;
-      this.loadGis().then(() => {
-        try {
-          google.accounts.id.initialize({
-            client_id: this.googleClientId,
-            callback: (resp: any) => this.handleGoogleCredential(resp?.credential),
-          });
-          google.accounts.id.prompt((notification: any) => {
-            if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
-              // Fallback: botón one-tap no disponible → usar token demo si backend lo permite
-              this.googleLoading = false;
-              this.ui.warn('No se pudo abrir Google. Usa el botón de correo o revisa el Client ID.');
-            }
-          });
-        } catch (e) {
-          console.error(e);
-          this.googleLoading = false;
-          this.ui.err('Error al iniciar Google Sign-In');
-        }
-      });
-      return;
-    }
-
-    // Demo local sin Client ID de Google (solo para pruebas en casa)
+  /** Gmail real si hay Client ID; si no, demo solo en desarrollo. */
+  async loginWithGoogle() {
     this.googleLoading = true;
-    this.http
-      .post<any>(`${environment.apiBaseUrl}/auth/google`, {
-        demo: true,
-        email: 'demo.google@estilodorado.local',
-        nombre: 'Cliente',
-        apellido: 'Google Demo',
-      })
-      .subscribe({
-        next: (res) => {
-          this.googleLoading = false;
-          if (res?.token) {
-            this.auth.applyExternalLogin(res);
-            this.closeLogin();
-            this.ui.ok('Entraste con Google (demo local)');
-            const dest = this.returnUrl.consume('/');
-            this.router.navigateByUrl(dest);
-          } else {
-            this.ui.err(res?.message || 'No se pudo iniciar con Google demo');
-          }
-        },
-        error: (err) => {
-          this.googleLoading = false;
-          this.ui.err(
-            err?.error?.message ||
-              'Google demo no disponible. Revisa Laravel (auth/google) y .env',
-          );
-        },
-      });
+    this.loginError = '';
+    try {
+      if (this.googleAuth.configured) {
+        const tokens = await this.googleAuth.signIn();
+        this.finishGoogle(tokens);
+        return;
+      }
+      if (environment.production) {
+        this.googleLoading = false;
+        this.ui.warn('Falta configurar Google Client ID en este servidor.');
+        return;
+      }
+      this.http
+        .post<any>(`${environment.apiBaseUrl}/auth/google`, {
+          demo: true,
+          email: 'demo.google@estilodorado.local',
+          nombre: 'Cliente',
+          apellido: 'Google Demo',
+        })
+        .subscribe({
+          next: (res) => this.onGoogleOk(res, true),
+          error: (err) => this.onGoogleErr(err),
+        });
+    } catch (e: any) {
+      this.googleLoading = false;
+      if (e?.message === 'NO_CLIENT_ID') {
+        this.ui.warn('Configura googleClientId para entrar con Gmail.');
+        return;
+      }
+      this.ui.err(e?.message || 'No se pudo abrir Google');
+    }
   }
 
-  private handleGoogleCredential(idToken: string) {
-    if (!idToken) {
-      this.googleLoading = false;
+  private finishGoogle(tokens: { id_token?: string; access_token?: string }) {
+    this.http.post<any>(`${environment.apiBaseUrl}/auth/google`, tokens).subscribe({
+      next: (res) => this.onGoogleOk(res, false),
+      error: (err) => this.onGoogleErr(err),
+    });
+  }
+
+  private onGoogleOk(res: any, demo: boolean) {
+    this.googleLoading = false;
+    if (!res?.token) {
+      this.ui.err(res?.message || 'No se pudo iniciar con Google');
       return;
     }
-    this.http.post<any>(`${environment.apiBaseUrl}/auth/google`, { id_token: idToken }).subscribe({
-      next: (res) => {
-        this.googleLoading = false;
-        if (res?.token) {
-          this.auth.applyExternalLogin(res);
-          this.closeLogin();
-          this.ui.ok('Sesión con Google iniciada');
-          const dest = this.returnUrl.consume('/');
-          this.router.navigateByUrl(dest);
-        }
-      },
-      error: (err) => {
-        this.googleLoading = false;
-        this.ui.err(err?.error?.message || 'No se pudo validar Google');
-      },
-    });
+    this.auth.applyExternalLogin(res);
+    this.closeLogin();
+    this.ui.ok(demo ? 'Entraste con Google (demo local)' : (res.message || 'Sesión con Google'));
+    const dest = this.returnUrl.consume('/');
+    this.router.navigateByUrl(dest);
   }
 
-  private loadGis(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (typeof google !== 'undefined' && google?.accounts?.id) {
-        resolve();
-        return;
-      }
-      const existing = document.getElementById('gis-script');
-      if (existing) {
-        existing.addEventListener('load', () => resolve());
-        return;
-      }
-      const s = document.createElement('script');
-      s.id = 'gis-script';
-      s.src = 'https://accounts.google.com/gsi/client';
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => reject();
-      document.head.appendChild(s);
-    });
+  private onGoogleErr(err: any) {
+    this.googleLoading = false;
+    this.ui.err(err?.error?.message || 'No se pudo validar Google');
   }
 
   onLogout() {
