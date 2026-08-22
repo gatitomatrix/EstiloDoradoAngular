@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { estimarEnvio } from '../utils/tarifa-envio';
 
 export type MetodoEntrega = 'retiro' | 'domicilio';
 
@@ -41,11 +42,12 @@ export class EntregaStateService {
   aplicarPolitica(m: MetodoEntrega) {
     this.setMetodo(m);
     if (m === 'retiro') {
-      this.setCostoEntrega(5);
+      this.setCostoEntrega(0);
       this.setDescuento(0);
     } else {
-      this.setCostoEntrega(20);
-      this.setDescuento(5);
+      const d = this.dir$.value;
+      this.setCostoEntrega(estimarEnvio(d?.departamento, d?.provincia).costo);
+      this.setDescuento(0);
     }
   }
 }

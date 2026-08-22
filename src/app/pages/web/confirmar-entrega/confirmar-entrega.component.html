@@ -59,8 +59,9 @@
             <input type="radio" name="ship" [checked]="selected==='EXPRESS'" (change)="onSelectExpress()">
             <div class="ed-radio__body">
               <div class="fw-semibold">Envío a dirección</div>
-              <div class="text-muted small">Envío a tu dirección de 1 a 2 días de acuerdo a tu ubicación y horarios de reparto.</div>
-              <div class="ed-price">S/ 20</div>
+              <div class="text-muted small">Estimado tipo Shalom según departamento/provincia (Huancayo, Junín, Lima o resto del Perú).</div>
+              <div class="ed-price">S/ {{ expressFee | number:'1.2-2' }}</div>
+              <div class="small text-muted">{{ feeLabel }}</div>
             </div>
           </label>
         </div>

@@ -5,6 +5,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
+import { estimarEnvio } from '../../../core/utils/tarifa-envio';
 
 @Component({
   selector: 'ed-web-confirmar-entrega',
@@ -27,6 +28,16 @@ export class ConfirmarEntregaComponent {
   get address() { return this.checkout.value.address?.full || '–'; }
   get mode() { return this.checkout.value.mode; }
 
+  get feeLabel(): string {
+    const a = this.checkout.value.address;
+    return estimarEnvio(a?.departamento, a?.provincia).etiqueta;
+  }
+
+  get expressFee(): number {
+    const a = this.checkout.value.address;
+    return estimarEnvio(a?.departamento, a?.provincia).costo;
+  }
+
   // Radio buttons
   selected: 'STORE_PICKUP' | 'EXPRESS' = this.checkout.value.mode === 'STORE_PICKUP' ? 'STORE_PICKUP' : 'EXPRESS';
 
@@ -43,15 +54,13 @@ export class ConfirmarEntregaComponent {
   
   onSelectPickup() {
     this.selected = 'STORE_PICKUP';
-    // Cambia costos según regla: pickup => fee 5, sin descuento
     this.checkout.setMode('STORE_PICKUP');
     this.checkout.setCosts(0, 0);
   }
   onSelectExpress() {
     this.selected = 'EXPRESS';
-    // Express => fee 20, descuento 5
     this.checkout.setMode('EXPRESS');
-    this.checkout.setCosts(20, 5);
+    this.checkout.setCosts(this.expressFee, 0);
   }
   irAPagar() {
   this.router.navigateByUrl('/pago');

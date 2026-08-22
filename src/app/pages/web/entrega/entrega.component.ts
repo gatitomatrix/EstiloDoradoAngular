@@ -8,6 +8,7 @@ import * as L from 'leaflet';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
+import { estimarEnvio } from '../../../core/utils/tarifa-envio';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -293,6 +294,8 @@ export class EntregaComponent {
       lng: this.lastCoords?.lng,
       full: this.composeFullAddress(v.via!, numero, v.distrito!, v.provincia!, v.departamento!)
     } as any);
+    const tarifa = estimarEnvio(v.departamento, v.provincia);
+    this.checkout.setCosts(tarifa.costo, 0);
 
     this.showAddressModal = false;
     this.router.navigateByUrl('/confirmar-entrega');
