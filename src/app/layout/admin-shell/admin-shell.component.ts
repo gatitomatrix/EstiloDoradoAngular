@@ -71,10 +71,37 @@ import { filter, Subscription } from 'rxjs';
       </div>
     </section>
 
-    <p-toast position="top-right" (onClick)="goPendientes()"></p-toast>
+    <p-toast position="top-right">
+      <ng-template let-message pTemplate="message">
+        <button type="button" class="ed-toast-hit" (click)="goPendientes(); $event.stopPropagation()">
+          <strong>{{ message.summary }}</strong>
+          <span>{{ message.detail }}</span>
+          <em>Ver pedidos →</em>
+        </button>
+      </ng-template>
+    </p-toast>
     <p-confirmDialog />
   </div>
   `,
+  styles: [`
+    .ed-toast-hit {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+    }
+    .ed-toast-hit strong { font-size: 14px; }
+    .ed-toast-hit span { font-size: 13px; opacity: .92; }
+    .ed-toast-hit em { font-size: 12px; font-style: normal; font-weight: 700; color: #1B5E38; }
+  `],
 })
 export class AdminShellComponent implements OnInit, OnDestroy {
   private auth = inject(AdminAuthService);
