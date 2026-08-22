@@ -148,8 +148,12 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     });
   }
 
+  private lastToastEstado = 'pendiente';
+
   goPendientes() {
-    this.router.navigate(['/admin/pedidos'], { queryParams: { estado: 'pendiente' } });
+    this.router.navigate(['/admin/pedidos'], {
+      queryParams: { estado: this.lastToastEstado || 'pendiente' },
+    });
   }
 
   private announcePedido(p: { id_pedido?: number; total?: number; estado?: string; cliente_nombre?: string }) {
@@ -157,10 +161,11 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     const total = Number(p?.total ?? 0).toFixed(2);
     const cli = (p?.cliente_nombre || 'Cliente').trim();
     const estado = p?.estado || 'pendiente';
+    this.lastToastEstado = estado;
     this.toast.add({
       severity: estado === 'pendiente' ? 'warn' : 'success',
       summary: `Nuevo pedido #${id}`,
-      detail: `${cli} · S/ ${total} · ${estado}. Clic para ver pendientes.`,
+      detail: `${cli} · S/ ${total} · ${estado}. Clic para abrir pedidos.`,
       life: 9000,
     });
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
