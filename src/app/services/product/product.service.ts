@@ -83,7 +83,7 @@ export class ProductoService {
     return tokens.every((t) => this.tokenVariants(t).some((v) => blob.includes(v)));
   }
 
-  /** peluches → peluche; ositos → osito; flores → flor */
+  /** peluches → peluche; ositos → osito; cartera → billetera */
   private tokenVariants(t: string): string[] {
     const out = new Set<string>([t]);
     if (t.endsWith('es') && t.length > 4) {
@@ -91,6 +91,16 @@ export class ProductoService {
       out.add(t.slice(0, -2));
     } else if (t.endsWith('s') && t.length > 3) {
       out.add(t.slice(0, -1));
+    }
+    const syn: Record<string, string[]> = {
+      cartera: ['billetera'],
+      carteras: ['billetera', 'billeteras'],
+      billetera: ['cartera'],
+      billeteras: ['cartera', 'carteras'],
+      monedero: ['billetera', 'cartera'],
+    };
+    for (const v of [...out]) {
+      (syn[v] || []).forEach((s) => out.add(s));
     }
     return [...out];
   }
