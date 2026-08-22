@@ -1,5 +1,17 @@
 .ed-detalle {
-  max-width: 1200px; margin: 16px auto 24px; padding: 0 12px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  max-width: 1100px;
+  margin: 16px auto 40px;
+  padding: 0 16px;
 }
-@media (max-width: 992px) { .ed-detalle { grid-template-columns: 1fr; } }
+.ed-detalle__back { margin-bottom: 8px; }
+.ed-detalle__grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  gap: 32px 40px;
+  align-items: start;
+}
+.ed-detalle__left,
+.ed-detalle__right { min-width: 0; }
+@media (max-width: 900px) {
+  .ed-detalle__grid { grid-template-columns: 1fr; }
+}
