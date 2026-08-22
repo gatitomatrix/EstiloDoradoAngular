@@ -78,7 +78,20 @@ export class ProductoService {
     if (!q) return true;
     const blob = `${p.nombre} ${p.descripcion || ''} ${p.etiquetas || ''} ${p.slug || ''} ${p.id}`
       .toLowerCase();
-    return q.split(/\s+/).filter((t) => t.length >= 2).every((t) => blob.includes(t))
-      || blob.includes(q);
+    const tokens = q.split(/\s+/).filter((t) => t.length >= 2);
+    if (tokens.length === 0) return blob.includes(q);
+    return tokens.every((t) => this.tokenVariants(t).some((v) => blob.includes(v)));
+  }
+
+  /** peluches → peluche; ositos → osito; flores → flor */
+  private tokenVariants(t: string): string[] {
+    const out = new Set<string>([t]);
+    if (t.endsWith('es') && t.length > 4) {
+      out.add(t.slice(0, -1));
+      out.add(t.slice(0, -2));
+    } else if (t.endsWith('s') && t.length > 3) {
+      out.add(t.slice(0, -1));
+    }
+    return [...out];
   }
 }
