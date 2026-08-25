@@ -9,7 +9,7 @@ import { AdminReportesService, FinancieroResumen } from '../../../../core/servic
 
 Chart.register(...registerables);
 
-type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: number; count?: number } };
+type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?: { threshold?: number; count?: number } };
 
 @Component({
   standalone: true,
@@ -18,7 +18,7 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
   template: `
   <div>
     <h2 class="ed-page-title">Dashboard</h2>
-    <p class="ed-page-sub">Resumen del día. Haz clic en una tarjeta para ver el detalle.</p>
+    <p class="ed-page-sub">Las 3 lecturas del negocio: ventas en el tiempo, productos que más facturan y stock por reponer. Haz clic en una tarjeta para el detalle.</p>
 
     <div class="ed-kpi-grid">
       <button type="button" class="ed-kpi ed-kpi-btn" (click)="goPedidos({ hoy: true })">
@@ -42,12 +42,12 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
       <button type="button" class="ed-kpi ed-kpi-btn" (click)="goProductosStock()">
         <i class="pi pi-exclamation-triangle ed-kpi-icon"></i>
         <div class="ed-kpi-label">Stock bajo (≤3)</div>
-        <div class="ed-kpi-value">{{ stockBajo().length }}</div>
+        <div class="ed-kpi-value">{{ stockCritico().length }}</div>
         <div class="ed-kpi-cta">Ver productos →</div>
       </button>
     </div>
 
-    <div *ngIf="stockBajo().length" class="ed-alert-stock">
+    <div *ngIf="stockCritico().length" class="ed-alert-stock">
       <strong>Alerta de stock:</strong>
       Productos con pocas unidades: {{ lowStockNames() }}
     </div>
@@ -58,18 +58,35 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
 
     <div class="ed-dash-charts">
       <article class="ed-dash-card">
-        <h3>Ventas cobradas (30 días)</h3>
-        <p>Solo pedidos pagado / enviado / entregado. Clic en Reportes para el detalle.</p>
+        <h3>1. Ventas cobradas (30 días)</h3>
+        <p>Consulta de ventas por tiempo. Solo pagado / enviado / entregado.</p>
         <div class="ed-dash-canvas-wrap">
           <canvas #ventasCanvas></canvas>
         </div>
       </article>
       <article class="ed-dash-card">
-        <h3>Por forma de pago</h3>
+        <h3>Forma de pago</h3>
         <p>Cómo están pagando en el mismo periodo.</p>
         <div class="ed-dash-canvas-wrap ed-dash-canvas-wrap--pie">
           <canvas #pagoCanvas></canvas>
         </div>
+      </article>
+      <article class="ed-dash-card">
+        <h3>2. Productos que más facturan</h3>
+        <p>Top 8 por importe cobrado (unidades × precio).</p>
+        <div class="ed-dash-canvas-wrap ed-dash-canvas-wrap--h">
+          <canvas #topCanvas></canvas>
+        </div>
+      </article>
+      <article class="ed-dash-card">
+        <h3>3. Stock bajo (≤10)</h3>
+        <p>Unidades restantes. Los de ≤3 salen en la alerta de arriba.</p>
+        <div class="ed-dash-canvas-wrap ed-dash-canvas-wrap--h" *ngIf="stockBajo().length; else sinStock">
+          <canvas #stockCanvas></canvas>
+        </div>
+        <ng-template #sinStock>
+          <p class="ed-dash-empty">Ningún producto por debajo de 10 unidades.</p>
+        </ng-template>
       </article>
     </div>
   </div>
@@ -94,7 +111,7 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
     }
     .ed-dash-charts {
       display: grid;
-      grid-template-columns: 1.4fr .9fr;
+      grid-template-columns: 1.3fr .9fr;
       gap: 1.1rem;
       margin-top: 1.25rem;
     }
@@ -117,6 +134,8 @@ type StockBajoResp = { data?: Array<{ nombre?: string }>; meta?: { threshold?: n
     }
     .ed-dash-canvas-wrap { position: relative; height: 220px; }
     .ed-dash-canvas-wrap--pie { height: 220px; max-width: 280px; margin: 0 auto; }
+    .ed-dash-canvas-wrap--h { height: 260px; }
+    .ed-dash-empty { margin: 1.5rem 0; color: #6B5B45; font-size: .9rem; }
     @media (max-width: 960px) {
       .ed-dash-charts { grid-template-columns: 1fr; }
     }
@@ -131,26 +150,31 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('ventasCanvas') ventasCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('pagoCanvas') pagoCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('topCanvas') topCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('stockCanvas') stockCanvas?: ElementRef<HTMLCanvasElement>;
 
   kpis = signal({ pedidosHoy: 0, pendientes: 0, pagados: 0 });
-  stockBajo = signal<any[]>([]);
+  stockBajo = signal<Array<{ nombre?: string; stock?: number }>>([]);
   loading = signal(true);
   private chartVentas?: Chart;
   private chartPago?: Chart;
+  private chartTop?: Chart;
+  private chartStock?: Chart;
   private finPendiente?: FinancieroResumen;
   private viewReady = false;
 
+  stockCritico = computed(() =>
+    (this.stockBajo() ?? []).filter((p) => Number(p?.stock ?? 0) <= 3),
+  );
   lowStockNames = computed(() =>
-    (this.stockBajo() ?? []).map((p) => p?.nombre).filter(Boolean).join(', '),
+    this.stockCritico().map((p) => p?.nombre).filter(Boolean).join(', '),
   );
 
   ngOnInit() {
     this.refrescarTodo();
     this.realtime.onPedidoCreated().subscribe(() => this.refrescarKPIs());
     this.realtime.onPedidoUpdated().subscribe(() => this.refrescarKPIs());
-    this.realtime.onStockAlertLow().subscribe(() => {
-      this.productos.stockBajo(3).subscribe((r: StockBajoResp) => this.stockBajo.set(r?.data ?? []));
-    });
+    this.realtime.onStockAlertLow().subscribe(() => this.cargarStock());
   }
 
   refrescarTodo() {
@@ -160,7 +184,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
       complete: () => this.loading.set(false),
     });
     this.refrescarKPIs();
-    this.productos.stockBajo(3).subscribe((res: StockBajoResp) => this.stockBajo.set(res?.data ?? []));
+    this.cargarStock();
     this.reportes.financiero(30).subscribe({
       next: (fin) => {
         this.finPendiente = fin;
@@ -173,6 +197,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.viewReady = true;
     if (this.finPendiente) this.pintarGraficos(this.finPendiente);
+    this.pintarStock();
   }
 
   refrescarKPIs() {
@@ -205,6 +230,49 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.chartVentas?.destroy();
     this.chartPago?.destroy();
+    this.chartTop?.destroy();
+    this.chartStock?.destroy();
+  }
+
+  private cargarStock() {
+    this.productos.stockBajo(10).subscribe((res: StockBajoResp) => {
+      this.stockBajo.set(res?.data ?? []);
+      queueMicrotask(() => this.pintarStock());
+    });
+  }
+
+  private pintarStock() {
+    const ink = '#2D2418';
+    const rows = (this.stockBajo() ?? []).slice(0, 8);
+    if (!this.stockCanvas?.nativeElement || rows.length === 0) {
+      this.chartStock?.destroy();
+      this.chartStock = undefined;
+      return;
+    }
+    this.chartStock?.destroy();
+    this.chartStock = new Chart(this.stockCanvas.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: rows.map((p) => this.corto(p.nombre, 22)),
+        datasets: [{
+          label: 'Unidades',
+          data: rows.map((p) => Number(p.stock ?? 0)),
+          backgroundColor: rows.map((p) => Number(p.stock ?? 0) <= 3 ? '#8B1E1E' : '#C9A227'),
+          borderRadius: 6,
+          maxBarThickness: 16,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: { stepSize: 1, color: ink }, grid: { color: '#EFE6D6' } },
+          y: { ticks: { color: ink, font: { size: 11 } }, grid: { display: false } },
+        },
+      },
+    });
   }
 
   private pintarGraficos(fin: FinancieroResumen) {
@@ -212,6 +280,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
     const ink = '#2D2418';
     const dias = fin?.por_dia ?? [];
     const pagos = fin?.por_pago ?? [];
+    const tops = (fin?.top_productos ?? []).slice(0, 8);
 
     if (this.ventasCanvas?.nativeElement) {
       this.chartVentas?.destroy();
@@ -265,5 +334,49 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
         },
       });
     }
+
+    if (this.topCanvas?.nativeElement) {
+      this.chartTop?.destroy();
+      this.chartTop = new Chart(this.topCanvas.nativeElement, {
+        type: 'bar',
+        data: {
+          labels: tops.map((p) => this.corto(p.nombre, 22)),
+          datasets: [{
+            label: 'Importe (S/)',
+            data: tops.map((p) => Number(p.importe || 0)),
+            backgroundColor: '#1B5E38',
+            borderRadius: 6,
+            maxBarThickness: 16,
+          }],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (c) => {
+                  const p = tops[c.dataIndex];
+                  return ` S/ ${Number(c.raw || 0).toFixed(2)} · ${p?.unidades ?? 0} und.`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: { beginAtZero: true, ticks: { color: ink }, grid: { color: '#EFE6D6' } },
+            y: { ticks: { color: ink, font: { size: 11 } }, grid: { display: false } },
+          },
+        },
+      });
+    }
+
+    this.pintarStock();
+  }
+
+  private corto(s: string | undefined, n: number) {
+    const t = (s || '').trim();
+    return t.length > n ? t.slice(0, n - 1) + '…' : t;
   }
 }
