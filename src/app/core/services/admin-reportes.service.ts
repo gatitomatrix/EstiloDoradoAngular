@@ -29,6 +29,10 @@ export class AdminReportesService {
   downloadFinanciero(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
     return this.http.get(`${API}/reportes/financiero.${ext}`, { params: { dias }, responseType: 'blob' });
   }
+
+  downloadStockBajo(ext: 'xlsx'|'csv'|'pdf'): Observable<Blob> {
+    return this.http.get(`${API}/reportes/stock-bajo.${ext}`, { params: { threshold: 10 }, responseType: 'blob' });
+  }
 }
 
 export interface FinancieroKpis {

@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminReportesService, FinancieroResumen } from '../../../../core/services/admin-reportes.service';
 
-type ReportKey = 'clientes' | 'productos' | 'pedidos' | 'inventario' | 'financiero';
+type ReportKey = 'clientes' | 'productos' | 'pedidos' | 'inventario' | 'financiero' | 'stock_bajo';
 type ReportExt = 'csv' | 'xlsx' | 'pdf';
 type Periodo = 7 | 30 | 90;
 
@@ -510,10 +510,17 @@ export class ReportesPage implements OnInit {
     },
     {
       key: 'financiero',
-      label: 'Financiero',
-      desc: 'Ingresos, ticket, margen y desglose del periodo elegido arriba.',
+      label: 'Financiero (las 3 lecturas)',
+      desc: 'Ventas por día, forma de pago y productos que más facturan (periodo de arriba).',
       icon: '💰',
       accent: '#0F766E',
+    },
+    {
+      key: 'stock_bajo',
+      label: 'Stock bajo',
+      desc: 'Productos con 10 unidades o menos, para reposición.',
+      icon: '⚠️',
+      accent: '#B45309',
     },
   ];
 
@@ -528,6 +535,7 @@ export class ReportesPage implements OnInit {
       pedidos: () => this.api.downloadPedidos(ext),
       inventario: () => this.api.downloadInventario(ext),
       financiero: () => this.api.downloadFinanciero(ext, this.periodo()),
+      stock_bajo: () => this.api.downloadStockBajo(ext),
     };
 
     map[tipo]().subscribe({
