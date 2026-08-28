@@ -34,7 +34,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   sending = false;
   draft = '';
   msgs: ChatMsg[] = [];
-  suggestions = ['¿Qué productos tienen?', 'Cerdita tiburón', 'Quiero la cerdita', '¿Cómo compro?'];
+  suggestions = ['Regalo de cumpleaños', '¿Qué productos tienen?', 'Cerdita tiburón', '¿Cómo compro?'];
   offered: AsistenteProducto[] = [];
   private sub?: Subscription;
 
@@ -48,7 +48,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.msgs = [
       {
         from: 'bot',
-        text: 'Hola, soy el asistente de Estilo Dorado. Pregúntame por un producto o cómo comprar. Puedes tocar Agregar o escribir «quiero la cerdita» si ya te la mostré.',
+        text: 'Hola, soy Dori, tu asistente de Estilo Dorado. Dime qué buscas o para quién es el regalo (cumpleaños, papá, novia…) y te muestro opciones del catálogo.',
       },
     ];
   }
@@ -96,7 +96,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         const msg =
           err?.error?.reply ||
           err?.error?.message ||
-          'No pude consultar el asistente. ¿Laravel y Ollama están en marcha?';
+          'No pude consultar a Dori. ¿Laravel está en marcha y Gemini tiene la API key?';
         this.msgs.push({ from: 'bot', text: msg });
         this.sending = false;
         this.scroll();
