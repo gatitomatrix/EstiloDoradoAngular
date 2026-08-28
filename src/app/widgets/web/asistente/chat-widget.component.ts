@@ -34,7 +34,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   sending = false;
   draft = '';
   msgs: ChatMsg[] = [];
-  suggestions = ['Regalo de cumpleaños', '¿Qué productos tienen?', 'Cerdita tiburón', '¿Cómo compro?'];
+  suggestions: string[] = [];
   offered: AsistenteProducto[] = [];
   private sub?: Subscription;
 
@@ -82,7 +82,6 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.api.send(text, ids).subscribe({
       next: (res: AsistenteReply) => {
         if (res.products?.length) this.offered = res.products;
-        if (res.suggestions?.length) this.suggestions = res.suggestions;
         this.msgs.push({
           from: 'bot',
           text: res.reply || '…',

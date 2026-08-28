@@ -61,14 +61,6 @@
           }
         </div>
 
-        @if (suggestions.length) {
-          <div class="ed-chips">
-            @for (s of suggestions; track s) {
-              <button type="button" (click)="send(s)" [disabled]="sending">{{ s }}</button>
-            }
-          </div>
-        }
-
         <footer class="ed-chat__foot">
           <input
             [(ngModel)]="draft"
