@@ -79,7 +79,10 @@ interface ReportGroup {
 
         <div class="ed-charts">
           <div class="ed-chart">
-            <h4>Ventas por día</h4>
+            <div class="ed-chart-head">
+              <h4>Ventas por día</h4>
+              <ng-container *ngTemplateOutlet="miniDl; context: { $implicit: 'ventas_dia' }"></ng-container>
+            </div>
             <div class="ed-bars" *ngIf="chartDays().length; else emptyChart">
               <div class="ed-bar-col" *ngFor="let b of chartDays()" [title]="b.fecha + ' · S/ ' + b.total">
                 <div class="ed-bar" [style.height.%]="b.pct"></div>
@@ -88,7 +91,10 @@ interface ReportGroup {
             </div>
           </div>
           <div class="ed-chart">
-            <h4>Por forma de pago</h4>
+            <div class="ed-chart-head">
+              <h4>Por forma de pago</h4>
+              <ng-container *ngTemplateOutlet="miniDl; context: { $implicit: 'forma_pago' }"></ng-container>
+            </div>
             <div class="ed-pay" *ngIf="f.por_pago.length; else emptyChart">
               <div class="ed-pay-row" *ngFor="let p of f.por_pago">
                 <span class="ed-pay-name">{{ p.metodo }}</span>
@@ -102,7 +108,10 @@ interface ReportGroup {
         </div>
 
         <div class="ed-chart ed-chart--full" *ngIf="f.top_productos.length">
-          <h4>Productos que más facturaron</h4>
+          <div class="ed-chart-head">
+            <h4>Productos que más facturaron</h4>
+            <ng-container *ngTemplateOutlet="miniDl; context: { $implicit: 'top_productos' }"></ng-container>
+          </div>
           <div class="ed-pay">
             <div class="ed-pay-row" *ngFor="let p of f.top_productos">
               <span class="ed-pay-name">{{ p.nombre }} <small>×{{ p.unidades }}</small></span>
@@ -116,6 +125,13 @@ interface ReportGroup {
       </ng-container>
       <ng-template #emptyChart>
         <p class="ed-fin-empty">Aún no hay ventas cobradas en este periodo.</p>
+      </ng-template>
+      <ng-template #miniDl let-key>
+        <div class="ed-mini-dl" role="group">
+          <button type="button" (click)="dlSerie(key, 'csv')" [disabled]="busyKey() === key + ':csv'">CSV</button>
+          <button type="button" (click)="dlSerie(key, 'xlsx')" [disabled]="busyKey() === key + ':xlsx'">Excel</button>
+          <button type="button" (click)="dlSerie(key, 'pdf')" [disabled]="busyKey() === key + ':pdf'">PDF</button>
+        </div>
       </ng-template>
     </section>
 
@@ -375,7 +391,29 @@ interface ReportGroup {
       grid-template-columns: 1.4fr 1fr;
       gap: .9rem;
     }
-    .ed-chart h4 { margin: 0 0 .5rem; font-size: .88rem; color: #2D2418; }
+    .ed-chart h4 { margin: 0; font-size: .88rem; color: #2D2418; }
+    .ed-chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      margin-bottom: .5rem;
+      flex-wrap: wrap;
+    }
+    .ed-mini-dl { display: flex; gap: .3rem; }
+    .ed-mini-dl button {
+      border: 1px solid #E7DAC6;
+      background: #fff;
+      color: #2D2418;
+      font: inherit;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: .22rem .45rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .ed-mini-dl button:hover { background: #F6EFE0; }
+    .ed-mini-dl button:disabled { opacity: .5; cursor: wait; }
     .ed-chart--full { margin-top: .9rem; }
     .ed-bars {
       display: flex;
@@ -523,6 +561,36 @@ export class ReportesPage implements OnInit {
       accent: '#B45309',
     },
   ];
+
+  dlSerie(tipo: 'ventas_dia' | 'forma_pago' | 'top_productos', ext: ReportExt) {
+    const key = `${tipo}:${ext}`;
+    this.busyKey.set(key);
+    this.msg.set(undefined);
+    const map = {
+      ventas_dia: () => this.api.downloadVentasDia(ext, this.periodo()),
+      forma_pago: () => this.api.downloadFormaPago(ext, this.periodo()),
+      top_productos: () => this.api.downloadTopProductos(ext, this.periodo()),
+    };
+    map[tipo]().subscribe({
+      next: (blob) => {
+        if (blob.type?.includes('application/json')) {
+          this.busyKey.set(null);
+          this.msgOk.set(false);
+          this.msg.set('El servidor respondió un error. Revisa Laravel y permisos de rol ADMIN.');
+          return;
+        }
+        this.downloadBlob(blob, `reporte_${tipo}.${ext}`);
+        this.busyKey.set(null);
+        this.msgOk.set(true);
+        this.msg.set(`Descarga lista: reporte_${tipo}.${ext}`);
+      },
+      error: () => {
+        this.busyKey.set(null);
+        this.msgOk.set(false);
+        this.msg.set('No se pudo descargar. ¿Laravel está en 8000 y eres ADMIN?');
+      },
+    });
+  }
 
   dl(tipo: ReportKey, ext: ReportExt) {
     const key = `${tipo}:${ext}`;

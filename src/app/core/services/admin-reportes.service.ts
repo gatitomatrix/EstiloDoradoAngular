@@ -30,6 +30,16 @@ export class AdminReportesService {
     return this.http.get(`${API}/reportes/financiero.${ext}`, { params: { dias }, responseType: 'blob' });
   }
 
+  downloadVentasDia(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
+    return this.http.get(`${API}/reportes/ventas-dia.${ext}`, { params: { dias }, responseType: 'blob' });
+  }
+  downloadFormaPago(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
+    return this.http.get(`${API}/reportes/forma-pago.${ext}`, { params: { dias }, responseType: 'blob' });
+  }
+  downloadTopProductos(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
+    return this.http.get(`${API}/reportes/top-productos.${ext}`, { params: { dias }, responseType: 'blob' });
+  }
+
   downloadStockBajo(ext: 'xlsx'|'csv'|'pdf'): Observable<Blob> {
     return this.http.get(`${API}/reportes/stock-bajo.${ext}`, { params: { threshold: 10 }, responseType: 'blob' });
   }
