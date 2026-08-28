@@ -301,7 +301,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (c) => ` S/ ${Number(c.raw || 0).toFixed(2)}` } },
+            tooltip: { callbacks: { label: (c: { raw?: unknown }) => ` S/ ${Number(c.raw || 0).toFixed(2)}` } },
           },
           scales: {
             x: { ticks: { maxRotation: 0, color: ink, font: { size: 10 } }, grid: { display: false } },
@@ -329,7 +329,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
           maintainAspectRatio: false,
           plugins: {
             legend: { position: 'bottom', labels: { color: ink, boxWidth: 12 } },
-            tooltip: { callbacks: { label: (c) => ` S/ ${Number(c.raw || 0).toFixed(2)}` } },
+            tooltip: { callbacks: { label: (c: { raw?: unknown }) => ` S/ ${Number(c.raw || 0).toFixed(2)}` } },
           },
         },
       });
@@ -357,7 +357,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (c) => {
+                label: (c: { raw?: unknown; dataIndex: number }) => {
                   const p = tops[c.dataIndex];
                   return ` S/ ${Number(c.raw || 0).toFixed(2)} · ${p?.unidades ?? 0} und.`;
                 },
