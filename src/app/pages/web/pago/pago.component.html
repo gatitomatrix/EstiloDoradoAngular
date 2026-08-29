@@ -79,8 +79,8 @@
           </div>
 
           <!-- Botón Culqi -->
-          <button class="btn btn-dark w-100 mb-2" [disabled]="!(pay.hasMethod$ | async)" (click)="pagarConCulqi()">
-            Pagar con Culqi
+          <button class="btn btn-dark w-100 mb-2" [disabled]="!(pay.hasMethod$ | async) || procesandoPago" (click)="pagarConCulqi()">
+            {{ procesandoPago ? 'Confirmando pago…' : 'Pagar con Culqi' }}
           </button>
           <button class="btn btn-outline-secondary w-100 mb-2" [disabled]="!(pay.hasMethod$ | async)" (click)="pagarDemoAcademico()">
             Pago de prueba (sin cobro)

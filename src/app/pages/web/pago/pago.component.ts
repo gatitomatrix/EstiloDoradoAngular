@@ -1,4 +1,4 @@
-import { Component, inject, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, inject, AfterViewInit, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -37,6 +37,8 @@ export class PagoComponent implements AfterViewInit {
   ubigeo = inject(UbigeoService);
   auth = inject(AuthService);
   orderSrv = inject(OrderService);
+  private zone = inject(NgZone);
+  procesandoPago = false;
 
   // Modal selector de comprobante
   @ViewChild('docModal') docModalRef!: ElementRef<HTMLDivElement>;
@@ -147,28 +149,32 @@ export class PagoComponent implements AfterViewInit {
     const tryInit = () => {
       if (typeof (window as any).Culqi === 'undefined') return false;
       (window as any).Culqi.publicKey = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
-      // ÚNICO callback oficial
       (window as any).culqi = () => {
-        const C = (window as any).Culqi;
-        if (C?.token?.id) {
-          // tarjeta: token -> tu backend
-          this.postCulqiToken(C.token.id, C.token.email || (this.auth.user?.email ?? 'cliente@correo.com'));
-          return;
-        }
-        if (C?.order?.id) {
-          // yape: id de orden (si no requieres backend extra)
-          this.onCulqiSuccess({ id: C.order.id as string, method: 'yape' });
-          return;
-        }
-        if (C?.error) {
-          alert(C.error.user_message || 'Pago cancelado.');
-        }
+        this.zone.run(() => this.handleCulqiResult());
       };
       return true;
     };
     if (tryInit()) return;
     const id = setInterval(() => { if (tryInit()) clearInterval(id); }, 300);
-    setTimeout(() => clearInterval(id), 5000);
+    setTimeout(() => clearInterval(id), 8000);
+  }
+
+  private handleCulqiResult() {
+    const C = (window as any).Culqi;
+    try { C?.close?.(); } catch {}
+    if (C?.token?.id) {
+      this.procesandoPago = true;
+      this.postCulqiToken(C.token.id, C.token.email || (this.auth.user?.email ?? 'cliente@correo.com'));
+      return;
+    }
+    if (C?.order?.id) {
+      this.onCulqiSuccess({ id: C.order.id as string, method: 'yape' });
+      return;
+    }
+    this.procesandoPago = false;
+    if (C?.error) {
+      alert(C.error.user_message || C.error.merchant_message || 'No se pudo completar el pago.');
+    }
   }
 
   pagarConCulqi() {
@@ -205,10 +211,15 @@ export class PagoComponent implements AfterViewInit {
       { token, monto: this.total, descripcion: 'Compra Estilo Dorado', correo: email }
     ).subscribe({
       next: (r) => {
+        this.procesandoPago = false;
         if (r.success) this.onCulqiSuccess({ id: token, method: 'tarjeta' });
-        else alert('❌ Error procesando pago: ' + (r.message ?? 'intenta de nuevo'));
+        else alert('Error procesando pago: ' + (r.message ?? 'intenta de nuevo'));
       },
-      error: () => alert('❌ Error de pago. Revisa consola / Network.')
+      error: (err) => {
+        this.procesandoPago = false;
+        const msg = err?.error?.message || err?.message || 'Laravel no respondió. ¿php artisan serve está en el 8000?';
+        alert('Error de pago: ' + msg);
+      }
     });
   }
 
