@@ -39,7 +39,7 @@ type LogItem = {
         </thead>
         <tbody>
           <tr *ngFor="let r of items">
-            <td class="text-nowrap">{{ r.created_at | date:'short' }}</td>
+            <td class="text-nowrap">{{ r.created_at }}</td>
             <td>{{ r.mensaje }}</td>
             <td>
               <span *ngIf="r.whatsapp" class="badge bg-success">WhatsApp</span>
