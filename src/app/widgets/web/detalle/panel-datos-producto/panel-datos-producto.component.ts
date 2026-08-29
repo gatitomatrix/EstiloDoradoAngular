@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; 
+import { RouterModule } from '@angular/router';
+import { WhatsappService } from '../../../../core/services/whatsapp.service';
 
 @Component({
   selector: 'ed-web-panel-datos-producto',
@@ -10,6 +11,8 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./panel-datos-producto.component.css']
 })
 export class PanelDatosProductoComponent {
+  readonly wa = inject(WhatsappService);
+
   @Input() titulo = '';
   @Input() subtitulo = '';
   @Input() descripcion = '';
@@ -31,6 +34,11 @@ export class PanelDatosProductoComponent {
    // 🔥 Total reactivo (se recalcula cuando cambia qty o precio)
   get total(): number {
     return (this.precio || 0) * (this.qty || 0);
+  }
+
+  get consultarHref(): string {
+    const nom = this.titulo || 'un producto';
+    return this.wa.href(`Hola, quiero consultar por: ${nom}`);
   }
 
   inc() {

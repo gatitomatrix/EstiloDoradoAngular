@@ -44,5 +44,8 @@
             <button type="button" class="ed-btn ed-btn--ghost" routerLink="/" (click)="seguirComprando.emit()">
                 Seguir comprando
             </button>
+            <a *ngIf="wa.enabled" class="ed-btn ed-btn--wa" [href]="consultarHref" target="_blank" rel="noopener noreferrer">
+                Consultar por WhatsApp
+            </a>
         </div>
     </div>

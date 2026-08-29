@@ -77,3 +77,12 @@
 .ed-btn--primary:hover { filter: brightness(0.95); }
 .ed-btn--ghost { background: #fff; color: #333; border-color: #c9a227; }
 .ed-btn--ghost:hover { background: #f7f2e0; }
+
+.ed-btn--wa {
+  background: #25D366;
+  color: #fff;
+  border-color: #1ebe57;
+  text-decoration: none;
+  text-align: center;
+}
+.ed-btn--wa:hover { filter: brightness(0.95); color: #fff; }

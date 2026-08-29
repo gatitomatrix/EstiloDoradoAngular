@@ -68,3 +68,16 @@
   .ed-topbar { grid-template-columns: auto 1fr auto; gap: 10px; }
   .ed-link-btn { display:none; } /* oculta 'Mis compras' si no entra; sigues accediendo por menú perfil */
 }
+
+.ed-wa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e7dac6;
+}
+.ed-wa:hover { background: #ecf9f0; }
+.ed-help { background: none; border: 0; cursor: pointer; padding: 0; }

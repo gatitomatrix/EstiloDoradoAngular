@@ -14,6 +14,7 @@ if (!api) {
 
 const culqi = process.env.CULQI_PUBLIC_KEY || 'pk_test_tu_clave_publica';
 const google = process.env.GOOGLE_CLIENT_ID || '';
+const wa = (process.env.WHATSAPP_NUMBER || '51916464315').replace(/\D/g, '');
 const dir = dirname(fileURLToPath(import.meta.url));
 const dest = join(dir, '../src/environments/environment.prod.ts');
 
@@ -22,6 +23,7 @@ const body = `export const environment = {
   apiBaseUrl: ${JSON.stringify(api)},
   culqiPublicKey: ${JSON.stringify(culqi)},
   googleClientId: ${JSON.stringify(google)},
+  whatsappNumber: ${JSON.stringify(wa)},
   realtime: {
     driver: 'poll' as 'poll' | 'sse' | 'pusher',
     intervalMs: 12000,

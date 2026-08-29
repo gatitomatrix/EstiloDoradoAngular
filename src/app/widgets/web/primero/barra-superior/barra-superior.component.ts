@@ -11,6 +11,7 @@ import { UiService } from '../../../../core/services/ui.service';
 import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { GoogleAuthService } from '../../../../core/services/google-auth.service';
+import { WhatsappService } from '../../../../core/services/whatsapp.service';
 
 @Component({
   selector: 'ed-web-barra-superior',
@@ -28,6 +29,7 @@ export class BarraSuperiorComponent implements OnInit, OnDestroy {
   private ui = inject(UiService);
   private http = inject(HttpClient);
   private googleAuth = inject(GoogleAuthService);
+  readonly wa = inject(WhatsappService);
 
   search = '';
   totalQty = 0;
