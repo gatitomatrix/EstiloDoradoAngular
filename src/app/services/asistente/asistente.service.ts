@@ -20,6 +20,8 @@ export interface AsistenteAction {
   precio?: number;
   stock?: number;
   imagen_url?: string;
+  url?: string;
+  label?: string;
 }
 
 export interface AsistenteReply {

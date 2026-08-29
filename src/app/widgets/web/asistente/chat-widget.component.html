@@ -51,6 +51,13 @@
                   <button type="button" class="ed-link" (click)="goCart()">Ver carrito</button>
                 </div>
               }
+              @if (m.action?.type === 'whatsapp' && m.action?.url) {
+                <div class="ed-confirm">
+                  <a class="ed-gold" [href]="m.action.url" target="_blank" rel="noopener noreferrer">
+                    {{ m.action.label || 'Escribir por WhatsApp' }}
+                  </a>
+                </div>
+              }
             </div>
           }
 

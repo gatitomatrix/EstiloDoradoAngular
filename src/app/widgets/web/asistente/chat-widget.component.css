@@ -240,3 +240,8 @@
     transition: none;
   }
 }
+
+a.ed-gold {
+  display: inline-block;
+  text-decoration: none;
+}
