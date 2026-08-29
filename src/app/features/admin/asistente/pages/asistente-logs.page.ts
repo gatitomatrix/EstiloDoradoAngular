@@ -62,7 +62,7 @@ export class AsistenteLogsPage implements OnInit {
   stats = { total: 0, sin_producto: 0, whatsapp: 0 };
 
   ngOnInit() {
-    this.http.get<{ items: LogItem[]; stats: typeof this.stats }>(`${environment.apiBaseUrl}/admin/asistente-logs`).subscribe({
+    this.http.get<{ items: LogItem[]; stats: { total: number; sin_producto: number; whatsapp: number } }>(`${environment.apiBaseUrl}/admin/asistente-logs`).subscribe({
       next: (r) => {
         this.items = r.items || [];
         this.stats = r.stats || this.stats;
