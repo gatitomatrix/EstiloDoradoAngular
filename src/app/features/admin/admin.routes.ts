@@ -99,6 +99,11 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [roleGuard], data: { roles: ['ADMIN'] },
         loadComponent: () => import('./reportes/pages/reportes.page').then(m => m.ReportesPage)
       },
+      {
+        path: 'consultas-dori',
+        canActivate: [roleGuard], data: { roles: ['ADMIN'] },
+        loadComponent: () => import('./asistente/pages/asistente-logs.page').then(m => m.AsistenteLogsPage)
+      },
 
       {
         path: 'auditoria',

@@ -232,6 +232,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
         ],
       },
       { label: 'Clientes', icon: 'pi pi-users', routerLink: ['/admin/clientes'] },
+      { label: 'Consultas Dori', icon: 'pi pi-comments', routerLink: ['/admin/consultas-dori'] },
       { label: 'Reportes', icon: 'pi pi-chart-bar', routerLink: ['/admin/reportes'] },
     ];
   }
@@ -245,6 +246,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
       categorias: 'Categorías',
       proveedores: 'Proveedores',
       clientes: 'Clientes',
+      'consultas-dori': 'Consultas Dori',
       reportes: 'Reportes',
       auditoria: 'Auditoría',
     };
