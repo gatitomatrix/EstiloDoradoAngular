@@ -86,8 +86,8 @@
             Pago de prueba (sin cobro)
           </button>
 
-          <!-- Botón Efectivo -->
-          <button class="btn btn-outline-dark w-100" (click)="pagarEnEfectivo()">
+          <!-- Efectivo solo si eligió retiro en tienda -->
+          <button *ngIf="canCash" class="btn btn-outline-dark w-100" (click)="pagarEnEfectivo()">
             Confirma tu pedido (efectivo en tienda)
           </button>
         </div>
