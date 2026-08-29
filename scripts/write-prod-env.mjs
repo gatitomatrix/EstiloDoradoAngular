@@ -12,7 +12,7 @@ if (!api) {
   process.exit(0);
 }
 
-const culqi = process.env.CULQI_PUBLIC_KEY || 'pk_test_tu_clave_publica';
+const culqi = process.env.CULQI_PUBLIC_KEY || 'pk_test_vJYOwLgj0Zghy6SF';
 const google = process.env.GOOGLE_CLIENT_ID || '';
 const wa = (process.env.WHATSAPP_NUMBER || '51916464315').replace(/\D/g, '');
 const dir = dirname(fileURLToPath(import.meta.url));

@@ -146,7 +146,7 @@ export class PagoComponent implements AfterViewInit {
   private initCulqi() {
     const tryInit = () => {
       if (typeof (window as any).Culqi === 'undefined') return false;
-      (window as any).Culqi.publicKey = environment.culqiPublicKey || 'pk_test_TU_PUBLICA';
+      (window as any).Culqi.publicKey = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
       // ÚNICO callback oficial
       (window as any).culqi = () => {
         const C = (window as any).Culqi;
