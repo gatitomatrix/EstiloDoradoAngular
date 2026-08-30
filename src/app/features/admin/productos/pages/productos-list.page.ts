@@ -197,7 +197,7 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
                   class="form-control"
                   placeholder="peluche,regalo,infantil,stich"
                 />
-                <small class="text-muted">Palabras en minúscula separadas por coma. Ayudan al asistente IA.</small>
+                <small class="text-muted">Palabras en minúscula, separadas por coma. Incluye edad y género para Dori: mujer, hombre, nino, joven, adulto, mayor, edad:10, edad:20, edad:30, edad:40, edad:50, edad:60.</small>
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
@@ -308,7 +308,7 @@ import { AdminProveedoresService } from '../../proveedores/services/admin-provee
                   class="form-control"
                   placeholder="peluche,regalo,infantil,stich"
                 />
-                <small class="text-muted">Palabras en minúscula separadas por coma. Ayudan al asistente IA.</small>
+                <small class="text-muted">Palabras en minúscula, separadas por coma. Incluye edad y género para Dori: mujer, hombre, nino, joven, adulto, mayor, edad:10, edad:20, edad:30, edad:40, edad:50, edad:60.</small>
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
