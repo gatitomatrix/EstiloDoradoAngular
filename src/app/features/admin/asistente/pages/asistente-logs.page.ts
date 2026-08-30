@@ -9,6 +9,10 @@ type LogItem = {
   tipo: string;
   n_productos: number;
   whatsapp: boolean | number;
+  productos?: string | null;
+  queja_tipo?: string | null;
+  queja_label?: string | null;
+  urgencia?: boolean | number;
   driver?: string;
   created_at: string;
 };
@@ -33,6 +37,7 @@ type LogItem = {
           <tr>
             <th>Cuándo</th>
             <th>Pregunta</th>
+            <th>Detalle</th>
             <th>Tipo</th>
             <th>Productos</th>
           </tr>
@@ -42,6 +47,10 @@ type LogItem = {
             <td class="text-nowrap">{{ r.created_at }}</td>
             <td>{{ r.mensaje }}</td>
             <td>
+              <div *ngIf="r.queja_label"><strong>{{ r.queja_label }}</strong></div>
+              <div *ngIf="r.productos" class="small text-muted">{{ r.productos }}</div>
+            </td>
+            <td>
               <span *ngIf="r.whatsapp" class="badge bg-success">WhatsApp</span>
               <span *ngIf="r.tipo === 'sin_producto' && !r.whatsapp" class="badge bg-warning text-dark">Sin catálogo</span>
               <span *ngIf="r.tipo === 'catalogo'" class="badge bg-secondary">Catálogo</span>
@@ -49,7 +58,7 @@ type LogItem = {
             <td>{{ r.n_productos }}</td>
           </tr>
           <tr *ngIf="!items.length">
-            <td colspan="4" class="text-muted">Aún no hay consultas. Escribe algo en Dori (tienda) y recarga esta página.</td>
+            <td colspan="5" class="text-muted">Aún no hay consultas. Escribe algo en Dori (tienda) y recarga esta página.</td>
           </tr>
         </tbody>
       </table>

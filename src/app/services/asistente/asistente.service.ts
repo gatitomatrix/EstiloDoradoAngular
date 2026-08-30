@@ -31,6 +31,7 @@ export interface AsistenteReply {
   products?: AsistenteProducto[];
   suggestions?: string[];
   action?: AsistenteAction | null;
+  awaiting?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -38,10 +39,11 @@ export class AsistenteService {
   private http = inject(HttpClient);
   private url = `${environment.apiBaseUrl}/asistente`;
 
-  send(message: string, offeredIds: number[] = []): Observable<AsistenteReply> {
+  send(message: string, offeredIds: number[] = [], awaiting: string | null = null): Observable<AsistenteReply> {
     return this.http.post<AsistenteReply>(this.url, {
       message,
       offered_ids: offeredIds,
+      awaiting,
     }).pipe(timeout(120000));
   }
 }

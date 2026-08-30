@@ -14,6 +14,17 @@ export interface PedidoNovedad {
   event?: string;
 }
 
+export interface DoriNovedad {
+  id: number;
+  mensaje?: string;
+  tipo?: string;
+  productos?: string | null;
+  queja_tipo?: string | null;
+  queja_label?: string | null;
+  urgencia?: boolean | number;
+  whatsapp?: boolean | number;
+}
+
 /**
  * Avisos del admin. La UI solo escucha Subjects.
  * Hoy: polling (local + prod simple).
@@ -30,10 +41,12 @@ export class RealtimeService implements OnDestroy {
   private stockUpdated$ = new Subject<any>();
   private stockAlertLow$ = new Subject<any>();
   private pendientes$ = new Subject<number>();
+  private doriLog$ = new Subject<DoriNovedad>();
 
   private sseSource?: EventSource;
   private pollTimer?: ReturnType<typeof setInterval>;
   private lastId = 0;
+  private lastDoriId = 0;
   private started = false;
 
   onPedidoCreated(): Observable<PedidoNovedad> { return this.pedidoCreated$.asObservable(); }
@@ -41,6 +54,7 @@ export class RealtimeService implements OnDestroy {
   onStockUpdated(): Observable<any> { return this.stockUpdated$.asObservable(); }
   onStockAlertLow(): Observable<any> { return this.stockAlertLow$.asObservable(); }
   onPendientesCount(): Observable<number> { return this.pendientes$.asObservable(); }
+  onDoriLog(): Observable<DoriNovedad> { return this.doriLog$.asObservable(); }
 
   start(): void {
     if (this.started) return;
@@ -125,6 +139,26 @@ export class RealtimeService implements OnDestroy {
         if (maxId > this.lastId) this.lastId = maxId;
       },
       error: () => { /* silencio: Laravel caído */ },
+    });
+
+    let dp = new HttpParams();
+    if (!baseline && this.lastDoriId > 0) {
+      dp = dp.set('after_id', String(this.lastDoriId));
+    }
+    this.http.get<any>(`${environment.apiBaseUrl}/admin/asistente-logs`, { params: dp }).subscribe({
+      next: (res) => {
+        const maxId = Number(res?.max_id ?? 0);
+        if (baseline || this.lastDoriId === 0) {
+          this.lastDoriId = maxId;
+          return;
+        }
+        const nuevos: DoriNovedad[] = Array.isArray(res?.nuevos) ? res.nuevos : [];
+        for (const n of nuevos) {
+          this.doriLog$.next(n);
+        }
+        if (maxId > this.lastDoriId) this.lastDoriId = maxId;
+      },
+      error: () => {},
     });
   }
 

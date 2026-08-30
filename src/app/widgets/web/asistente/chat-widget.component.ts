@@ -36,6 +36,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   msgs: ChatMsg[] = [];
   suggestions: string[] = [];
   offered: AsistenteProducto[] = [];
+  awaiting: string | null = null;
   private sub?: Subscription;
 
   ngOnInit() {
@@ -79,9 +80,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.scroll();
 
     const ids = this.offered.map((p) => p.id).filter(Boolean);
-    this.api.send(text, ids).subscribe({
+    this.api.send(text, ids, this.awaiting).subscribe({
       next: (res: AsistenteReply) => {
         if (res.products?.length) this.offered = res.products;
+        this.awaiting = res.awaiting || null;
         this.msgs.push({
           from: 'bot',
           text: res.reply || '…',

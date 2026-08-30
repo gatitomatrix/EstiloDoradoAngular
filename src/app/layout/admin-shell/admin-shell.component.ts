@@ -73,10 +73,10 @@ import { filter, Subscription } from 'rxjs';
 
     <p-toast position="top-right">
       <ng-template let-message pTemplate="message">
-        <button type="button" class="ed-toast-hit" (click)="goPendientes(); $event.stopPropagation()">
+        <button type="button" class="ed-toast-hit" (click)="onToastClick(message); $event.stopPropagation()">
           <strong>{{ message.summary }}</strong>
           <span>{{ message.detail }}</span>
-          <em>Ver pedidos →</em>
+          <em>{{ toastCta(message) }}</em>
         </button>
       </ng-template>
     </p-toast>
@@ -160,6 +160,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
         this.rebuildMenu(n);
       }),
       this.realtime.onPedidoCreated().subscribe((p) => this.announcePedido(p)),
+      this.realtime.onDoriLog().subscribe((d) => this.announceDori(d)),
     );
   }
 
@@ -181,6 +182,52 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/pedidos'], {
       queryParams: { estado: this.lastToastEstado || 'pendiente' },
     });
+  }
+
+  goDori() {
+    this.router.navigate(['/admin/consultas-dori']);
+  }
+
+  toastCta(message: { summary?: string; key?: string }): string {
+    return this.isDoriToast(message) ? 'Ver Consultas Dori →' : 'Ver pedidos →';
+  }
+
+  onToastClick(message: { summary?: string; key?: string }) {
+    if (this.isDoriToast(message)) this.goDori();
+    else this.goPendientes();
+  }
+
+  private isDoriToast(message: { summary?: string; key?: string }): boolean {
+    return message?.key === 'dori' || (message?.summary || '').startsWith('Dori');
+  }
+
+  private announceDori(d: {
+    mensaje?: string;
+    tipo?: string;
+    productos?: string | null;
+    queja_label?: string | null;
+    urgencia?: boolean | number;
+    whatsapp?: boolean | number;
+  }) {
+    if (d?.tipo === 'queja_espera') return;
+    const urgente = !!d?.urgencia || !!d?.whatsapp;
+    const queja = d?.queja_label;
+    const prods = (d?.productos || '').trim();
+    let detail = (d?.mensaje || '').slice(0, 140);
+    if (queja) detail = `${queja}. ${detail}`;
+    else if (prods) detail = `Productos: ${prods}`;
+    this.toast.add({
+      key: 'dori',
+      severity: urgente ? 'error' : 'info',
+      summary: urgente ? 'Dori · atención' : 'Dori · consulta',
+      detail: detail || 'Nueva consulta',
+      life: urgente ? 14000 : 8000,
+    });
+    if (urgente && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try {
+        new Notification('Estilo Dorado · Dori', { body: detail, icon: '/images/logo_empresa.jpeg' });
+      } catch { /* ignore */ }
+    }
   }
 
   private announcePedido(p: { id_pedido?: number; total?: number; estado?: string; cliente_nombre?: string }) {
