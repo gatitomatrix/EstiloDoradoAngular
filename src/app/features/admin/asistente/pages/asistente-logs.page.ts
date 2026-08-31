@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 
 type ProdChip = {
@@ -9,6 +10,7 @@ type ProdChip = {
   precio?: number | null;
   stock?: number | null;
   imagen_url?: string | null;
+  descripcion?: string | null;
 };
 
 type LogItem = {
@@ -29,7 +31,7 @@ type LogItem = {
 @Component({
   standalone: true,
   selector: 'app-asistente-logs',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   styles: [`
     .ed-chip {
       display: inline-block;
@@ -48,12 +50,13 @@ type LogItem = {
       z-index: 80; display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     .ed-modal {
-      background: #fffaf2; border-radius: 16px; max-width: 420px; width: 100%;
+      background: #fffaf2; border-radius: 16px; max-width: 440px; width: 100%;
       box-shadow: 0 16px 48px rgba(0,0,0,.25); overflow: hidden;
     }
     .ed-modal img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
     .ed-modal-body { padding: 16px 18px 18px; }
     .ed-modal h3 { margin: 0 0 8px; font-size: 1.15rem; }
+    .ed-modal .desc { font-size: 13px; color: #5c4a32; white-space: pre-wrap; }
   `],
   template: `
     <div class="p-3">
@@ -110,8 +113,17 @@ type LogItem = {
           <h3>{{ open.nombre }}</h3>
           <p class="mb-1" *ngIf="open.precio != null">Precio: <strong>S/ {{ open.precio }}</strong></p>
           <p class="mb-2" *ngIf="open.stock != null">Stock: {{ open.stock }}</p>
-          <p class="small text-muted" *ngIf="open.id">Código interno #{{ open.id }}</p>
-          <button type="button" class="btn btn-sm btn-dark" (click)="close()">Cerrar</button>
+          <p class="desc mb-2" *ngIf="open.descripcion">{{ open.descripcion }}</p>
+          <p class="small text-muted" *ngIf="loading">Cargando ficha…</p>
+          <div class="d-flex gap-2">
+            <a
+              *ngIf="open.id"
+              class="btn btn-sm btn-dark"
+              [routerLink]="['/admin/productos', open.id]"
+              (click)="close()"
+            >Ver en catálogo</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -122,6 +134,7 @@ export class AsistenteLogsPage implements OnInit {
   items: LogItem[] = [];
   stats = { total: 0, sin_producto: 0, whatsapp: 0 };
   open: ProdChip | null = null;
+  loading = false;
 
   ngOnInit() {
     this.http.get<{ items: LogItem[]; stats: { total: number; sin_producto: number; whatsapp: number } }>(`${environment.apiBaseUrl}/admin/asistente-logs`).subscribe({
@@ -141,24 +154,46 @@ export class AsistenteLogsPage implements OnInit {
 
   close() {
     this.open = null;
+    this.loading = false;
   }
 
   openProd(p: ProdChip) {
     this.open = { ...p };
+    this.loading = true;
     const id = Number(p.id || 0);
-    if (id < 1) return;
-    this.http.get<any>(`${environment.apiBaseUrl}/admin/productos/${id}`).subscribe({
-      next: (prod) => {
-        if (!this.open || Number(this.open.id) !== id) return;
-        this.open = {
-          id,
-          nombre: prod.nombre || p.nombre,
-          precio: prod.precio_venta ?? p.precio,
-          stock: prod.stock ?? p.stock,
-          imagen_url: prod.imagen_url || p.imagen_url,
-        };
+    if (id > 0) {
+      this.http.get<any>(`${environment.apiBaseUrl}/admin/productos/${id}`).subscribe({
+        next: (prod) => this.applyProd(prod, p),
+        error: () => { this.loading = false; this.lookupByName(p.nombre); },
+      });
+      return;
+    }
+    this.lookupByName(p.nombre);
+  }
+
+  private lookupByName(nombre: string) {
+    this.http.get<any>(`${environment.apiBaseUrl}/admin/productos`, { params: { q: nombre, per_page: 20 } }).subscribe({
+      next: (res) => {
+        const list: any[] = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        const n = nombre.trim().toLowerCase();
+        const hit = list.find((x) => String(x.nombre || '').trim().toLowerCase() === n) || list[0];
+        if (hit) this.applyProd(hit, { nombre });
+        else this.loading = false;
       },
-      error: () => {},
+      error: () => { this.loading = false; },
     });
+  }
+
+  private applyProd(prod: any, fallback: ProdChip) {
+    this.loading = false;
+    if (!this.open) return;
+    this.open = {
+      id: Number(prod.id_producto ?? prod.id ?? fallback.id ?? 0) || undefined,
+      nombre: prod.nombre || fallback.nombre,
+      precio: prod.precio_venta ?? fallback.precio,
+      stock: prod.stock ?? fallback.stock,
+      imagen_url: prod.imagen_url || fallback.imagen_url,
+      descripcion: prod.descripcion || null,
+    };
   }
 }
