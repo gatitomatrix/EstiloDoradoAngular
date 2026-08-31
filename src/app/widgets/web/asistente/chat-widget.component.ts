@@ -2,7 +2,9 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Subscription, filter } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply, AsistentePedidoChip, AsistenteComplaint } from '../../../services/asistente/asistente.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { UiService } from '../../../core/services/ui.service';
@@ -30,6 +32,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private ui = inject(UiService);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private http = inject(HttpClient);
 
   @ViewChild('scroller') scroller?: ElementRef<HTMLDivElement>;
 
@@ -47,6 +50,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   loginPass = '';
   loginErr = '';
   loginBusy = false;
+  orderView: {
+    id_pedido: number;
+    total?: string | number;
+    estado?: string;
+    fecha?: string;
+    items: string[];
+  } | null = null;
+  orderLoading = false;
   private sub?: Subscription;
 
   ngOnInit() {
@@ -177,6 +188,33 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   goCart() {
     this.open = false;
     this.router.navigateByUrl('/carrito');
+  }
+
+  viewOrder(o: AsistentePedidoChip) {
+    this.orderLoading = true;
+    this.orderView = {
+      id_pedido: o.id_pedido,
+      total: o.total,
+      estado: o.estado,
+      fecha: o.fecha,
+      items: o.resumen ? [o.resumen] : [],
+    };
+    this.http.get<any>(`${environment.apiBaseUrl}/mis-pedidos/${o.id_pedido}`).subscribe({
+      next: (p) => {
+        const dets = Array.isArray(p?.detalles) ? p.detalles : [];
+        this.orderView = {
+          id_pedido: p.id_pedido ?? o.id_pedido,
+          total: p.total ?? o.total,
+          estado: p.estado ?? o.estado,
+          fecha: o.fecha,
+          items: dets.map((d: { producto?: { nombre?: string }; cantidad?: number }) =>
+            `${d.producto?.nombre || 'Ítem'} × ${d.cantidad ?? 1}`
+          ),
+        };
+        this.orderLoading = false;
+      },
+      error: () => { this.orderLoading = false; },
+    });
   }
 
   doLogin() {

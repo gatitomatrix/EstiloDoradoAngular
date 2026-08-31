@@ -52,11 +52,18 @@
                 </div>
               }
               @if (m.pedidos?.length) {
-                <div class="ed-confirm" style="flex-wrap:wrap">
+                <div class="ed-cards">
                   @for (o of m.pedidos; track o.id_pedido) {
-                    <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">
-                      #{{ o.id_pedido }} · S/ {{ o.total }} · {{ o.fecha }}
-                    </button>
+                    <article class="ed-card">
+                      <div>
+                        <b>Pedido #{{ o.id_pedido }}</b>
+                        <small>{{ o.fecha }} · S/ {{ o.total }} · {{ o.resumen }}</small>
+                      </div>
+                      <div class="ed-card__actions">
+                        <button type="button" class="ed-ghost" (click)="viewOrder(o); $event.stopPropagation()">Ver</button>
+                        <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">Este es</button>
+                      </div>
+                    </article>
                   }
                   <button type="button" class="ed-ghost" (click)="send('otro')">Otro / WhatsApp</button>
                 </div>
@@ -116,6 +123,23 @@
             Enviar
           </button>
         </footer>
+
+        @if (orderView) {
+          <div class="ed-order-pop" (click)="orderView = null">
+            <div class="ed-order-pop__box" (click)="$event.stopPropagation()">
+              <h4>Pedido #{{ orderView.id_pedido }}</h4>
+              <p class="small">{{ orderView.estado }} · S/ {{ orderView.total }}</p>
+              @if (orderView.fecha) { <p class="small">{{ orderView.fecha }}</p> }
+              <ul class="small">
+                @for (d of orderView.items; track $index) {
+                  <li>{{ d }}</li>
+                }
+              </ul>
+              <p *ngIf="orderLoading" class="small">Cargando…</p>
+              <button type="button" class="ed-gold" (click)="orderView = null">Cerrar</button>
+            </div>
+          </div>
+        }
       </section>
     }
 

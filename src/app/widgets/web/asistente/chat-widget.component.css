@@ -245,3 +245,25 @@ a.ed-gold {
   display: inline-block;
   text-decoration: none;
 }
+
+.ed-chat__panel { position: relative; }
+.ed-order-pop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 12, 4, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 2;
+}
+.ed-order-pop__box {
+  background: #fffaf2;
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.2);
+}
+.ed-order-pop__box h4 { margin: 0 0 8px; }
+
