@@ -51,6 +51,17 @@
                   <button type="button" class="ed-link" (click)="goCart()">Ver carrito</button>
                 </div>
               }
+              @if (m.pedidos?.length) {
+                <div class="ed-confirm" style="flex-wrap:wrap">
+                  @for (o of m.pedidos; track o.id_pedido) {
+                    <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">
+                      #{{ o.id_pedido }} · S/ {{ o.total }} · {{ o.fecha }}
+                    </button>
+                  }
+                  <button type="button" class="ed-ghost" (click)="send('otro')">Otro / WhatsApp</button>
+                </div>
+              }
+
               @if (m.action?.type === 'whatsapp' && m.action?.url) {
                 <div class="ed-confirm">
                   <a class="ed-gold" [href]="m.action!.url" target="_blank" rel="noopener noreferrer">
@@ -58,10 +69,35 @@
                   </a>
                 </div>
               }
+              @if (m.action?.type === 'login' || (m.actions && m.actions[0]?.type === 'login')) {
+                <div class="ed-confirm">
+                  <button type="button" class="ed-gold" (click)="showLogin = true">Iniciar sesión</button>
+                </div>
+              }
+              @if (m.actions?.length) {
+                @for (a of m.actions; track $index) {
+                  @if (a.type === 'whatsapp' && a.url && m.action?.type !== 'whatsapp') {
+                    <div class="ed-confirm">
+                      <a class="ed-gold" [href]="a.url" target="_blank" rel="noopener noreferrer">{{ a.label || 'WhatsApp' }}</a>
+                    </div>
+                  }
+                }
+              }
             </div>
           }
 
-          @if (sending) {
+          @if (showLogin && !auth.isLoggedIn) {
+            <div class="ed-bubble">
+              <p>Inicia sesión para ubicar tu pedido. El chat no se cierra.</p>
+              <input [(ngModel)]="loginEmail" placeholder="Correo" name="dori_email" />
+              <input [(ngModel)]="loginPass" type="password" placeholder="Contraseña" name="dori_pass" (keydown.enter)="doLogin()" />
+              @if (loginErr) { <small>{{ loginErr }}</small> }
+              <div class="ed-confirm">
+                <button type="button" class="ed-gold" [disabled]="loginBusy" (click)="doLogin()">Entrar</button>
+                <button type="button" class="ed-ghost" (click)="showLogin = false; send('whatsapp')">Seguir por WhatsApp</button>
+              </div>
+            </div>
+          }
             <div class="ed-bubble">
               <p class="ed-typing">Dori está escribiendo…</p>
             </div>

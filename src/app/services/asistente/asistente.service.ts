@@ -24,6 +24,21 @@ export interface AsistenteAction {
   label?: string;
 }
 
+export interface AsistentePedidoChip {
+  id_pedido: number;
+  fecha?: string;
+  total?: string;
+  estado?: string;
+  resumen?: string;
+}
+
+export interface AsistenteComplaint {
+  tipo?: string;
+  pedido_id?: number;
+  phone?: string;
+  mensaje?: string;
+}
+
 export interface AsistenteReply {
   success?: boolean;
   reply: string;
@@ -31,7 +46,10 @@ export interface AsistenteReply {
   products?: AsistenteProducto[];
   suggestions?: string[];
   action?: AsistenteAction | null;
+  actions?: AsistenteAction[];
+  pedidos?: AsistentePedidoChip[];
   awaiting?: string | null;
+  complaint?: AsistenteComplaint | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -39,11 +57,17 @@ export class AsistenteService {
   private http = inject(HttpClient);
   private url = `${environment.apiBaseUrl}/asistente`;
 
-  send(message: string, offeredIds: number[] = [], awaiting: string | null = null): Observable<AsistenteReply> {
+  send(
+    message: string,
+    offeredIds: number[] = [],
+    awaiting: string | null = null,
+    complaint: AsistenteComplaint | null = null,
+  ): Observable<AsistenteReply> {
     return this.http.post<AsistenteReply>(this.url, {
       message,
       offered_ids: offeredIds,
       awaiting,
+      complaint,
     }).pipe(timeout(120000));
   }
 }

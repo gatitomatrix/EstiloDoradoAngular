@@ -3,15 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
-import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply } from '../../../services/asistente/asistente.service';
+import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply, AsistentePedidoChip, AsistenteComplaint } from '../../../services/asistente/asistente.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { UiService } from '../../../core/services/ui.service';
+import { AuthService } from '../../../services/auth/auth.service';
 
 interface ChatMsg {
   from: 'user' | 'bot';
   text: string;
   products?: AsistenteProducto[];
   action?: AsistenteAction | null;
+  actions?: AsistenteAction[];
+  pedidos?: AsistentePedidoChip[];
 }
 
 @Component({
@@ -26,6 +29,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private cart = inject(CartService);
   private ui = inject(UiService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   @ViewChild('scroller') scroller?: ElementRef<HTMLDivElement>;
 
@@ -37,6 +41,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   suggestions: string[] = [];
   offered: AsistenteProducto[] = [];
   awaiting: string | null = null;
+  complaint: AsistenteComplaint | null = null;
+  showLogin = false;
+  loginEmail = '';
+  loginPass = '';
+  loginErr = '';
+  loginBusy = false;
   private sub?: Subscription;
 
   ngOnInit() {
@@ -80,16 +90,22 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.scroll();
 
     const ids = this.offered.map((p) => p.id).filter(Boolean);
-    this.api.send(text, ids, this.awaiting).subscribe({
+    this.api.send(text, ids, this.awaiting, this.complaint).subscribe({
       next: (res: AsistenteReply) => {
         if (res.products?.length) this.offered = res.products;
         this.awaiting = res.awaiting || null;
+        this.complaint = res.complaint || this.complaint;
         this.msgs.push({
           from: 'bot',
           text: res.reply || '…',
           products: res.products || [],
           action: res.action,
+          actions: res.actions?.length ? res.actions : (res.action ? [res.action] : []),
+          pedidos: res.pedidos || [],
         });
+        if (res.actions?.some((a) => a.type === 'login') || res.action?.type === 'login') {
+          this.showLogin = true;
+        }
         this.sending = false;
         this.scroll();
       },
@@ -161,6 +177,26 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   goCart() {
     this.open = false;
     this.router.navigateByUrl('/carrito');
+  }
+
+  doLogin() {
+    this.loginErr = '';
+    if (!this.loginEmail.trim() || !this.loginPass) {
+      this.loginErr = 'Correo y contraseña';
+      return;
+    }
+    this.loginBusy = true;
+    this.auth.login(this.loginEmail.trim(), this.loginPass).subscribe({
+      next: () => {
+        this.loginBusy = false;
+        this.showLogin = false;
+        this.send('ya inicié sesión');
+      },
+      error: (e: { error?: { message?: string } }) => {
+        this.loginBusy = false;
+        this.loginErr = e?.error?.message || 'No pude iniciar sesión';
+      },
+    });
   }
 
   private scroll() {
