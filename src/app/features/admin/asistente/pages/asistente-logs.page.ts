@@ -103,7 +103,7 @@ type LogItem = {
       </table>
     </div>
 
-    <div class="ed-modal-bg" *ngIf="open" (click)="open = false">
+    <div class="ed-modal-bg" *ngIf="open" (click)="close()">
       <div class="ed-modal" (click)="$event.stopPropagation()">
         <img *ngIf="open.imagen_url" [src]="open.imagen_url" [alt]="open.nombre" />
         <div class="ed-modal-body">
@@ -111,7 +111,7 @@ type LogItem = {
           <p class="mb-1" *ngIf="open.precio != null">Precio: <strong>S/ {{ open.precio }}</strong></p>
           <p class="mb-2" *ngIf="open.stock != null">Stock: {{ open.stock }}</p>
           <p class="small text-muted" *ngIf="open.id">Código interno #{{ open.id }}</p>
-          <button type="button" class="btn btn-sm btn-dark" (click)="open = false">Cerrar</button>
+          <button type="button" class="btn btn-sm btn-dark" (click)="close()">Cerrar</button>
         </div>
       </div>
     </div>
@@ -137,6 +137,10 @@ export class AsistenteLogsPage implements OnInit {
     if (r.productos_items?.length) return r.productos_items;
     if (!r.productos) return [];
     return r.productos.split(/,\s*/).filter(Boolean).map((nombre) => ({ nombre }));
+  }
+
+  close() {
+    this.open = null;
   }
 
   openProd(p: ProdChip) {
