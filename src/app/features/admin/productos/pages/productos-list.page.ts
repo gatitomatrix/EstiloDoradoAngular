@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 
 import { AdminProductosService, Producto } from '../services/admin-productos.service';
 import { AdminProveedoresService } from '../../proveedores/services/admin-proveedores.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -388,6 +389,8 @@ export class ProductosListPage implements OnInit {
   private api  = inject(AdminProductosService);
   private cats = inject(AdminCategoriasService);
   private prov = inject(AdminProveedoresService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   q: any = { page: 1, per_page: 10, search: '', id_categoria: undefined, estado: undefined };
   rows = signal<Producto[]>([]);
@@ -406,6 +409,16 @@ export class ProductosListPage implements OnInit {
     this.cats.list().subscribe(res => this.categorias.set(res?.data ?? res ?? []));
     this.prov.list().subscribe(res => this.proveedores.set(res?.data ?? res ?? []));
     this.buscar();
+    const editar = Number(this.route.snapshot.queryParamMap.get('editar'));
+    if (editar > 0) {
+      this.api.get(editar).subscribe({
+        next: (p) => {
+          this.openEdit(p);
+          this.router.navigate([], { queryParams: {}, replaceUrl: true });
+        },
+        error: () => {},
+      });
+    }
   }
 
   isAdmin(): boolean {
