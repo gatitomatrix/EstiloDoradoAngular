@@ -19,6 +19,13 @@ interface ChatMsg {
   pedidos?: AsistentePedidoChip[];
 }
 
+interface OrderViewItem {
+  nombre: string;
+  cantidad: number;
+  imagen_url?: string | null;
+  id?: number;
+}
+
 @Component({
   selector: 'ed-chat-widget',
   standalone: true,
@@ -50,12 +57,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   loginPass = '';
   loginErr = '';
   loginBusy = false;
+  readonly placeholderImg = '/assets/img/no-image.png';
   orderView: {
     id_pedido: number;
     total?: string | number;
     estado?: string;
     fecha?: string;
-    items: string[];
+    items: OrderViewItem[];
   } | null = null;
   orderLoading = false;
   private sub?: Subscription;
@@ -190,6 +198,15 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/carrito');
   }
 
+  imgOf(url?: string | null): string {
+    return url?.trim() || this.placeholderImg;
+  }
+
+  onImgError(ev: Event) {
+    const el = ev.target as HTMLImageElement | null;
+    if (el && el.src !== this.placeholderImg) el.src = this.placeholderImg;
+  }
+
   viewOrder(o: AsistentePedidoChip) {
     this.orderLoading = true;
     this.orderView = {
@@ -197,7 +214,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       total: o.total,
       estado: o.estado,
       fecha: o.fecha,
-      items: o.resumen ? [o.resumen] : [],
+      items: o.resumen ? [{ nombre: o.resumen, cantidad: 1 }] : [],
     };
     this.http.get<any>(`${environment.apiBaseUrl}/mis-pedidos/${o.id_pedido}`).subscribe({
       next: (p) => {
@@ -207,9 +224,15 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
           total: p.total ?? o.total,
           estado: p.estado ?? o.estado,
           fecha: o.fecha,
-          items: dets.map((d: { producto?: { nombre?: string }; cantidad?: number }) =>
-            `${d.producto?.nombre || 'Ítem'} × ${d.cantidad ?? 1}`
-          ),
+          items: dets.map((d: {
+            producto?: { nombre?: string; imagen_url?: string; id_producto?: number };
+            cantidad?: number;
+          }) => ({
+            nombre: d.producto?.nombre || 'Ítem',
+            cantidad: d.cantidad ?? 1,
+            imagen_url: d.producto?.imagen_url || null,
+            id: d.producto?.id_producto,
+          })),
         };
         this.orderLoading = false;
       },

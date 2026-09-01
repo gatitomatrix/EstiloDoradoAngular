@@ -23,6 +23,12 @@
                   @for (p of m.products; track p.id) {
                     <article class="ed-card">
                       <button type="button" class="ed-card__main" (click)="goProduct(p.id)">
+                        <img
+                          class="ed-card__thumb"
+                          [src]="imgOf(p.imagen_url)"
+                          [alt]="p.nombre"
+                          (error)="onImgError($event)"
+                        />
                         <div>
                           <b>{{ p.nombre }}</b>
                           <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
@@ -131,12 +137,28 @@
               <h4>Pedido #{{ orderView.id_pedido }}</h4>
               <p class="small">{{ orderView.estado }} · S/ {{ orderView.total }}</p>
               @if (orderView.fecha) { <p class="small">{{ orderView.fecha }}</p> }
-              <ul class="small">
+              <ul class="ed-order-items">
                 @for (d of orderView.items; track $index) {
-                  <li>{{ d }}</li>
+                  <li class="ed-order-item">
+                    <img
+                      class="ed-order-item__img"
+                      [src]="imgOf(d.imagen_url)"
+                      [alt]="d.nombre"
+                      (error)="onImgError($event)"
+                    />
+                    <div class="ed-order-item__meta">
+                      <b>{{ d.nombre }}</b>
+                      <small>× {{ d.cantidad }}</small>
+                    </div>
+                    @if (d.id) {
+                      <button type="button" class="ed-ghost ed-order-item__open" (click)="goProduct(d.id!)">Ver</button>
+                    }
+                  </li>
                 }
               </ul>
-              <p *ngIf="orderLoading" class="small">Cargando…</p>
+              @if (orderLoading) {
+                <p class="small">Cargando…</p>
+              }
               <button type="button" class="ed-gold" (click)="orderView = null">Cerrar</button>
             </div>
           </div>
