@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit {
   precioMinSel: number | null = null;
   precioMaxSel: number | null = null;
 
-  chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Ocasiones', 'Tendencias', 'Peluches'];
+  chips = ['Todos', 'Amor', 'Para Él', 'Para Ella', 'Cumpleaños', 'Tendencias', 'Peluches'];
 
   /** Palabras reales del catálogo (etiquetas / nombre), no marketing vacío. */
   private readonly chipKeys: Record<string, string[]> = {
@@ -59,7 +59,6 @@ export class HomeComponent implements OnInit {
     'Para Él': ['caballero', 'cerveza', 'adulto', 'billetera', 'futbol', 'deporte'],
     'Para Ella': ['bolso', 'moda', 'perfume', 'fragancia', 'rosa'],
     Cumpleaños: ['cumpleaños', 'fiesta', 'globos'],
-    Ocasiones: ['cartel', 'mensaje', 'foto', 'fiesta'],
     Tendencias: ['stich', 'hotwheels', 'piton', 'cerdita'],
     Peluches: ['peluche', 'osito', 'stich', 'cerdita', 'infantil'],
   };
