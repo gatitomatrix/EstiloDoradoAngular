@@ -31,7 +31,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private cart = inject(CartService);
   private ui = inject(UiService);
   private router = inject(Router);
-  private auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   private http = inject(HttpClient);
 
   @ViewChild('scroller') scroller?: ElementRef<HTMLDivElement>;

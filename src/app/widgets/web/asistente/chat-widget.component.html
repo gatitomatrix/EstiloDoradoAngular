@@ -76,7 +76,7 @@
                   </a>
                 </div>
               }
-              @if (m.action?.type === 'login' || (m.actions && m.actions[0]?.type === 'login')) {
+              @if (m.action?.type === 'login' || (m.actions && m.actions.length && m.actions[0].type === 'login')) {
                 <div class="ed-confirm">
                   <button type="button" class="ed-gold" (click)="showLogin = true">Iniciar sesión</button>
                 </div>
