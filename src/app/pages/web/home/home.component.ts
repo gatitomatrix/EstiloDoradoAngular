@@ -59,7 +59,7 @@ export class HomeComponent implements OnInit {
   /** Palabras reales del catálogo (etiquetas / nombre), no marketing vacío. */
   private readonly chipKeys: Record<string, string[]> = {
     Amor: ['romance', 'pareja', 'enamorados'],
-    'Para Él': ['caballero', 'cerveza', 'adulto', 'billetera', 'futbol', 'deporte'],
+    'Para Él': ['caballero', 'hombre', 'cerveza', 'billetera', 'futbol', 'deporte'],
     'Para Ella': ['bolso', 'moda', 'perfume', 'fragancia', 'rosa'],
     Cumpleaños: ['cumpleaños', 'fiesta', 'globos'],
     Tendencias: ['stich', 'hotwheels', 'piton', 'cerdita'],
