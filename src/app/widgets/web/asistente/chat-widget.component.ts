@@ -172,7 +172,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       from: 'bot',
       text: `${a.nombre} se agregó al carrito. Puedes seguir comprando o ir al carrito.`,
     });
-    this.ui.ok(`${a.nombre} agregado al carrito`);
+    this.ui.ok(`${a.nombre} agregado al carrito`, 'Carrito', { link: '/carrito', cta: 'Ver carrito' });
     this.scroll();
   }
 

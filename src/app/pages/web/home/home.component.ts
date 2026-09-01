@@ -241,7 +241,7 @@ export class HomeComponent implements OnInit {
       qty: 1,
       stockMax: Math.max(1, stockMax),
     });
-    this.ui.ok(`${p.nombre} agregado al carrito`);
+    this.ui.ok(`${p.nombre} agregado al carrito`, 'Carrito', { link: '/carrito', cta: 'Ver carrito' });
   }
 
   onOpenDetail(p: ProductPreview) {

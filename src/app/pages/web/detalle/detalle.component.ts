@@ -82,7 +82,7 @@ export class DetalleComponent implements OnInit, OnDestroy {
       qty,
       stockMax,
     });
-    this.ui.ok(`${this.prod.nombre} agregado al carrito`);
+    this.ui.ok(`${this.prod.nombre} agregado al carrito`, 'Carrito', { link: '/carrito', cta: 'Ver carrito' });
   }
 
   irHome() {
