@@ -32,7 +32,8 @@
           [min]="precioMinDisponible"
           [max]="precioMaxDisponible"
           [(ngModel)]="precioMinSel"
-          (ngModelChange)="onChangePrecio()"
+          (change)="onChangePrecio()"
+          (blur)="onChangePrecio()"
         />
         <span>—</span>
         <input
@@ -42,11 +43,13 @@
           [min]="precioMinDisponible"
           [max]="precioMaxDisponible"
           [(ngModel)]="precioMaxSel"
-          (ngModelChange)="onChangePrecio()"
+          (change)="onChangePrecio()"
+          (blur)="onChangePrecio()"
         />
       </div>
       <small class="ed-help">
-        Rango disponible: S/ {{ precioMinDisponible | number:'1.2-2' }} — S/ {{ precioMaxDisponible | number:'1.2-2' }}
+        Rango disponible: S/ {{ precioMinDisponible | number:'1.2-2' }} — S/ {{ precioMaxDisponible | number:'1.2-2' }}.
+        Si escribes fuera de ese rango, se ajusta solo.
       </small>
     </div>
   </section>

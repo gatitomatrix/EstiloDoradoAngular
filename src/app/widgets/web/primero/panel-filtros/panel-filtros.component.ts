@@ -60,10 +60,29 @@ export class PanelFiltrosComponent {
   @Output() precioChange = new EventEmitter<{ min: number | null; max: number | null }>();
 
   onChangePrecio() {
-    this.precioChange.emit({
-      min: this.precioMinSel,
-      max: this.precioMaxSel
-    });
+    const lo = Number(this.precioMinDisponible) || 0;
+    const hi = Number(this.precioMaxDisponible) || 0;
+    let min = this.toNum(this.precioMinSel);
+    let max = this.toNum(this.precioMaxSel);
+    if (hi > 0) {
+      if (min != null) min = Math.min(hi, Math.max(lo, min));
+      if (max != null) max = Math.min(hi, Math.max(lo, max));
+    }
+    if (min != null && max != null && min > max) {
+      const t = min;
+      min = max;
+      max = t;
+    }
+    this.precioMinSel = min;
+    this.precioMaxSel = max;
+    this.precioChange.emit({ min, max });
+  }
+
+  private toNum(v: number | null | undefined): number | null {
+    if (v === null || v === undefined || v === ('' as unknown as number)) return null;
+    const n = Number(v);
+    if (!Number.isFinite(n)) return null;
+    return n;
   }
 
   limpiarPrecios() {
