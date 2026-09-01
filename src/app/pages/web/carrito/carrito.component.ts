@@ -48,7 +48,7 @@ export class CarritoComponent implements OnInit, OnDestroy {
     return this.cart.getSubtotal();
   }
   get descuentos(): number {
-    return 0;
+    return this.cart.getDescuentos();
   }
   get total(): number {
     return this.subtotal - this.descuentos;

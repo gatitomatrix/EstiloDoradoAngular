@@ -274,6 +274,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
         icon: 'pi pi-database',
         items: [
           { label: 'Productos', icon: 'pi pi-tags', routerLink: ['/admin/productos'] },
+          { label: 'Promociones', icon: 'pi pi-percentage', routerLink: ['/admin/promociones'] },
           { label: 'Categorías', icon: 'pi pi-sitemap', routerLink: ['/admin/categorias'] },
           { label: 'Proveedores', icon: 'pi pi-truck', routerLink: ['/admin/proveedores'] },
         ],
@@ -290,6 +291,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
       pedidos: 'Pedidos',
       inventario: 'Inventario',
       productos: 'Productos',
+      promociones: 'Promociones',
       categorias: 'Categorías',
       proveedores: 'Proveedores',
       clientes: 'Clientes',

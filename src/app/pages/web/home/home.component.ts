@@ -45,6 +45,7 @@ export class HomeComponent implements OnInit {
   error: string | null = null;
   searchQuery = '';
   chipActivo: string | null = null;
+  promoTexto = '';
 
   precioMinDisponible = 0;
   precioMaxDisponible = 0;
@@ -67,6 +68,10 @@ export class HomeComponent implements OnInit {
     this.route.queryParamMap.subscribe((qp) => {
       this.searchQuery = (qp.get('q') || '').trim();
       this.cargarProductos();
+    });
+    this.productService.getPromoActiva().subscribe({
+      next: (p) => { this.promoTexto = p?.activa && p.texto ? p.texto : ''; },
+      error: () => { this.promoTexto = ''; },
     });
   }
 
@@ -237,6 +242,7 @@ export class HomeComponent implements OnInit {
       nombre: p.nombre,
       imagen: p.imagen,
       precio: p.precio,
+      precioLista: p.precioLista ?? p.precio,
       qty: 1,
       stockMax: Math.max(1, stockMax),
     });

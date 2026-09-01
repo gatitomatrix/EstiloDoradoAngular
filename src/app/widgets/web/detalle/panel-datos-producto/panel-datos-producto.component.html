@@ -19,6 +19,9 @@
     <div class="ed-det__price">
         <small>Precio unitario:</small>
         <strong>S/. {{ precio | number:'1.2-2' }}</strong>
+        <small class="d-block text-muted" *ngIf="precioLista > precio">
+          <s>S/. {{ precioLista | number:'1.2-2' }}</s>
+        </small>
     </div>
 
     <div class="ed-det__actions">

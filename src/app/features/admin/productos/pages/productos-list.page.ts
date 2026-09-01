@@ -135,7 +135,10 @@ import { ActivatedRoute, Router } from '@angular/router';
             <td class="col-tags">
               <div class="ed-prod-tags">{{ p.etiquetas || '—' }}</div>
             </td>
-            <td class="col-price text-nowrap">S/ {{p.precio_venta | number:'1.2-2'}}</td>
+            <td class="col-price text-nowrap">
+              S/ {{p.precio_venta | number:'1.2-2'}}
+              <div class="small text-success" *ngIf="(p.descuento_pct || 0) > 0">−{{ p.descuento_pct }}%</div>
+            </td>
             <td class="col-stock">
               <span class="badge" [class.text-bg-danger]="p.stock<=3" [class.text-bg-success]="p.stock>3">{{p.stock}}</span>
             </td>
@@ -208,6 +211,16 @@ import { ActivatedRoute, Router } from '@angular/router';
                   <div class="col-md-6">
                     <label class="form-label">Precio venta</label>
                     <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_venta" name="c_precio_venta" required class="form-control"/>
+                  </div>
+                </div>
+                <div class="row mt-2 g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Descuento %</label>
+                    <input pInputText type="number" min="0" max="90" step="1" [(ngModel)]="form.descuento_pct" name="c_descuento_pct" class="form-control"/>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Oferta hasta (opcional)</label>
+                    <input pInputText type="date" [(ngModel)]="form.oferta_hasta" name="c_oferta_hasta" class="form-control"/>
                   </div>
                 </div>
 
@@ -319,6 +332,16 @@ import { ActivatedRoute, Router } from '@angular/router';
                   <div class="col-md-6">
                     <label class="form-label">Precio venta</label>
                     <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_venta" name="e_precio_venta" required class="form-control"/>
+                  </div>
+                </div>
+                <div class="row mt-2 g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Descuento %</label>
+                    <input pInputText type="number" min="0" max="90" step="1" [(ngModel)]="form.descuento_pct" name="e_descuento_pct" class="form-control"/>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Oferta hasta (opcional)</label>
+                    <input pInputText type="date" [(ngModel)]="form.oferta_hasta" name="e_oferta_hasta" class="form-control"/>
                   </div>
                 </div>
 
@@ -471,7 +494,7 @@ export class ProductosListPage implements OnInit {
 
   openCreate() {
     this.form = {
-      nombre:'', descripcion:'', etiquetas:'', precio_compra:0, precio_venta:0, stock:0,
+      nombre:'', descripcion:'', etiquetas:'', precio_compra:0, precio_venta:0, descuento_pct:0, oferta_hasta:null, stock:0,
       id_categoria: this.categorias()[0]?.id_categoria ?? undefined,
       id_proveedor: this.proveedores()[0]?.id_proveedor ?? undefined,
       estado:'activo', imagen_url:'', slug:'',
@@ -484,7 +507,11 @@ export class ProductosListPage implements OnInit {
   closeCreate() { this.createOpen.set(false); }
 
   openEdit(p: Producto) {
-    this.form = { ...p };
+    this.form = {
+      ...p,
+      descuento_pct: Number(p.descuento_pct || 0),
+      oferta_hasta: p.oferta_hasta ? String(p.oferta_hasta).slice(0, 10) : null,
+    };
     if (!this.form.created_at) this.form.created_at = this.todayYmd();
     this.preview.set(undefined);
     this.editOpen.set(true);
@@ -508,6 +535,8 @@ export class ProductosListPage implements OnInit {
         etiquetas: (base.etiquetas ?? '').toString().trim() || null,
         precio_compra: base.precio_compra,
         precio_venta: base.precio_venta,
+        descuento_pct: Number(base.descuento_pct || 0),
+        oferta_hasta: base.oferta_hasta || null,
         stock: base.stock,
         id_categoria: base.id_categoria,
         id_proveedor: base.id_proveedor,
@@ -523,6 +552,8 @@ export class ProductosListPage implements OnInit {
         etiquetas: (base.etiquetas ?? '').toString().trim() || null,
         precio_compra: base.precio_compra,
         precio_venta: base.precio_venta,
+        descuento_pct: Number(base.descuento_pct || 0),
+        oferta_hasta: base.oferta_hasta || null,
         stock: base.stock,
         id_categoria: base.id_categoria,
         id_proveedor: base.id_proveedor,

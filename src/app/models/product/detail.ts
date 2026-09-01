@@ -3,6 +3,8 @@ export interface ProductDetail {
   nombre: string;
   descripcion: string;
   precio: number;
+  precioLista?: number;
+  descuentoPct?: number;
   stock?: number;
   imagen?: string;
   slug?: string;

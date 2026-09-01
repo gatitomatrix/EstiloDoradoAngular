@@ -2,7 +2,8 @@
 <ed-web-barra-superior></ed-web-barra-superior>
 <ed-web-carrusel-hero></ed-web-carrusel-hero>
 <ed-web-cinta-promocion
-  texto="¡35% de descuento en arreglos florales por primavera!"
+  *ngIf="promoTexto"
+  [texto]="promoTexto"
   textoBoton="Ver Productos"
   url="#productos"
   [mostrarBoton]="true"

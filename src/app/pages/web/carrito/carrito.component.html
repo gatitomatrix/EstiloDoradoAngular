@@ -74,7 +74,8 @@
       <button class="ed-btn ed-btn--ghost" (click)="seguirComprando()">Seguir comprando</button>
 
       <p class="ed-note" *ngIf="!canContinue">Agrega productos para continuar.</p>
-      <p class="ed-note">Los descuentos solo se aplican en temporadas de promoción.</p>
+      <p class="ed-note" *ngIf="descuentos > 0">Descuento de promoción ya aplicado al total.</p>
+      <p class="ed-note" *ngIf="descuentos === 0">Los descuentos se activan desde el admin (Promociones o % en el producto).</p>
     </div>
   </aside>
 </section>

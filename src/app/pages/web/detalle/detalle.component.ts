@@ -79,6 +79,7 @@ export class DetalleComponent implements OnInit, OnDestroy {
       nombre: this.prod.nombre,
       imagen: this.prod.imagen,
       precio: this.prod.precio,
+      precioLista: this.prod.precioLista ?? this.prod.precio,
       qty,
       stockMax,
     });

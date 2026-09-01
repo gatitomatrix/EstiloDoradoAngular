@@ -25,6 +25,7 @@
         [features]="[]"
         [stock]="prod.stock ?? 0"
         [precio]="prod.precio"
+        [precioLista]="prod.precioLista || prod.precio"
         [rating]="4"
         (agregarCarrito)="onAddToCart($event)"
         (seguirComprando)="irHome()"

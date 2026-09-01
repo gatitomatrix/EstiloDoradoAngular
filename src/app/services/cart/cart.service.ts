@@ -116,6 +116,14 @@ export class CartService {
     return this.items.reduce((acc, x) => acc + x.precio * x.qty, 0);
   }
 
+  getListado(): number {
+    return this.items.reduce((acc, x) => acc + (x.precioLista ?? x.precio) * x.qty, 0);
+  }
+
+  getDescuentos(): number {
+    return Math.max(0, this.getListado() - this.getSubtotal());
+  }
+
   /** Une dos carritos sumando qty y respetando stockMax. */
   private mergeCarts(base: CartItem[], extra: CartItem[]): CartItem[] {
     const map = new Map<string | number, CartItem>();

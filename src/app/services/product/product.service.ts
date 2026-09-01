@@ -12,6 +12,9 @@ type ApiProducto = {
   etiquetas?: string | null;
   precio_compra?: string;
   precio_venta: string;
+  precio_final?: number | string;
+  descuento_aplicado?: number | string;
+  en_oferta?: boolean;
   stock?: number;
   id_categoria?: number;
   imagen_url?: string;
@@ -30,7 +33,9 @@ export class ProductoService {
     nombre: a.nombre,
     descripcion: a.descripcion ?? '',
     etiquetas: a.etiquetas ?? '',
-    precio: Number(a.precio_venta),
+    precio: Number(a.precio_final ?? a.precio_venta),
+    precioLista: Number(a.precio_venta),
+    descuentoPct: Number(a.descuento_aplicado ?? 0),
     stock: a.stock ?? 0,
     imagen: a.imagen_url ?? '',
     categoriaId: a.id_categoria ?? null,
@@ -41,7 +46,9 @@ export class ProductoService {
     id: a.id_producto,
     nombre: a.nombre,
     descripcion: a.descripcion ?? '',
-    precio: Number(a.precio_venta),
+    precio: Number(a.precio_final ?? a.precio_venta),
+    precioLista: Number(a.precio_venta),
+    descuentoPct: Number(a.descuento_aplicado ?? 0),
     stock: a.stock ?? 0,
     imagen: a.imagen_url ?? '',
     slug: a.slug ?? '',
@@ -50,6 +57,12 @@ export class ProductoService {
   getAll(): Observable<ProductPreview[]> {
     return this.http.get<ApiProducto[]>(this.base).pipe(
       map(list => (list ?? []).map(this.toPreview))
+    );
+  }
+
+  getPromoActiva() {
+    return this.http.get<{ activa: boolean; texto?: string; porcentaje?: number }>(
+      `${environment.apiBaseUrl}/promocion-activa`
     );
   }
 

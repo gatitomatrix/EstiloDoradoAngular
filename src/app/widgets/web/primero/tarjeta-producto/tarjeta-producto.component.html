@@ -9,7 +9,13 @@
   <h3 class="ed-card__title">{{ producto.nombre }}</h3>
 
   <div class="ed-card__price">
-    S/ {{ producto.precio | number:'1.2-2' }}
+    @if ((producto.descuentoPct || 0) > 0 && (producto.precioLista || 0) > producto.precio) {
+      <s class="text-muted">S/ {{ producto.precioLista | number:'1.2-2' }}</s>
+      <strong class="ms-1">S/ {{ producto.precio | number:'1.2-2' }}</strong>
+      <small class="text-success d-block">−{{ producto.descuentoPct | number:'1.0-0' }}%</small>
+    } @else {
+      S/ {{ producto.precio | number:'1.2-2' }}
+    }
   </div>
 
   <div class="ed-card__actions">

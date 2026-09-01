@@ -106,6 +106,11 @@ export const ADMIN_ROUTES: Routes = [
       },
 
       {
+        path: 'promociones',
+        canActivate: [roleGuard], data: { roles: ['ADMIN'] },
+        loadComponent: () => import('./promociones/pages/promociones.page').then(m => m.PromocionesPage)
+      },
+      {
         path: 'auditoria',
         canActivate: [roleGuard], data: { roles: ['ADMIN'] },
         loadComponent: () => import('./auditoria/pages/auditoria-list.page').then(m => m.AuditoriaListPage)

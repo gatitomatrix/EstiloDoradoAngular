@@ -10,6 +10,8 @@ export interface Producto {
   etiquetas?: string | null;
   precio_compra: number;
   precio_venta: number;
+  descuento_pct?: number;
+  oferta_hasta?: string | null;
   stock: number;
   id_categoria: number;
   id_proveedor: number;
