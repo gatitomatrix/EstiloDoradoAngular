@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subscription, filter } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply, AsistentePedidoChip, AsistenteComplaint } from '../../../services/asistente/asistente.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { UiService } from '../../../core/services/ui.service';
