@@ -38,6 +38,41 @@
   min-width: 0;
 }
 
+.ed-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #E7DAC6;
+}
+.ed-pager__btn,
+.ed-pager__num {
+  border: 1px solid #C4A030;
+  background: #fffaf2;
+  color: #2D2418;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ed-pager__num--on,
+.ed-pager__btn:hover:not(:disabled),
+.ed-pager__num:hover {
+  background: #D4AF37;
+  border-color: #C4A030;
+}
+.ed-pager__btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+.ed-pager__meta {
+  margin-left: auto;
+  font-size: 13px;
+  color: #6b5d4d;
+}
+
 /* Caja placeholder para ver la estructura */
 .ed-placeholder-box {
   background: #FFFEFA;

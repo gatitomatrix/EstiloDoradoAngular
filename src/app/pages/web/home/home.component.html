@@ -53,11 +53,24 @@
 
     <ed-web-grilla-productos
       *ngIf="!loading && !error"
-      [productos]="productos"
+      [productos]="productosPagina"
       [loading]="loading"
       (addToCart)="onAddToCart($event)"
       (openDetail)="onOpenDetail($event)"
     >
     </ed-web-grilla-productos>
+
+    <nav class="ed-pager" *ngIf="!loading && !error && productos.length > pageSize" aria-label="Páginas del catálogo">
+      <button type="button" class="ed-pager__btn" [disabled]="page <= 1" (click)="irPagina(page - 1)">Anterior</button>
+      <button
+        type="button"
+        class="ed-pager__num"
+        *ngFor="let n of paginas"
+        [class.ed-pager__num--on]="n === page"
+        (click)="irPagina(n)"
+      >{{ n }}</button>
+      <button type="button" class="ed-pager__btn" [disabled]="page >= totalPages" (click)="irPagina(page + 1)">Siguiente</button>
+      <span class="ed-pager__meta">{{ productos.length }} productos · {{ pageSize }} por página</span>
+    </nav>
   </div>
 </section>

@@ -38,6 +38,8 @@ export class HomeComponent implements OnInit {
   private ui = inject(UiService);
 
   productos: ProductPreview[] = [];
+  page = 1;
+  readonly pageSize = 12;
   categoriaId: number | null = null;
   categoriaNombre: string | null = null;
   allProductos: ProductPreview[] = [];
@@ -140,6 +142,28 @@ export class HomeComponent implements OnInit {
     }
 
     this.productos = lista;
+    this.page = 1;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.productos.length / this.pageSize));
+  }
+
+  get paginas(): number[] {
+    const n = this.totalPages;
+    return Array.from({ length: n }, (_, i) => i + 1);
+  }
+
+  get productosPagina(): ProductPreview[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.productos.slice(start, start + this.pageSize);
+  }
+
+  irPagina(n: number) {
+    const p = Math.min(this.totalPages, Math.max(1, n));
+    if (p === this.page) return;
+    this.page = p;
+    document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   onCategoriaChange(ev: { id: number | null; nombre: string | null } | number | null) {
