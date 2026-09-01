@@ -209,30 +209,37 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   viewOrder(o: AsistentePedidoChip) {
     this.orderLoading = true;
+    const seed: OrderViewItem[] = o.resumen
+      ? [{ nombre: o.resumen, cantidad: 1, imagen_url: o.imagen_url || null }]
+      : [];
     this.orderView = {
       id_pedido: o.id_pedido,
       total: o.total,
       estado: o.estado,
       fecha: o.fecha,
-      items: o.resumen ? [{ nombre: o.resumen, cantidad: 1 }] : [],
+      items: seed,
     };
     this.http.get<any>(`${environment.apiBaseUrl}/mis-pedidos/${o.id_pedido}`).subscribe({
       next: (p) => {
-        const dets = Array.isArray(p?.detalles) ? p.detalles : [];
+        const raw = p?.detalles ?? p?.data?.detalles ?? [];
+        const dets = Array.isArray(raw) ? raw : [];
+        const items = dets.length
+          ? dets.map((d: Record<string, any>) => {
+              const prod = d?.producto || d?.Producto || {};
+              return {
+                nombre: prod.nombre || d.nombre || 'Ítem',
+                cantidad: Number(d.cantidad ?? 1) || 1,
+                imagen_url: prod.imagen_url || prod.imagen || d.imagen_url || o.imagen_url || null,
+                id: prod.id_producto || prod.id,
+              } as OrderViewItem;
+            })
+          : seed;
         this.orderView = {
-          id_pedido: p.id_pedido ?? o.id_pedido,
-          total: p.total ?? o.total,
-          estado: p.estado ?? o.estado,
+          id_pedido: p.id_pedido ?? p?.data?.id_pedido ?? o.id_pedido,
+          total: p.total ?? p?.data?.total ?? o.total,
+          estado: p.estado ?? p?.data?.estado ?? o.estado,
           fecha: o.fecha,
-          items: dets.map((d: {
-            producto?: { nombre?: string; imagen_url?: string; id_producto?: number };
-            cantidad?: number;
-          }) => ({
-            nombre: d.producto?.nombre || 'Ítem',
-            cantidad: d.cantidad ?? 1,
-            imagen_url: d.producto?.imagen_url || null,
-            id: d.producto?.id_producto,
-          })),
+          items,
         };
         this.orderLoading = false;
       },

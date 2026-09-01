@@ -61,9 +61,15 @@
                 <div class="ed-cards">
                   @for (o of m.pedidos; track o.id_pedido) {
                     <article class="ed-card">
-                      <div>
-                        <b>Pedido #{{ o.id_pedido }}</b>
-                        <small>{{ o.fecha }} · S/ {{ o.total }} · {{ o.resumen }}</small>
+                      <div class="ed-card__main" style="display:flex;gap:8px;align-items:center">
+                        @if (o.imagen_url) {
+                          <img [src]="imgOf(o.imagen_url)" alt="" (error)="onImgError($event)"
+                            style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" />
+                        }
+                        <div>
+                          <b>Pedido #{{ o.id_pedido }}</b>
+                          <small>{{ o.fecha }} · S/ {{ o.total }} · {{ o.resumen }}</small>
+                        </div>
                       </div>
                       <div class="ed-card__actions">
                         <button type="button" class="ed-ghost" (click)="viewOrder(o); $event.stopPropagation()">Ver</button>
