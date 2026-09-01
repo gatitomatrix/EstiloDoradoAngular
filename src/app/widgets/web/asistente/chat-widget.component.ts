@@ -224,8 +224,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         const raw = p?.detalles ?? p?.data?.detalles ?? [];
         const dets = Array.isArray(raw) ? raw : [];
         const items = dets.length
-          ? dets.map((d: Record<string, any>) => {
-              const prod = d?.producto || d?.Producto || {};
+          ? dets.map((d: {
+              nombre?: string;
+              cantidad?: number;
+              imagen_url?: string;
+              producto?: { nombre?: string; imagen?: string; imagen_url?: string; id_producto?: number; id?: number };
+              Producto?: { nombre?: string; imagen?: string; imagen_url?: string; id_producto?: number; id?: number };
+            }) => {
+              const prod = d.producto || d.Producto || {};
               return {
                 nombre: prod.nombre || d.nombre || 'Ítem',
                 cantidad: Number(d.cantidad ?? 1) || 1,
