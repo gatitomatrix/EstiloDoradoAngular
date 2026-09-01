@@ -22,8 +22,38 @@
   </section>
 
   <section class="ed-filter-group">
-    <h4 class="ed-filter-group__title">Precio</h4>
+    <div class="ed-filter-group__head">
+      <h4 class="ed-filter-group__title">Precio</h4>
+      <button type="button" class="ed-btn-clear--link" (click)="limpiarPrecios()">Limpiar</button>
+    </div>
     <div class="ed-filter-group__content">
+      <div class="ed-range" *ngIf="precioMaxDisponible > precioMinDisponible">
+        <div class="ed-range__rail">
+          <div class="ed-range__fill" [style.left.%]="fillLeft" [style.width.%]="fillWidth"></div>
+        </div>
+        <input
+          type="range"
+          class="ed-range__input"
+          [min]="precioMinDisponible"
+          [max]="precioMaxDisponible"
+          [step]="1"
+          [ngModel]="slideMin"
+          (ngModelChange)="onSlideMin($event)"
+        />
+        <input
+          type="range"
+          class="ed-range__input"
+          [min]="precioMinDisponible"
+          [max]="precioMaxDisponible"
+          [step]="1"
+          [ngModel]="slideMax"
+          (ngModelChange)="onSlideMax($event)"
+        />
+      </div>
+      <div class="ed-range__labels">
+        <span>mínimo<br /><strong>S/ {{ slideMin | number:'1.0-0' }}</strong></span>
+        <span class="text-end">máximo<br /><strong>S/ {{ slideMax | number:'1.0-0' }}</strong></span>
+      </div>
       <div class="ed-price-row">
         <input
           type="number"
@@ -47,9 +77,6 @@
           (blur)="onChangePrecio()"
         />
       </div>
-      <small class="ed-help">
-        S/ {{ precioMinDisponible | number:'1.0-0' }} — S/ {{ precioMaxDisponible | number:'1.0-0' }}
-      </small>
     </div>
   </section>
 </aside>

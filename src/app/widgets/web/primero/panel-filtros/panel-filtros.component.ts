@@ -59,6 +59,48 @@ export class PanelFiltrosComponent {
   @Input() precioMaxSel: number | null = null;
   @Output() precioChange = new EventEmitter<{ min: number | null; max: number | null }>();
 
+  get slideMin(): number {
+    return this.toNum(this.precioMinSel) ?? this.precioMinDisponible;
+  }
+
+  get slideMax(): number {
+    return this.toNum(this.precioMaxSel) ?? this.precioMaxDisponible;
+  }
+
+  get fillLeft(): number {
+    return this.pct(this.slideMin);
+  }
+
+  get fillWidth(): number {
+    return Math.max(0, this.pct(this.slideMax) - this.pct(this.slideMin));
+  }
+
+  onSlideMin(v: number | string) {
+    let min = Number(v);
+    const max = this.slideMax;
+    if (min > max) min = max;
+    this.precioMinSel = min;
+    this.precioMaxSel = max;
+    this.onChangePrecio();
+  }
+
+  onSlideMax(v: number | string) {
+    let max = Number(v);
+    const min = this.slideMin;
+    if (max < min) max = min;
+    this.precioMinSel = min;
+    this.precioMaxSel = max;
+    this.onChangePrecio();
+  }
+
+  private pct(v: number): number {
+    const lo = this.precioMinDisponible;
+    const hi = this.precioMaxDisponible;
+    const span = hi - lo;
+    if (span <= 0) return 0;
+    return ((v - lo) / span) * 100;
+  }
+
   onChangePrecio() {
     const lo = Number(this.precioMinDisponible) || 0;
     const hi = Number(this.precioMaxDisponible) || 0;

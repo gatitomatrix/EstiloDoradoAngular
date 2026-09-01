@@ -65,6 +65,77 @@
   height: 16px;
 }
 
+.ed-filter-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ed-filter-group__head .ed-filter-group__title { margin: 0; }
+
+.ed-range {
+  position: relative;
+  height: 28px;
+  margin: 4px 2px 2px;
+}
+.ed-range__rail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 11px;
+  height: 6px;
+  border-radius: 999px;
+  background: #E7DAC6;
+}
+.ed-range__fill {
+  position: absolute;
+  top: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: #2D2418;
+}
+.ed-range__input {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 4px;
+  margin: 0;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+  height: 20px;
+}
+.ed-range__input::-webkit-slider-thumb {
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2D2418;
+  border: 2px solid #D4AF37;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  cursor: pointer;
+}
+.ed-range__input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2D2418;
+  border: 2px solid #D4AF37;
+  cursor: pointer;
+}
+.ed-range__input::-webkit-slider-runnable-track { background: transparent; height: 6px; }
+.ed-range__input::-moz-range-track { background: transparent; height: 6px; border: 0; }
+.ed-range__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b5d4d;
+  line-height: 1.25;
+}
+.ed-range__labels strong { color: #2D2418; font-size: 13px; }
+
 /* Precio */
 .ed-price-row {
   display: flex;
