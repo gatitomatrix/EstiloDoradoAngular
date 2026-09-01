@@ -10,6 +10,7 @@ export interface AsistenteProducto {
   precio: number;
   stock: number;
   imagen_url?: string;
+  cantidad?: number;
 }
 
 export interface AsistenteAction {
@@ -30,6 +31,7 @@ export interface AsistentePedidoChip {
   total?: string;
   estado?: string;
   resumen?: string;
+  imagen_url?: string;
 }
 
 export interface AsistenteComplaint {
