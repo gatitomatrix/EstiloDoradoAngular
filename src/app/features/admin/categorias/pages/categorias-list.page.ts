@@ -44,8 +44,8 @@ import { MessageService } from 'primeng/api';
             <td>{{ c.nombre }}</td>
             <td class="text-truncate" style="max-width:500px" [title]="c.descripcion">{{ c.descripcion }}</td>
             <td class="text-end">
-              <button class="btn btn-sm btn-outline-secondary me-1" (click)="openEdit(c)"><i class="pi pi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" (click)="remove(c)"><i class="pi pi-trash"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary me-1" (click)="openEdit(c)"><i class="pi pi-pencil"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="remove(c); $event.stopPropagation()"><i class="pi pi-trash"></i></button>
             </td>
           </tr>
           <tr *ngIf="!rows().length">
@@ -104,6 +104,7 @@ export class CategoriasListPage implements OnInit {
   form: any = { id_categoria: null, nombre: '', descripcion: '' };
   saving = signal(false);
   q: string = '';
+  private deletingId: number | null = null;
 
   ngOnInit() { this.load(); }
 
@@ -134,10 +135,21 @@ export class CategoriasListPage implements OnInit {
   }
 
   remove(c: any) {
+    const id = Number(c?.id_categoria);
+    if (!id || this.deletingId === id) return;
     this.ui.confirmDanger('¿Eliminar categoría?', () => {
-      this.api.remove(c.id_categoria).subscribe({
-        next: _ => { this.ui.ok('Eliminado correctamente'); this.load(); },
-        error: (e: any) => this.ui.err(e?.error?.message || 'No se pudo eliminar')
+      if (this.deletingId === id) return;
+      this.deletingId = id;
+      this.api.remove(id).subscribe({
+        next: _ => {
+          this.ui.ok('Eliminado correctamente');
+          this.deletingId = null;
+          this.load();
+        },
+        error: (e: any) => {
+          this.deletingId = null;
+          this.ui.err(e?.error?.message || 'No se pudo eliminar');
+        }
       });
     });
   }

@@ -23,6 +23,15 @@ export class UiService {
   warn(msg:string, summary='Atención'){ this.toast?.add({severity:'warn', summary, detail: msg}); }
 
   confirmDanger(message:string, accept: () => void, header='Confirmación'){
-    this.confirmSvc?.confirm({ message, header, icon:'pi pi-exclamation-triangle', accept });
+    this.confirmSvc?.confirm({
+      message,
+      header,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'No',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-outlined',
+      accept,
+    });
   }
 }
