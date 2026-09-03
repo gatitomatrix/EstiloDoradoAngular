@@ -7,7 +7,6 @@ import { MenuItem, MessageService } from 'primeng/api';
 import { AdminAuthService } from '../../core/services/admin-auth.service';
 import { RealtimeService } from '../../core/services/realtime.service';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { filter, Subscription } from 'rxjs';
 
 @Component({
@@ -18,7 +17,6 @@ import { filter, Subscription } from 'rxjs';
     RouterOutlet,
     PanelMenuModule,
     ToastModule,
-    ConfirmDialogModule,
   ],
   template: `
   <div class="app-shell admin-gold-theme">
@@ -82,7 +80,6 @@ import { filter, Subscription } from 'rxjs';
         </button>
       </ng-template>
     </p-toast>
-    <p-confirmDialog />
   </div>
   `,
   styles: [`
