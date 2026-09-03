@@ -10,7 +10,9 @@ const API = `${environment.apiBaseUrl}/admin`;
 export class AdminProveedoresService {
   private http = inject(HttpClient);
 
-  list(): Observable<any> { return this.http.get(`${API}/proveedores`); }
+  list(params?: Record<string, string | number>): Observable<any> {
+    return this.http.get(`${API}/proveedores`, { params: params as any });
+  }
   detail(id: number): Observable<any> { return this.http.get(`${API}/proveedores/${id}`); }
   create(payload: any): Observable<any> { return this.http.post(`${API}/proveedores`, payload); }
   update(id: number, payload: any): Observable<any> { return this.http.put(`${API}/proveedores/${id}`, payload); }

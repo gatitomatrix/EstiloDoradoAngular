@@ -238,7 +238,8 @@ import { ActivatedRoute, Router } from '@angular/router';
                   <div class="col-md-4">
                     <label class="form-label">Proveedor</label>
                     <select class="form-select" [(ngModel)]="form.id_proveedor" name="c_id_proveedor" required>
-                      <option *ngFor="let p of proveedores()" [ngValue]="p.id_proveedor">{{p.nombre}}</option>
+                      <option [ngValue]="undefined" disabled>Seleccione proveedor</option>
+                      <option *ngFor="let p of proveedores()" [ngValue]="p.id_proveedor">{{ p.nombre_empresa || p.nombre }}</option>
                     </select>
                   </div>
                 </div>
@@ -359,7 +360,8 @@ import { ActivatedRoute, Router } from '@angular/router';
                   <div class="col-md-4">
                     <label class="form-label">Proveedor</label>
                     <select class="form-select" [(ngModel)]="form.id_proveedor" name="e_id_proveedor" required>
-                      <option *ngFor="let p of proveedores()" [ngValue]="p.id_proveedor">{{p.nombre}}</option>
+                      <option [ngValue]="undefined" disabled>Seleccione proveedor</option>
+                      <option *ngFor="let p of proveedores()" [ngValue]="p.id_proveedor">{{ p.nombre_empresa || p.nombre }}</option>
                     </select>
                   </div>
                 </div>
@@ -430,7 +432,7 @@ export class ProductosListPage implements OnInit {
 
   ngOnInit() {
     this.cats.list().subscribe(res => this.categorias.set(res?.data ?? res ?? []));
-    this.prov.list().subscribe(res => this.proveedores.set(res?.data ?? res ?? []));
+    this.prov.list({ per_page: 100 }).subscribe(res => this.proveedores.set(res?.data ?? res ?? []));
     this.buscar();
     const editar = Number(this.route.snapshot.queryParamMap.get('editar'));
     if (editar > 0) {
