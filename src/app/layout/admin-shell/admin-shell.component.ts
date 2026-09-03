@@ -76,7 +76,9 @@ import { filter, Subscription } from 'rxjs';
         <button type="button" class="ed-toast-hit" (click)="onToastClick(message); $event.stopPropagation()">
           <strong>{{ message.summary }}</strong>
           <span>{{ message.detail }}</span>
-          <em>{{ toastCta(message) }}</em>
+          @if (toastCta(message)) {
+            <em>{{ toastCta(message) }}</em>
+          }
         </button>
       </ng-template>
     </p-toast>
@@ -189,16 +191,22 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   }
 
   toastCta(message: { summary?: string; key?: string }): string {
-    return this.isDoriToast(message) ? 'Ver Consultas Dori →' : 'Ver pedidos →';
+    if (this.isDoriToast(message)) return 'Ver Consultas Dori →';
+    if (this.isPedidoToast(message)) return 'Ver pedidos →';
+    return '';
   }
 
   onToastClick(message: { summary?: string; key?: string }) {
     if (this.isDoriToast(message)) this.goDori();
-    else this.goPendientes();
+    else if (this.isPedidoToast(message)) this.goPendientes();
   }
 
   private isDoriToast(message: { summary?: string; key?: string }): boolean {
     return message?.key === 'dori' || (message?.summary || '').startsWith('Dori');
+  }
+
+  private isPedidoToast(message: { summary?: string; key?: string }): boolean {
+    return (message?.summary || '').startsWith('Nuevo pedido');
   }
 
   private announceDori(d: {
