@@ -206,11 +206,11 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
                     <label class="form-label">Precio compra</label>
-                    <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_compra" name="c_precio_compra" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="0.01" [(ngModel)]="form.precio_compra" name="c_precio_compra" required class="form-control"/>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Precio venta</label>
-                    <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_venta" name="c_precio_venta" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="0.01" [(ngModel)]="form.precio_venta" name="c_precio_venta" required class="form-control"/>
                   </div>
                 </div>
                 <div class="row mt-2 g-3">
@@ -227,7 +227,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="row mt-2 g-3">
                   <div class="col-md-4">
                     <label class="form-label">Stock</label>
-                    <input pInputText type="number" [(ngModel)]="form.stock" name="c_stock" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="1" [(ngModel)]="form.stock" name="c_stock" required class="form-control"/>
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Categoría</label>
@@ -327,11 +327,11 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="row mt-2 g-3">
                   <div class="col-md-6">
                     <label class="form-label">Precio compra</label>
-                    <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_compra" name="e_precio_compra" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="0.01" [(ngModel)]="form.precio_compra" name="e_precio_compra" required class="form-control"/>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Precio venta</label>
-                    <input pInputText type="number" step="0.01" [(ngModel)]="form.precio_venta" name="e_precio_venta" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="0.01" [(ngModel)]="form.precio_venta" name="e_precio_venta" required class="form-control"/>
                   </div>
                 </div>
                 <div class="row mt-2 g-3">
@@ -348,7 +348,7 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <div class="row mt-2 g-3">
                   <div class="col-md-4">
                     <label class="form-label">Stock</label>
-                    <input pInputText type="number" [(ngModel)]="form.stock" name="e_stock" required class="form-control"/>
+                    <input pInputText type="number" min="0" step="1" [(ngModel)]="form.stock" name="e_stock" required class="form-control"/>
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Categoría</label>
@@ -524,6 +524,16 @@ export class ProductosListPage implements OnInit {
 
   save() {
     const base = { ...this.form };
+    const compra = Number(base.precio_compra);
+    const venta = Number(base.precio_venta);
+    const stock = Number(base.stock);
+    if ([compra, venta, stock].some((n) => !Number.isFinite(n) || n < 0)) {
+      alert('Stock y precios no pueden ser negativos.');
+      return;
+    }
+    base.precio_compra = Math.max(0, compra);
+    base.precio_venta = Math.max(0, venta);
+    base.stock = Math.max(0, Math.floor(stock));
     let payload: any;
     const isEdit = !!base?.id_producto;
 
