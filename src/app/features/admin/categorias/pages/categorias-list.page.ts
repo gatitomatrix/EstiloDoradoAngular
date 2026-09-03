@@ -14,7 +14,6 @@ import { MessageService } from 'primeng/api';
   <div class="p-3">
     <h2 class="mb-3">Categorías</h2>
 
-    <!-- Filtro y crear -->
     <form class="row g-2 mb-3 align-items-end" (ngSubmit)="load()">
       <div class="col-sm-6">
         <label class="form-label small">Buscar por nombre</label>
@@ -29,7 +28,6 @@ import { MessageService } from 'primeng/api';
       </div>
     </form>
 
-    <!-- Tabla -->
     <div class="table-responsive">
       <table class="table table-sm align-middle">
         <thead>
@@ -62,7 +60,6 @@ import { MessageService } from 'primeng/api';
     </div>
   </div>
 
-  <!-- Modal Crear / Editar -->
   <div class="modal-backdrop fade show" *ngIf="showDialog"></div>
   <div class="modal d-block" tabindex="-1" *ngIf="showDialog">
     <div class="modal-dialog modal-dialog-centered">
@@ -129,7 +126,10 @@ export class CategoriasListPage implements OnInit {
 
     req.subscribe({
       next: _ => { this.ui.ok('Guardado correctamente'); this.showDialog = false; this.saving.set(false); this.load(); },
-      error: _ => { this.ui.err('Error al guardar'); this.saving.set(false); }
+      error: (e: any) => {
+        this.ui.err(e?.error?.message || e?.error?.errors?.nombre?.[0] || 'Error al guardar');
+        this.saving.set(false);
+      }
     });
   }
 
@@ -137,7 +137,7 @@ export class CategoriasListPage implements OnInit {
     this.ui.confirmDanger('¿Eliminar categoría?', () => {
       this.api.remove(c.id_categoria).subscribe({
         next: _ => { this.ui.ok('Eliminado correctamente'); this.load(); },
-        error: _ => this.ui.err('No se pudo eliminar')
+        error: (e: any) => this.ui.err(e?.error?.message || 'No se pudo eliminar')
       });
     });
   }
