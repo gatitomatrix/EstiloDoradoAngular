@@ -37,6 +37,7 @@ export class EntregaComponent {
   private marker?: L.Marker;
   private lastCoords?: { lat: number; lng: number };
   private lastDisplay?: string; // 👈 para deducir número
+  private restoring = false;
 
   // UI
   showAddressModal = false;
@@ -65,7 +66,9 @@ export class EntregaComponent {
       this.router.navigateByUrl('/carrito');
       return;
     }
-    this.checkout.setCosts(0, 0);
+    if (this.checkout.value.mode === 'NONE') {
+      this.checkout.setCosts(0, 0);
+    }
 
     this.ubigeo.getDepartamentos().subscribe(d => this.departamentos = d);
 
@@ -73,6 +76,7 @@ export class EntregaComponent {
       this.provincias = []; this.distritos = [];
       this.addrForm.patchValue({ provincia: '', distrito: '' }, { emitEvent: false });
       if (dep) this.ubigeo.getProvincias(dep).subscribe(p => this.provincias = p);
+      this.persistDraft();
     });
 
     this.addrForm.get('provincia')!.valueChanges.subscribe(prov => {
@@ -80,10 +84,21 @@ export class EntregaComponent {
       this.addrForm.patchValue({ distrito: '' }, { emitEvent: false });
       const dep = this.addrForm.value.departamento!;
       if (dep && prov) this.ubigeo.getDistritos(dep, prov).subscribe(d => this.distritos = d);
+      this.persistDraft();
     });
+
+    this.addrForm.get('distrito')!.valueChanges.subscribe(() => this.persistDraft());
+    this.addrForm.get('via')!.valueChanges.subscribe(() => this.persistDraft());
+    this.addrForm.get('numero')!.valueChanges.subscribe(() => this.persistDraft());
 
     const st = history.state as any;
     if (st?.openAddress) this.openAddressModal(true);
+    else {
+      const saved = this.checkout.value.address || this.checkout.value.draft;
+      if (saved?.lat && saved?.lng) {
+        this.lastCoords = { lat: Number(saved.lat), lng: Number(saved.lng) };
+      }
+    }
   }
 
   // ---------- UI ----------
@@ -100,35 +115,64 @@ export class EntregaComponent {
     this.checkout.setCosts(0, 0);
   }
 
-  openExpress() { this.openAddressModal(false); }
+  openExpress() { this.openAddressModal(true); }
+
+  private persistDraft() {
+    if (this.restoring) return;
+    const v = this.addrForm.getRawValue();
+    this.checkout.setDraft({
+      departamento: v.departamento || '',
+      provincia: v.provincia || '',
+      distrito: v.distrito || '',
+      via: v.via || '',
+      numero: v.numero || '',
+      lat: this.lastCoords?.lat,
+      lng: this.lastCoords?.lng,
+    });
+  }
 
   private openAddressModal(prefill: boolean) {
     this.stepMap = false; this.showAddressModal = true;
     if (!prefill) return;
 
-    const a = this.checkout.value.address as any;
-    if (!a) return;
+    const a = (this.checkout.value.draft || this.checkout.value.address) as any;
+    if (!a || (a.via === 'Retiro en tienda')) {
+      const d = this.checkout.value.draft;
+      if (!d || d.via === 'Retiro en tienda') return;
+    }
+    const src = (this.checkout.value.draft && this.checkout.value.draft.via !== 'Retiro en tienda')
+      ? this.checkout.value.draft
+      : this.checkout.value.address;
+    if (!src) return;
+    if (src.lat && src.lng) this.lastCoords = { lat: Number(src.lat), lng: Number(src.lng) };
 
+    this.restoring = true;
     this.addrForm.patchValue({
-      departamento: a.departamento || '',
+      departamento: src.departamento || '',
       provincia: '',
       distrito: '',
-      via: a.via || '',
-      numero: a.numero || ''
+      via: src.via || '',
+      numero: src.numero || ''
     }, { emitEvent: true });
 
-    if (a.departamento) {
-      this.ubigeo.getProvincias(a.departamento).subscribe(provs => {
+    if (src.departamento) {
+      this.ubigeo.getProvincias(src.departamento).subscribe(provs => {
         this.provincias = provs;
-        this.addrForm.patchValue({ provincia: a.provincia || '' }, { emitEvent: true });
+        this.addrForm.patchValue({ provincia: src.provincia || '' }, { emitEvent: true });
 
-        if (a.provincia) {
-          this.ubigeo.getDistritos(a.departamento!, a.provincia).subscribe(dists => {
+        if (src.provincia) {
+          this.ubigeo.getDistritos(src.departamento!, src.provincia).subscribe(dists => {
             this.distritos = dists;
-            this.addrForm.patchValue({ distrito: a.distrito || '' }, { emitEvent: false });
+            this.addrForm.patchValue({ distrito: src.distrito || '' }, { emitEvent: false });
+            this.restoring = false;
+            this.persistDraft();
           });
+        } else {
+          this.restoring = false;
         }
       });
+    } else {
+      this.restoring = false;
     }
   }
 
@@ -267,6 +311,7 @@ export class EntregaComponent {
     const numero = numFromReverse || numFromDisplay || prev || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
+    this.persistDraft();
 
     // Dpto/Prov/Dist
     await this.applyUbigeoFromReverse(r.departamento, r.provincia, r.distrito);

@@ -16,6 +16,8 @@ export interface Address {
 export interface CheckoutState {
   mode: DeliveryMode;
   address?: Address;
+  /** Borrador de dirección (aunque no hayan confirmado aún). */
+  draft?: Partial<Address> | null;
   fee: number;       // costo de entrega
   discount: number;  // descuento aplicado
 }
@@ -34,8 +36,15 @@ export class CheckoutService {
   }
 
   setAddress(addr: Address) {
-    // genera textual
-    this.state.address = { ...addr, full: `${addr.via} ${addr.numero}, ${addr.distrito}, ${addr.provincia}, ${addr.departamento}` };
+    this.state.address = { ...addr, full: addr.full || `${addr.via} ${addr.numero}, ${addr.distrito}, ${addr.provincia}, ${addr.departamento}` };
+    if (addr.via !== 'Retiro en tienda') {
+      this.state.draft = { ...this.state.address };
+    }
+    this.persist();
+  }
+
+  setDraft(partial: Partial<Address>) {
+    this.state.draft = { ...(this.state.draft || {}), ...partial };
     this.persist();
   }
 
@@ -46,7 +55,7 @@ export class CheckoutService {
   }
 
   reset() {
-    this.state = { mode: 'NONE', fee: 0, discount: 0 };
+    this.state = { mode: 'NONE', fee: 0, discount: 0, draft: this.state.draft ?? null };
     this.persist();
   }
 
