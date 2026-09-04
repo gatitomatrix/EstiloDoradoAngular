@@ -9,6 +9,7 @@ import { AsistenteService, AsistenteProducto, AsistenteAction, AsistenteReply, A
 import { CartService } from '../../../services/cart/cart.service';
 import { UiService } from '../../../core/services/ui.service';
 import { AuthService } from '../../../services/auth/auth.service';
+import { GoogleAuthService } from '../../../core/services/google-auth.service';
 
 interface ChatMsg {
   from: 'user' | 'bot';
@@ -40,6 +41,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   readonly auth = inject(AuthService);
   private http = inject(HttpClient);
+  private googleAuth = inject(GoogleAuthService);
 
   @ViewChild('scroller') scroller?: ElementRef<HTMLDivElement>;
 
@@ -256,21 +258,49 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   doLogin() {
     this.loginErr = '';
     if (!this.loginEmail.trim() || !this.loginPass) {
-      this.loginErr = 'Correo y contraseña';
+      this.loginErr = 'Correo y contraseña, o usa Google.';
       return;
     }
     this.loginBusy = true;
     this.auth.login(this.loginEmail.trim(), this.loginPass).subscribe({
-      next: () => {
-        this.loginBusy = false;
-        this.showLogin = false;
-        this.send('ya inicié sesión');
-      },
+      next: () => this.afterChatLogin(),
       error: (e: { error?: { message?: string } }) => {
         this.loginBusy = false;
-        this.loginErr = e?.error?.message || 'No pude iniciar sesión';
+        this.loginErr = e?.error?.message || 'Correo o contraseña incorrectos. Si te registraste con Google, usa ese botón.';
       },
     });
+  }
+
+  async doGoogleLogin() {
+    this.loginErr = '';
+    this.loginBusy = true;
+    try {
+      if (!this.googleAuth.configured) {
+        this.loginBusy = false;
+        this.loginErr = 'Google no está configurado en este entorno.';
+        return;
+      }
+      const tokens = await this.googleAuth.signIn();
+      this.http.post<any>(`${environment.apiBaseUrl}/auth/google`, tokens).subscribe({
+        next: (res) => {
+          this.auth.applyExternalLogin(res);
+          this.afterChatLogin();
+        },
+        error: (e: { error?: { message?: string } }) => {
+          this.loginBusy = false;
+          this.loginErr = e?.error?.message || 'No pude entrar con Google';
+        },
+      });
+    } catch (e: any) {
+      this.loginBusy = false;
+      this.loginErr = e?.message || 'Google cancelado';
+    }
+  }
+
+  private afterChatLogin() {
+    this.loginBusy = false;
+    this.showLogin = false;
+    this.send('ya inicié sesión');
   }
 
   private scroll() {

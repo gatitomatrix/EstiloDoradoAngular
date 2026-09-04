@@ -108,11 +108,13 @@
           @if (showLogin && !auth.isLoggedIn) {
             <div class="ed-bubble">
               <p>Inicia sesión para ubicar tu pedido. El chat no se cierra.</p>
+              <p class="ed-hint">Si tu cuenta es de Google, no uses contraseña: entra con Gmail.</p>
               <input [(ngModel)]="loginEmail" placeholder="Correo" name="dori_email" />
-              <input [(ngModel)]="loginPass" type="password" placeholder="Contraseña" name="dori_pass" (keydown.enter)="doLogin()" />
+              <input [(ngModel)]="loginPass" type="password" placeholder="Contraseña (cuenta creada en la tienda)" name="dori_pass" (keydown.enter)="doLogin()" />
               @if (loginErr) { <small>{{ loginErr }}</small> }
               <div class="ed-confirm">
                 <button type="button" class="ed-gold" [disabled]="loginBusy" (click)="doLogin()">Entrar</button>
+                <button type="button" class="ed-gold" [disabled]="loginBusy" (click)="doGoogleLogin()">Continuar con Google</button>
                 <button type="button" class="ed-ghost" (click)="showLogin = false; send('whatsapp')">Seguir por WhatsApp</button>
               </div>
             </div>
