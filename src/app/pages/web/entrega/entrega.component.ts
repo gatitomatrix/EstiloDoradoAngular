@@ -8,7 +8,7 @@ import * as L from 'leaflet';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
-import { estimarEnvio } from '../../../core/utils/tarifa-envio';
+import { estimarEnvio, cubreEnvio, TEXTO_COBERTURA } from '../../../core/utils/tarifa-envio';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -43,6 +43,7 @@ export class EntregaComponent {
   showAddressModal = false;
   stepMap = false;
   submitting = false;
+  cobertura = TEXTO_COBERTURA;
 
   // Resumen
   get subtotal() { return this.cart.getSubtotal(); }
@@ -70,7 +71,9 @@ export class EntregaComponent {
       this.checkout.setCosts(0, 0);
     }
 
-    this.ubigeo.getDepartamentos().subscribe(d => this.departamentos = d);
+    this.ubigeo.getDepartamentos().subscribe(d => {
+      this.departamentos = d.filter(x => cubreEnvio(x));
+    });
 
     this.addrForm.get('departamento')!.valueChanges.subscribe(dep => {
       this.provincias = []; this.distritos = [];
@@ -248,7 +251,7 @@ export class EntregaComponent {
 
   private async applyUbigeoFromReverse(dep?: string, prov?: string, dist?: string) {
     if (!this.departamentos.length) {
-      this.departamentos = await firstValueFrom(this.ubigeo.getDepartamentos());
+      this.departamentos = (await firstValueFrom(this.ubigeo.getDepartamentos())).filter(x => cubreEnvio(x));
     }
 
     const matchDep = this.bestMatch(dep, this.departamentos);
@@ -326,6 +329,11 @@ export class EntregaComponent {
     if (!numero) {
       numero = this.guessNumberFromDisplay(this.lastDisplay, v.via!) || '0';
       this.addrForm.patchValue({ numero }, { emitEvent: false });
+    }
+
+    if (!cubreEnvio(v.departamento, v.provincia)) {
+      alert(TEXTO_COBERTURA);
+      return;
     }
 
     this.checkout.setMode('EXPRESS');
