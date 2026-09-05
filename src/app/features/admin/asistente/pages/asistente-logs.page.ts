@@ -34,6 +34,26 @@ type LogItem = {
   wa_url?: string | null;
 };
 
+type FichaPedido = {
+  id_pedido: number;
+  fecha: string;
+  total: string;
+  estado: string;
+  items: { nombre: string; cantidad: number; imagen_url?: string | null }[];
+};
+
+type Ficha = {
+  id_cliente: number;
+  nombre: string;
+  email?: string | null;
+  telefono?: string | null;
+  n_pedidos: number;
+  total_gastado: string;
+  ultimo_pedido?: string | null;
+  frecuente: boolean;
+  pedidos: FichaPedido[];
+};
+
 @Component({
   standalone: true,
   selector: 'app-asistente-logs',
@@ -59,6 +79,15 @@ type LogItem = {
       background: #fffaf2; border-radius: 16px; max-width: 440px; width: 100%;
       box-shadow: 0 16px 48px rgba(0,0,0,.25); overflow: hidden;
     }
+    .ed-modal.ed-ficha { max-width: 520px; }
+    .ed-name {
+      border: 0; background: none; padding: 0; text-align: left; color: #3d2a12;
+      font-weight: 700; text-decoration: underline; cursor: pointer;
+    }
+    .ed-name:hover { color: #7a5420; }
+    .ed-pedido-mini { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #ead9c0; }
+    .ed-pedido-mini img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; background: #eee; }
+    .ed-badge-freq { background: #3d2a12; color: #f6e7c8; border-radius: 999px; padding: 2px 8px; font-size: 11px; }
     .ed-modal img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
     .ed-modal-body { padding: 16px 18px 18px; }
     .ed-modal h3 { margin: 0 0 8px; font-size: 1.15rem; }
@@ -70,7 +99,8 @@ type LogItem = {
     <div class="p-3">
       <h2 class="ed-page-title">Consultas Dori</h2>
       <p class="text-muted">
-        Las quejas y el WhatsApp van aquí. El ranking de productos consultados está en
+        Las quejas y el WhatsApp van aquí. Clic en el nombre del cliente para ver sus compras pagadas.
+        El ranking de productos consultados está en
         <a routerLink="/admin/interes-dori">Interés Dori</a>.
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
@@ -92,9 +122,10 @@ type LogItem = {
         <tbody>
           <tr *ngFor="let r of items" (click)="openQueja(r)" style="cursor:pointer">
             <td class="text-nowrap">{{ r.created_at }}</td>
-            <td>
-              <div *ngIf="r.cliente_nombre">{{ r.cliente_nombre }}</div>
-              <small class="text-muted" *ngIf="r.cliente_email">{{ r.cliente_email }}</small>
+            <td (click)="$event.stopPropagation()">
+              <button *ngIf="r.id_cliente && r.cliente_nombre" type="button" class="ed-name" (click)="openCliente(r)">{{ r.cliente_nombre }}</button>
+              <div *ngIf="!r.id_cliente && r.cliente_nombre">{{ r.cliente_nombre }}</div>
+              <small class="text-muted d-block" *ngIf="r.cliente_email">{{ r.cliente_email }}</small>
               <span *ngIf="!r.cliente_nombre" class="text-muted">Invitado</span>
             </td>
             <td>{{ r.mensaje }}</td>
@@ -120,6 +151,35 @@ type LogItem = {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="ed-modal-bg" *ngIf="ficha" (click)="close()">
+      <div class="ed-modal ed-ficha" (click)="$event.stopPropagation()">
+        <div class="ed-modal-body">
+          <h3>{{ ficha.nombre }}
+            <span class="ed-badge-freq" *ngIf="ficha.frecuente">Cliente frecuente</span>
+          </h3>
+          <p class="ed-queja-meta" *ngIf="ficha.email">{{ ficha.email }}</p>
+          <p class="ed-queja-meta">
+            {{ ficha.n_pedidos }} pedido(s) pagados · S/ {{ ficha.total_gastado }}
+            <span *ngIf="ficha.ultimo_pedido"> · último {{ ficha.ultimo_pedido }}</span>
+          </p>
+          <p class="small text-muted" *ngIf="fichaLoad">Cargando compras…</p>
+          <div *ngFor="let p of ficha.pedidos" class="ed-pedido-mini">
+            <img *ngIf="p.items[0]?.imagen_url" [src]="p.items[0].imagen_url" alt="" />
+            <div>
+              <strong>Pedido #{{ p.id_pedido }}</strong>
+              <div class="small text-muted">{{ p.fecha }} · S/ {{ p.total }} · {{ p.estado }}</div>
+              <div class="small">{{ itemsTxt(p) }}</div>
+            </div>
+          </div>
+          <p class="text-muted small" *ngIf="!fichaLoad && !ficha.pedidos.length">Aún no tiene pedidos pagados.</p>
+          <div class="d-flex gap-2 mt-3">
+            <a class="btn btn-sm btn-dark" [routerLink]="['/admin/clientes', ficha.id_cliente]" (click)="close()">Ficha completa</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="ed-modal-bg" *ngIf="queja" (click)="close()">
@@ -173,7 +233,9 @@ export class AsistenteLogsPage implements OnInit {
   stats = { total: 0, sin_producto: 0, whatsapp: 0 };
   open: ProdChip | null = null;
   queja: LogItem | null = null;
+  ficha: Ficha | null = null;
   loading = false;
+  fichaLoad = false;
 
   ngOnInit() {
     this.http.get<{ items: LogItem[]; stats: { total: number; sin_producto: number; whatsapp: number } }>(`${environment.apiBaseUrl}/admin/asistente-logs`).subscribe({
@@ -194,7 +256,37 @@ export class AsistenteLogsPage implements OnInit {
   close() {
     this.open = null;
     this.queja = null;
+    this.ficha = null;
     this.loading = false;
+    this.fichaLoad = false;
+  }
+
+  itemsTxt(p: FichaPedido): string {
+    return (p.items || []).map((i) => `${i.nombre} × ${i.cantidad}`).join(', ');
+  }
+
+  openCliente(r: LogItem) {
+    const id = Number(r.id_cliente || 0);
+    if (id < 1) return;
+    this.fichaLoad = true;
+    this.ficha = {
+      id_cliente: id,
+      nombre: r.cliente_nombre || 'Cliente',
+      email: r.cliente_email,
+      n_pedidos: 0,
+      total_gastado: '0.00',
+      frecuente: false,
+      pedidos: [],
+    };
+    this.http.get<Ficha>(`${environment.apiBaseUrl}/admin/asistente-cliente/${id}`).subscribe({
+      next: (x) => {
+        this.ficha = x;
+        this.fichaLoad = false;
+      },
+      error: () => {
+        this.fichaLoad = false;
+      },
+    });
   }
 
   openQueja(r: LogItem) {
