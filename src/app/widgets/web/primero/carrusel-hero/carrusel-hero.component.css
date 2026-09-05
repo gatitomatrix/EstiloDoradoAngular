@@ -6,7 +6,7 @@
 /* Altura sugerida en desktop */
 .ed-hero .carousel-item img {
   height: 380px;
-  width: 10px;
+  width: 100%;
   object-fit: cover;
   object-position: center;
   display: block;

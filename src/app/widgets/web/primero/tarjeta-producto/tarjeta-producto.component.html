@@ -17,6 +17,9 @@
       S/ {{ producto.precio | number:'1.2-2' }}
     }
   </div>
+  <p class="ed-card__stock" [class.ed-card__stock--out]="(producto.stock || 0) < 1">
+    {{ (producto.stock || 0) > 0 ? ('Stock ' + producto.stock) : 'Agotado' }}
+  </p>
 
   <div class="ed-card__actions">
     <button class="btn btn-outline-secondary" (click)="openDetail.emit(producto)">Ver detalle</button>
