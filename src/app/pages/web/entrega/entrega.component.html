@@ -33,7 +33,11 @@
                     <h4 class="fw-bold mb-3">Elige un tipo de entrega</h4>
 
                     <!-- Retira tu pedido -->
-                    <div class="ed-option" (click)="openPickup()">
+                    <div
+                      class="ed-option"
+                      [class.ed-option--on]="mode === 'STORE_PICKUP'"
+                      (click)="openPickup()"
+                    >
                         <div class="ed-icon">🏠</div>
                         <div class="ed-body">
                             <div class="fw-semibold">Retira tu pedido en tienda</div>
@@ -44,16 +48,22 @@
                             </div>
                             <div class="text-muted small">Recuerda que si pagas por Culqui puedes obtener tu comprobante electrónico.</div>
                         </div>
+                        <div class="ed-check" *ngIf="mode === 'STORE_PICKUP'" aria-hidden="true">✓</div>
                     </div>
 
                     <!-- Envío express -->
-                    <div class="ed-option" (click)="openExpress()">
+                    <div
+                      class="ed-option"
+                      [class.ed-option--on]="mode === 'EXPRESS'"
+                      (click)="openExpress()"
+                    >
                         <div class="ed-icon">🚚</div>
                         <div class="ed-body">
                             <div class="fw-semibold">Envío Express</div>
                             <div class="text-muted small">Ingresa tu dirección para conocer disponibilidad</div>
-                            <div class="text-muted small mt-1">Solo Lima, Callao, Junín (Huancayo) y Pasco (Cerro de Pasco).</div>
+                            <div class="text-muted small mt-1">Solo Lima (distritos de Lima).</div>
                         </div>
+                        <div class="ed-check" *ngIf="mode === 'EXPRESS'" aria-hidden="true">✓</div>
                     </div>
                 </div>
             </div>

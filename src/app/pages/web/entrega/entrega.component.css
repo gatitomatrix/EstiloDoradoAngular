@@ -3,7 +3,9 @@
 .ed-step--mute{opacity:.35}
 .ed-line{flex:1;height:2px;background:#e5e7eb}
 
-.ed-option{display:flex;gap:12px;border:1px solid #eee;border-radius:12px;padding:14px 16px;margin-bottom:12px;cursor:pointer}
+.ed-option{display:flex;gap:12px;align-items:center;border:1px solid #eee;border-radius:12px;padding:14px 16px;margin-bottom:12px;cursor:pointer}
 .ed-option:hover{border-color:#d6d6d6;background:#fafafa}
+.ed-option--on{border-color:#d4af37;background:#fbf6e8;box-shadow:0 0 0 2px rgba(212,175,55,.28)}
 .ed-icon{font-size:22px;line-height:1}
 .ed-body{flex:1}
+.ed-check{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#d4af37;color:#2d2418;display:flex;align-items:center;justify-content:center;font-weight:800}
