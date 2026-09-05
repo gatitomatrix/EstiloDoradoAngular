@@ -80,4 +80,12 @@
   border: 1px solid #e7dac6;
 }
 .ed-wa:hover { background: #ecf9f0; }
-.ed-help { background: none; border: 0; cursor: pointer; padding: 0; }
+.ed-help { background: none; border: 0; cursor: pointer; padding: 0; line-height: 0; }
+.ed-help-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: block;
+  object-fit: cover;
+  background: #2d2418;
+}
