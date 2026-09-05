@@ -46,7 +46,7 @@ export class EntregaStateService {
       this.setDescuento(0);
     } else {
       const d = this.dir$.value;
-      this.setCostoEntrega(estimarEnvio(d?.departamento, d?.provincia).costo);
+      this.setCostoEntrega(estimarEnvio(d?.departamento, d?.provincia, d?.distrito).costo);
       this.setDescuento(0);
     }
   }

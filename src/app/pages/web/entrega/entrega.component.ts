@@ -8,7 +8,7 @@ import * as L from 'leaflet';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
-import { estimarEnvio, cubreEnvio, filtrarProvinciasEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
+import { estimarEnvio, cubreEnvio, filtrarProvinciasEnvio, filtrarDistritosEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -95,7 +95,11 @@ export class EntregaComponent {
       this.distritos = [];
       this.addrForm.patchValue({ distrito: '' }, { emitEvent: false });
       const dep = this.addrForm.value.departamento!;
-      if (dep && prov) this.ubigeo.getDistritos(dep, prov).subscribe(d => this.distritos = d);
+      if (dep && prov) {
+        this.ubigeo.getDistritos(dep, prov).subscribe(d => {
+          this.distritos = filtrarDistritosEnvio(dep, prov, d);
+        });
+      }
       this.persistDraft();
     });
 
@@ -177,7 +181,7 @@ export class EntregaComponent {
 
         if (prov) {
           this.ubigeo.getDistritos(src.departamento!, prov).subscribe(dists => {
-            this.distritos = dists;
+            this.distritos = filtrarDistritosEnvio(src.departamento!, prov, dists);
             const dist = this.distritos.includes(src.distrito || '') ? src.distrito : '';
             this.addrForm.patchValue({ distrito: dist || '' }, { emitEvent: false });
             this.restoring = false;
@@ -284,9 +288,17 @@ export class EntregaComponent {
     const currentProv = this.addrForm.value.provincia || '';
     if (matchProv !== currentProv) {
       this.addrForm.patchValue({ provincia: matchProv, distrito: '' }, { emitEvent: true });
-      this.distritos = await firstValueFrom(this.ubigeo.getDistritos(matchDep, matchProv));
+      this.distritos = filtrarDistritosEnvio(
+        matchDep,
+        matchProv,
+        await firstValueFrom(this.ubigeo.getDistritos(matchDep, matchProv)),
+      );
     } else if (!this.distritos.length) {
-      this.distritos = await firstValueFrom(this.ubigeo.getDistritos(matchDep, matchProv));
+      this.distritos = filtrarDistritosEnvio(
+        matchDep,
+        matchProv,
+        await firstValueFrom(this.ubigeo.getDistritos(matchDep, matchProv)),
+      );
     }
 
     const matchDist = this.bestMatch(dist, this.distritos);
@@ -344,7 +356,7 @@ export class EntregaComponent {
       this.addrForm.patchValue({ numero }, { emitEvent: false });
     }
 
-    if (!cubreEnvio(v.departamento, v.provincia)) {
+    if (!cubreEnvio(v.departamento, v.provincia, v.distrito)) {
       alert(TEXTO_COBERTURA);
       return;
     }
@@ -360,7 +372,7 @@ export class EntregaComponent {
       lng: this.lastCoords?.lng,
       full: this.composeFullAddress(v.via!, numero, v.distrito!, v.provincia!, v.departamento!)
     } as any);
-    const tarifa = estimarEnvio(v.departamento, v.provincia);
+    const tarifa = estimarEnvio(v.departamento, v.provincia, v.distrito);
     this.checkout.setCosts(tarifa.costo, 0);
 
     this.showAddressModal = false;

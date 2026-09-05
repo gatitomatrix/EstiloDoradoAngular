@@ -31,12 +31,12 @@ export class ConfirmarEntregaComponent {
 
   get feeLabel(): string {
     const a = this.checkout.value.address;
-    return estimarEnvio(a?.departamento, a?.provincia).etiqueta;
+    return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).etiqueta;
   }
 
   get expressFee(): number {
     const a = this.checkout.value.address;
-    return estimarEnvio(a?.departamento, a?.provincia).costo;
+    return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).costo;
   }
 
   // Radio buttons
