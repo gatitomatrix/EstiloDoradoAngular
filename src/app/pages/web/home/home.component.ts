@@ -26,6 +26,7 @@ import { UiService } from '../../../core/services/ui.service';
     ChipsCategoriasComponent,
     PanelFiltrosComponent,
     GrillaProductosComponent,
+    RouterLink,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],

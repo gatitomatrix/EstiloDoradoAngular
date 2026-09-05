@@ -7,6 +7,7 @@ import { RegistroComponent } from './pages/web/registro/registro.component';
 import { RecuperarComponent } from './pages/web/recuperar/recuperar.component';
 import { MiCuentaComponent } from './pages/web/mi-cuenta/mi-cuenta.component';
 import { RestablecerComponent } from './pages/web/restablecer/restablecer.component';
+import { PrivacidadComponent } from './pages/web/privacidad/privacidad.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'registro', component: RegistroComponent },
   { path: 'recuperar', component: RecuperarComponent },
   { path: 'restablecer', component: RestablecerComponent },
+  { path: 'privacidad', component: PrivacidadComponent },
   { path: 'mi-cuenta', component: MiCuentaComponent, canActivate: [authGuard] },
   {
     path: 'mis-compras',
