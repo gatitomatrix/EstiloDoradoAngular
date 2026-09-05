@@ -30,9 +30,8 @@
         <div>
           <div class="fw-semibold">Pagos con Culqi</div>
           <small>
-            <strong>Pagar con Culqi</strong> abre la ventana oficial (tarjeta / Yape).
-            Si en este servidor no hay claves de prueba, esa ventana no validará la tarjeta:
-            usa entonces <strong>Pago de prueba</strong> (registra el pedido sin cobro).
+            <strong>Pagar con Culqi</strong> abre la ventana oficial (tarjeta o Yape de prueba).
+            Efectivo solo si elegiste recojo en tienda.
           </small>
         </div>
       </div>
@@ -84,9 +83,6 @@
           <!-- Botón Culqi -->
           <button class="btn btn-dark w-100 mb-2" [disabled]="!(pay.hasMethod$ | async) || procesandoPago" (click)="pagarConCulqi()">
             {{ procesandoPago ? 'Confirmando pago…' : 'Pagar con Culqi' }}
-          </button>
-          <button class="btn btn-outline-secondary w-100 mb-2" [disabled]="!(pay.hasMethod$ | async)" (click)="pagarDemoAcademico()">
-            Pago de prueba (sin cobro)
           </button>
 
           <!-- Efectivo solo si eligió retiro en tienda -->

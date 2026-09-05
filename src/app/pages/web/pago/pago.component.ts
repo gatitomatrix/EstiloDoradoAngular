@@ -195,18 +195,6 @@ export class PagoComponent implements AfterViewInit {
     Culqi.open();
   }
 
-  /** Pedido de prueba sin pasar por Culqi (demo académica / Render sin claves). */
-  pagarDemoAcademico() {
-    const ok = confirm(
-      'Pago de demostración: no se cobra dinero real.\n\n¿Registrar el pedido como pagado (prueba)?'
-    );
-    if (!ok) return;
-    this.onCulqiSuccess({
-      id: 'tok_demo_' + Date.now(),
-      method: 'tarjeta',
-    });
-  }
-
   private postCulqiToken(token: string, email: string) {
     this.http.post<{ success: boolean; message?: string }>(
       `${environment.apiBaseUrl}/pagar-con-culqi`,
