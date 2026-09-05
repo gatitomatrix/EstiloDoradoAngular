@@ -38,9 +38,10 @@ type Item = {
     <div class="p-3">
       <h2 class="ed-page-title">Interés Dori</h2>
       <p class="text-muted">
-        Productos que Dori mostró en el chat. Los 👍 los marca el cliente en la tarjeta.
-        Las quejas siguen en
-        <a routerLink="/admin/consultas-dori">Consultas Dori</a>.
+        Ranking de productos que Dori mostró en el chat de la tienda.
+        “Veces mostrados” es cuántas conversaciones los recomendó.
+        El cliente puede marcar 👍 o 👎 en la tarjeta; “Agregados al carrito” es cuando dijo que sí en el chat.
+        Sirve para ver qué se consulta más y qué conviene destacar o reponer.
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="card p-3 ed-stat"><strong>{{ stats.productos }}</strong><div class="small">Productos</div></div>
