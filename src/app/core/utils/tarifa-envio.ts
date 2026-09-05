@@ -34,9 +34,15 @@ export function estimarEnvio(departamento?: string | null, provincia?: string | 
   return { costo: 0, zona: 'fuera', etiqueta: `Fuera de cobertura. Enviamos a ${COBERTURA}` };
 }
 
+export const DIRECCION_TIENDA =
+  'Prolongación Yauli Nro. S/N Pasco - Pasco – Chaupimarca.';
+
+export const TEXTO_RECOJO = `Retiro en tienda — ${DIRECCION_TIENDA}`;
+
 export function tarifaRecojo(): TarifaEnvio {
   return { costo: 0, zona: 'tienda', etiqueta: 'Recojo en tienda' };
 }
+
 
 export const TEXTO_COBERTURA = `Envíos a ${COBERTURA}. Otras ciudades: recojo en tienda.`;
 

@@ -8,7 +8,7 @@ import * as L from 'leaflet';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
-import { estimarEnvio, cubreEnvio, TEXTO_COBERTURA } from '../../../core/utils/tarifa-envio';
+import { estimarEnvio, cubreEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -44,6 +44,7 @@ export class EntregaComponent {
   stepMap = false;
   submitting = false;
   cobertura = TEXTO_COBERTURA;
+  direccionTienda = DIRECCION_TIENDA;
 
   // Resumen
   get subtotal() { return this.cart.getSubtotal(); }
@@ -108,12 +109,12 @@ export class EntregaComponent {
   openPickup() {
     this.checkout.setMode('STORE_PICKUP');
     this.checkout.setAddress({
-      departamento: '',
-      provincia: '',
-      distrito: '',
+      departamento: 'Pasco',
+      provincia: 'Pasco',
+      distrito: 'Chaupimarca',
       via: 'Retiro en tienda',
-      numero: '-',
-      full: 'Retiro en tienda'
+      numero: 'S/N',
+      full: TEXTO_RECOJO,
     } as any);
     this.checkout.setCosts(0, 0);
   }

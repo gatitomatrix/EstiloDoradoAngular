@@ -9,6 +9,7 @@ import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/
 
 import { CheckoutService } from '../../../services/checkout/checkout.service';
 import { CartService } from '../../../services/cart/cart.service';
+import { TEXTO_RECOJO, DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { BoletaData, InvoiceData, PaymentStateService, SavedCard } from '../../../core/state/payment-state.service';
 
@@ -57,6 +58,7 @@ export class PagoComponent implements AfterViewInit {
   // Modo entrega
   get mode() { return this.checkout.value.mode as 'STORE_PICKUP' | 'EXPRESS' | 'NONE'; }
   get canCash() { return this.mode === 'STORE_PICKUP'; }
+  readonly direccionTienda = DIRECCION_TIENDA;
 
   // Offcanvas visibles
   showCardDrawer: 'credito' | 'debito' | null = null;
@@ -271,7 +273,7 @@ export class PagoComponent implements AfterViewInit {
     if (!payload) { alert('Transacción no disponible. Intenta de nuevo.'); return; }
 
     const direccion = this.mode === 'STORE_PICKUP'
-      ? 'Retiro en tienda -'
+      ? TEXTO_RECOJO
       : (this.checkout.value.address?.full ?? '');
 
     const items = this.cart.items.map(i => ({ id_producto: Number(i.id), cantidad: i.qty }));
@@ -309,7 +311,7 @@ export class PagoComponent implements AfterViewInit {
       alert('El pago en efectivo solo está disponible para Retiro en tienda.');
       return;
     }
-    const direccion = 'Retiro en tienda -';
+    const direccion = TEXTO_RECOJO;
     const items = this.cart.items.map(i => ({ id_producto: Number(i.id), cantidad: i.qty }));
     if (!items.length) { alert('Tu carrito está vacío.'); return; }
 

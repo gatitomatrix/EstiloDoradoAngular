@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../../services/order/order.service';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
+import { DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
 import Swal from 'sweetalert2';
 
 declare const bootstrap: any;
@@ -23,6 +24,7 @@ export class ResumenPedidoComponent implements AfterViewInit {
   id!: number;
   data: any;
   files?: { xml?: string; cdr?: string; pdf?: string };
+  readonly direccionTienda = DIRECCION_TIENDA;
 
   @ViewChild('okModal') okModalRef!: ElementRef<HTMLDivElement>;
   private okModal?: any;

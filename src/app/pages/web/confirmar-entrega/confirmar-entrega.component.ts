@@ -5,7 +5,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
-import { estimarEnvio } from '../../../core/utils/tarifa-envio';
+import { estimarEnvio, DIRECCION_TIENDA, TEXTO_RECOJO } from '../../../core/utils/tarifa-envio';
 
 @Component({
   selector: 'ed-web-confirmar-entrega',
@@ -27,6 +27,7 @@ export class ConfirmarEntregaComponent {
 
   get address() { return this.checkout.value.address?.full || '–'; }
   get mode() { return this.checkout.value.mode; }
+  readonly direccionTienda = DIRECCION_TIENDA;
 
   get feeLabel(): string {
     const a = this.checkout.value.address;
@@ -55,6 +56,14 @@ export class ConfirmarEntregaComponent {
   onSelectPickup() {
     this.selected = 'STORE_PICKUP';
     this.checkout.setMode('STORE_PICKUP');
+    this.checkout.setAddress({
+      departamento: 'Pasco',
+      provincia: 'Pasco',
+      distrito: 'Chaupimarca',
+      via: 'Retiro en tienda',
+      numero: 'S/N',
+      full: TEXTO_RECOJO,
+    });
     this.checkout.setCosts(0, 0);
   }
   onSelectExpress() {
