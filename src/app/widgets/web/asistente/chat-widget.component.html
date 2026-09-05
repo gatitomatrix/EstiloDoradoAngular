@@ -21,33 +21,50 @@
               @if (m.products?.length) {
                 <div class="ed-cards">
                   @for (p of m.products; track p.id) {
-                    <article class="ed-card">
-                      <button type="button" class="ed-card__main" (click)="goProduct(p.id)">
-                        <img
-                          class="ed-card__thumb"
-                          [src]="imgOf(p.imagen_url)"
-                          [alt]="p.nombre"
-                          (error)="onImgError($event)"
-                        />
-                        <div>
-                          <b>{{ p.nombre }}</b>
-                          <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
+                    @if (m.action?.type === 'whatsapp') {
+                      <article class="ed-card ed-card--info">
+                        <div class="ed-card__main">
+                          <img
+                            class="ed-card__thumb"
+                            [src]="imgOf(p.imagen_url)"
+                            [alt]="p.nombre"
+                            (error)="onImgError($event)"
+                          />
+                          <div>
+                            <b>{{ p.nombre }}</b>
+                            <small>Producto del pedido (referencia para la foto)</small>
+                          </div>
                         </div>
-                      </button>
-                      <div class="ed-card__actions">
-                        <button type="button" class="ed-ghost" (click)="goProduct(p.id)">Ver</button>
-                        <button
-                          type="button"
-                          class="ed-gold"
-                          [disabled]="(p.stock || 0) < 1"
-                          (click)="askConfirm(p)"
-                        >
-                          {{ (p.stock || 0) < 1 ? 'Agotado' : 'Agregar' }}
+                      </article>
+                    } @else {
+                      <article class="ed-card">
+                        <button type="button" class="ed-card__main" (click)="goProduct(p.id)">
+                          <img
+                            class="ed-card__thumb"
+                            [src]="imgOf(p.imagen_url)"
+                            [alt]="p.nombre"
+                            (error)="onImgError($event)"
+                          />
+                          <div>
+                            <b>{{ p.nombre }}</b>
+                            <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
+                          </div>
                         </button>
-                        <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'up'" (click)="vote(p, 'up')" title="Me sirve">👍</button>
-                        <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'down'" (click)="vote(p, 'down')" title="No me sirve">👎</button>
-                      </div>
-                    </article>
+                        <div class="ed-card__actions">
+                          <button type="button" class="ed-ghost" (click)="goProduct(p.id)">Ver</button>
+                          <button
+                            type="button"
+                            class="ed-gold"
+                            [disabled]="(p.stock || 0) < 1"
+                            (click)="askConfirm(p)"
+                          >
+                            {{ (p.stock || 0) < 1 ? 'Agotado' : 'Agregar' }}
+                          </button>
+                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'up'" (click)="vote(p, 'up')" title="Me sirve">👍</button>
+                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'down'" (click)="vote(p, 'down')" title="No me sirve">👎</button>
+                        </div>
+                      </article>
+                    }
                   }
                 </div>
               }

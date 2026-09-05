@@ -152,6 +152,9 @@
   color: #6b5d4d;
   font-family: system-ui, sans-serif;
 }
+.ed-card--info {
+  pointer-events: none;
+}
 .ed-card__actions,
 .ed-confirm {
   display: flex;
