@@ -143,6 +143,10 @@
             ¿Aún no tienes cuenta?
             <a (click)="closeLogin(); toRegistro()">Regístrate</a>
           </div>
+          <p class="text-muted text-center mb-0" style="font-size:.75rem;">
+            Al crear cuenta (correo o Google) aceptas el tratamiento de datos de la
+            <a routerLink="/privacidad" (click)="closeLogin()">política de privacidad</a>.
+          </p>
         </form>
       </div>
     </div>
