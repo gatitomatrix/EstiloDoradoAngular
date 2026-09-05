@@ -4,14 +4,11 @@
 <section class="container" style="max-width: 760px;">
     <div class="card shadow-sm my-4">
         <div class="card-body p-4">
-            <h3 class="fw-bold mb-3"><span class="me-2">🔒</span>Restablecer contraseña</h3>
+            <h3 class="fw-bold mb-3">Nueva contraseña</h3>
 
             <div class="alert alert-success" *ngIf="fromCheck">
-                Si el correo ingresado está registrado, recibirás un código verificador para restablecer tu contraseña
+                Si el correo está registrado, te enviamos un código de 6 dígitos. Revisa bandeja de entrada y spam.
             </div>
-
-            <p class="text-muted">Ingresa una nueva contraseña para tu cuenta y evita que se repita con las que
-                utilizaste anteriormente.</p>
 
             <form [formGroup]="form" class="d-grid gap-3" (ngSubmit)="crear()">
 
@@ -21,36 +18,41 @@
                 </div>
 
                 <div>
-                    <label class="form-label">Código verificador</label>
-                    <input type="text" class="form-control" placeholder="Ingresa el código" formControlName="code">
-                    <div class="form-text text-danger" *ngIf="form.get('code')?.hasError('invalid')">Código inválido
-                    </div>
+                    <label class="form-label">Código de 6 dígitos</label>
+                    <input type="text" class="form-control" inputmode="numeric" maxlength="6"
+                        placeholder="000000" formControlName="codigo">
                 </div>
 
                 <div>
                     <label class="form-label">Nueva contraseña</label>
                     <div class="input-group">
                         <input [type]="hide ? 'password' : 'text'" class="form-control"
-                            placeholder="Ingresa una contraseña" formControlName="password">
+                            placeholder="Mínimo 6 caracteres" formControlName="password">
                         <button type="button" class="btn btn-outline-secondary" (click)="hide=!hide">👁</button>
                     </div>
-
-                    <ul class="small mt-2" style="columns:2;">
-                        <li [class.text-success]="reqLen">Mín. 8 caracteres</li>
-                        <li [class.text-success]="reqNumber">1 número</li>
-                        <li [class.text-success]="reqUpper">1 mayúscula</li>
-                        <li [class.text-success]="reqNoSpace">Sin espacio</li>
-                        <li [class.text-success]="reqLower">1 minúscula</li>
+                    <ul class="small mt-2">
+                        <li [class.text-success]="reqLen">Mín. 6 caracteres</li>
+                        <li [class.text-success]="reqMatch">Las dos claves coinciden</li>
                     </ul>
                 </div>
 
-                <button class="btn btn-dark fw-bold py-2" type="submit" [disabled]="form.invalid">Crear</button>
+                <div>
+                    <label class="form-label">Confirmar contraseña</label>
+                    <input [type]="hide ? 'password' : 'text'" class="form-control"
+                        formControlName="password_confirmation">
+                </div>
+
+                <div class="alert alert-danger py-2" *ngIf="err">{{ err }}</div>
+
+                <button class="btn btn-dark fw-bold py-2" type="submit" [disabled]="form.invalid || submitting">
+                    {{ submitting ? 'Guardando…' : 'Guardar y entrar' }}
+                </button>
             </form>
 
             <div class="text-center mt-3 text-muted">
-                ¿Aún no te llega? puedes pedir un nuevo código por 
-                <a class="link-primary text-decoration-underline" routerLink="/recuperar">correo</a>
+                ¿No te llegó?
+                <a class="link-primary text-decoration-underline" routerLink="/recuperar">Pedir otro código</a>
             </div>
         </div>
     </div>
-</section>  
+</section>

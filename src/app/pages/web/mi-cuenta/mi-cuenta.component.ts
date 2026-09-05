@@ -27,6 +27,9 @@ export class MiCuentaComponent implements OnInit {
   edit = false;
   saveMsg = '';
   saveErr = '';
+  passMsg = '';
+  passErr = '';
+  passBusy = false;
 
   form = this.fb.group({
     nombre: ['', [Validators.required, Validators.pattern(NAME_RE)]],
@@ -34,6 +37,12 @@ export class MiCuentaComponent implements OnInit {
     telefono: ['', [Validators.pattern(PHONE_OPT_RE)]],
     direccion: [''],
     email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+  });
+
+  passForm = this.fb.group({
+    actual: [''],
+    nueva: [''],
+    confirma: [''],
   });
 
   ngOnInit() {
@@ -116,4 +125,37 @@ export class MiCuentaComponent implements OnInit {
     });
     this.form.get('email')?.disable();
   }
+
+  cambiarClave() {
+    this.passMsg = '';
+    this.passErr = '';
+    const actual = (this.passForm.get('actual')?.value || '').trim();
+    const nueva = this.passForm.get('nueva')?.value || '';
+    const conf = this.passForm.get('confirma')?.value || '';
+    if (actual.length < 1 || nueva.length < 6) {
+      this.passErr = 'La nueva clave debe tener al menos 6 caracteres.';
+      return;
+    }
+    if (nueva !== conf) {
+      this.passErr = 'La confirmación no coincide.';
+      return;
+    }
+    this.passBusy = true;
+    this.auth.updatePassword({
+      password_actual: actual,
+      password: nueva,
+      password_confirmation: conf,
+    }).subscribe({
+      next: () => {
+        this.passBusy = false;
+        this.passMsg = 'Contraseña actualizada. Te enviamos un correo de aviso.';
+        this.passForm.reset();
+      },
+      error: (e) => {
+        this.passBusy = false;
+        this.passErr = e?.error?.message || 'No se pudo cambiar. Si entraste con Google, usa “¿Olvidaste tu contraseña?”.';
+      },
+    });
+  }
 }
+

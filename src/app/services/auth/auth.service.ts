@@ -73,6 +73,14 @@ export class AuthService {
       .pipe(tap(u => saveUser(u, this._user$)));
   }
 
+  updatePassword(p: {
+    password_actual: string;
+    password: string;
+    password_confirmation: string;
+  }) {
+    return this.http.post<{ message: string }>(`${API}/auth/password`, p);
+  }
+
   logout(): Observable<any> {
     return this.http.post(`${API}/auth/logout`, {})
       .pipe(tap(() => clear(this._user$)));

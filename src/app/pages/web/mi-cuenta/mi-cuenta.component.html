@@ -55,4 +55,33 @@
       <button class="ed-btn ed-btn--primary" (click)="guardar()" [disabled]="form.invalid">Guardar cambios</button>
     </div>
   </div>
+
+  <div class="ed-card" style="margin-top:20px;">
+    <div class="ed-card__header">
+      <h2>Contraseña</h2>
+    </div>
+    <p class="text-muted" style="margin-top:0;">Si creaste la cuenta con correo. Si solo usas Google, pide un código en “¿Olvidaste tu contraseña?”.</p>
+    <form [formGroup]="passForm" class="ed-grid" (ngSubmit)="cambiarClave()">
+      <div>
+        <label>Contraseña actual</label>
+        <input type="password" formControlName="actual" autocomplete="current-password">
+      </div>
+      <div>
+        <label>Nueva (mín. 6)</label>
+        <input type="password" formControlName="nueva" autocomplete="new-password">
+      </div>
+      <div>
+        <label>Confirmar nueva</label>
+        <input type="password" formControlName="confirma" autocomplete="new-password">
+      </div>
+    </form>
+    <p class="text-success" *ngIf="passMsg">{{ passMsg }}</p>
+    <p class="text-danger" *ngIf="passErr">{{ passErr }}</p>
+    <div class="ed-actions">
+      <button class="ed-btn ed-btn--primary" type="button" (click)="cambiarClave()" [disabled]="passBusy">
+        {{ passBusy ? 'Guardando…' : 'Cambiar contraseña' }}
+      </button>
+      <a routerLink="/recuperar" class="ed-link">¿Olvidaste tu contraseña?</a>
+    </div>
+  </div>
 </section>

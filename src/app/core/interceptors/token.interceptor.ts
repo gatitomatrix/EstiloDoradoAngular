@@ -11,9 +11,12 @@ const CLIENT_TOKEN_KEY = 'ed_auth_token';
  */
 const PUBLIC_AUTH_ENDPOINTS = [
   '/auth/check-email',
+  '/auth/password/forgot',
+  '/auth/password/reset',
   '/auth/password/reset-simple',
   '/auth/register',
-  '/auth/login'
+  '/auth/login',
+  '/auth/google',
 ];
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
