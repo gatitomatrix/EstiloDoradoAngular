@@ -193,6 +193,12 @@
       </section>
     }
 
+    @if (!open && showHint) {
+      <button type="button" class="ed-chat__nube" (click)="toggle(true)">
+        <span>Hola, soy Dori.<br />¿Te ayudo a elegir un regalo?</span>
+        <span class="ed-chat__nube-x" (click)="hideHint($event)" aria-label="Cerrar">×</span>
+      </button>
+    }
     <button
       type="button"
       class="ed-chat__fab"
@@ -203,7 +209,7 @@
       @if (open) {
         <span>Cerrar</span>
       } @else {
-        <span>Hola, soy Dori</span>
+        <span>Dori</span>
       }
     </button>
   </div>

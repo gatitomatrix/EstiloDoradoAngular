@@ -27,6 +27,39 @@
   background: #1a140c;
 }
 
+.ed-chat__nube {
+  position: relative;
+  max-width: 230px;
+  border: 1.2px solid #d4af37;
+  background: #fff;
+  color: #2d2418;
+  text-align: left;
+  padding: 10px 28px 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.3;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+}
+.ed-chat__nube::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  bottom: -7px;
+  border: 7px solid transparent;
+  border-top-color: #fff;
+  filter: drop-shadow(0 1px 0 #d4af37);
+}
+.ed-chat__nube-x {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 16px;
+  color: #8a7b65;
+  line-height: 1;
+}
+
 .ed-chat__panel {
   width: min(400px, calc(100vw - 24px));
   height: min(560px, calc(100vh - 110px));
