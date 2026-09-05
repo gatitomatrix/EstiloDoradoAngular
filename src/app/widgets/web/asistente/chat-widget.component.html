@@ -44,6 +44,8 @@
                         >
                           {{ (p.stock || 0) < 1 ? 'Agotado' : 'Agregar' }}
                         </button>
+                        <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'up'" (click)="vote(p, 'up')" title="Me sirve">👍</button>
+                        <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'down'" (click)="vote(p, 'down')" title="No me sirve">👎</button>
                       </div>
                     </article>
                   }

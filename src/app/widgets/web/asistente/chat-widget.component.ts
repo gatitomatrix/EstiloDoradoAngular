@@ -59,6 +59,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   loginPass = '';
   loginErr = '';
   loginBusy = false;
+  votes: Record<number, 'up' | 'down'> = {};
   readonly placeholderImg = '/assets/img/no-image.png';
   orderView: {
     id_pedido: number;
@@ -183,6 +184,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       text: `${a.nombre} se agregó al carrito. Puedes seguir comprando o ir al carrito.`,
     });
     this.ui.ok(`${a.nombre} agregado al carrito`, 'Carrito', { link: '/carrito', cta: 'Ver carrito' });
+    this.http.post(`${environment.apiBaseUrl}/asistente/feedback`, { id_producto: a.id, voto: 'add' }).subscribe({ error: () => {} });
     this.scroll();
   }
 
@@ -198,6 +200,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   goCart() {
     this.open = false;
     this.router.navigateByUrl('/carrito');
+  }
+
+  vote(p: AsistenteProducto, voto: 'up' | 'down') {
+    if (!p?.id || this.votes[p.id] === voto) return;
+    this.votes[p.id] = voto;
+    this.http.post(`${environment.apiBaseUrl}/asistente/feedback`, { id_producto: p.id, voto }).subscribe({ error: () => {} });
   }
 
   imgOf(url?: string | null): string {

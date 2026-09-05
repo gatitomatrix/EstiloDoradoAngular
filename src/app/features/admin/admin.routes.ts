@@ -104,6 +104,11 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [roleGuard], data: { roles: ['ADMIN'] },
         loadComponent: () => import('./asistente/pages/asistente-logs.page').then(m => m.AsistenteLogsPage)
       },
+      {
+        path: 'interes-dori',
+        canActivate: [roleGuard], data: { roles: ['ADMIN'] },
+        loadComponent: () => import('./asistente/pages/asistente-interes.page').then(m => m.AsistenteInteresPage)
+      },
 
       {
         path: 'promociones',

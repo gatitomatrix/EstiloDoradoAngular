@@ -159,6 +159,19 @@
   margin-top: 8px;
   flex-wrap: wrap;
 }
+.ed-vote {
+  border: 1px solid #e6d4b8;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+.ed-vote--on {
+  background: #f3e6d0;
+  border-color: #c4a574;
+}
 
 .ed-gold,
 .ed-ghost,

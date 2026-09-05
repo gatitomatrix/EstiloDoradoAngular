@@ -70,7 +70,8 @@ type LogItem = {
     <div class="p-3">
       <h2 class="ed-page-title">Consultas Dori</h2>
       <p class="text-muted">
-        Preguntas de clientes en el chat. Clic en la fila de una queja o en el celular (WhatsApp).
+        Las quejas y el WhatsApp van aquí. El ranking de productos consultados está en
+        <a routerLink="/admin/interes-dori">Interés Dori</a>.
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="card p-3"><strong>{{ stats.total }}</strong><div class="small">Consultas</div></div>
