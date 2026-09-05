@@ -20,6 +20,7 @@
       <ed-web-panel-datos-producto
         *ngIf="prod"
         [titulo]="prod.nombre || ''"
+        [productoId]="prod.id"
         [subtitulo]="prod.slug || ''"
         [descripcion]="prod.descripcion || ''"
         [features]="[]"

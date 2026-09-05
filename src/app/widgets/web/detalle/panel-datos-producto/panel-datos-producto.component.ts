@@ -14,6 +14,7 @@ export class PanelDatosProductoComponent {
   readonly wa = inject(WhatsappService);
 
   @Input() titulo = '';
+  @Input() productoId: number | null = null;
   @Input() subtitulo = '';
   @Input() descripcion = '';
   @Input() features: string[] = [];
@@ -39,7 +40,11 @@ export class PanelDatosProductoComponent {
 
   get consultarHref(): string {
     const nom = this.titulo || 'un producto';
-    return this.wa.href(`Hola, quiero consultar por: ${nom}`);
+    let msg = `Hola, quiero consultar por: ${nom}`;
+    if (this.productoId) {
+      msg += `\n\nVer producto: https://estilodorado.net.pe/producto/${this.productoId}`;
+    }
+    return this.wa.href(msg);
   }
 
   inc() {
