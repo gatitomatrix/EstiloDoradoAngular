@@ -26,6 +26,12 @@ type LogItem = {
   urgencia?: boolean | number;
   driver?: string;
   created_at: string;
+  id_cliente?: number | null;
+  cliente_nombre?: string | null;
+  cliente_email?: string | null;
+  celular?: string | null;
+  celular_fmt?: string | null;
+  wa_url?: string | null;
 };
 
 @Component({
@@ -57,12 +63,14 @@ type LogItem = {
     .ed-modal-body { padding: 16px 18px 18px; }
     .ed-modal h3 { margin: 0 0 8px; font-size: 1.15rem; }
     .ed-modal .desc { font-size: 13px; color: #5c4a32; white-space: pre-wrap; }
+    .ed-wa { display: inline-block; margin: 4px 8px 8px 0; font-weight: 600; color: #128c7e; text-decoration: underline; }
+    .ed-queja-meta { font-size: 13px; color: #5c4a32; margin: 0 0 8px; }
   `],
   template: `
     <div class="p-3">
       <h2 class="ed-page-title">Consultas Dori</h2>
       <p class="text-muted">
-        Preguntas de clientes en el chat (sin saludos ni “gracias”). Clic en un producto para verlo.
+        Preguntas de clientes en el chat. Clic en la fila de una queja o en el celular (WhatsApp).
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="card p-3"><strong>{{ stats.total }}</strong><div class="small">Consultas</div></div>
@@ -73,6 +81,7 @@ type LogItem = {
         <thead>
           <tr>
             <th>Cuándo</th>
+            <th>Cliente</th>
             <th>Pregunta</th>
             <th>Detalle</th>
             <th>Tipo</th>
@@ -80,11 +89,17 @@ type LogItem = {
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let r of items">
+          <tr *ngFor="let r of items" (click)="openQueja(r)" style="cursor:pointer">
             <td class="text-nowrap">{{ r.created_at }}</td>
-            <td>{{ r.mensaje }}</td>
             <td>
+              <div *ngIf="r.cliente_nombre">{{ r.cliente_nombre }}</div>
+              <small class="text-muted" *ngIf="r.cliente_email">{{ r.cliente_email }}</small>
+              <span *ngIf="!r.cliente_nombre" class="text-muted">Invitado</span>
+            </td>
+            <td>{{ r.mensaje }}</td>
+            <td (click)="$event.stopPropagation()">
               <div *ngIf="r.queja_label"><strong>{{ r.queja_label }}</strong></div>
+              <a *ngIf="r.wa_url" class="ed-wa" [href]="r.wa_url" target="_blank" rel="noopener">{{ r.celular_fmt || 'WhatsApp' }}</a>
               <button
                 type="button"
                 class="ed-chip"
@@ -100,10 +115,32 @@ type LogItem = {
             <td>{{ r.n_productos }}</td>
           </tr>
           <tr *ngIf="!items.length">
-            <td colspan="5" class="text-muted">Aún no hay consultas. Escribe algo en Dori (tienda) y recarga esta página.</td>
+            <td colspan="6" class="text-muted">Aún no hay consultas. Escribe algo en Dori (tienda) y recarga esta página.</td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="ed-modal-bg" *ngIf="queja" (click)="close()">
+      <div class="ed-modal" (click)="$event.stopPropagation()">
+        <div class="ed-modal-body">
+          <h3>{{ queja.queja_label || 'Consulta' }}</h3>
+          <p class="ed-queja-meta" *ngIf="queja.cliente_nombre">
+            <strong>{{ queja.cliente_nombre }}</strong>
+            <span *ngIf="queja.cliente_email"> · {{ queja.cliente_email }}</span>
+          </p>
+          <p class="ed-queja-meta" *ngIf="!queja.cliente_nombre">Cliente no identificado (invitado).</p>
+          <p class="desc mb-2">{{ queja.mensaje }}</p>
+          <p class="mb-2" *ngIf="queja.wa_url">
+            Celular:
+            <a class="ed-wa" [href]="queja.wa_url" target="_blank" rel="noopener">{{ queja.celular_fmt }}</a>
+          </p>
+          <div class="d-flex gap-2">
+            <a *ngIf="queja.wa_url" class="btn btn-sm btn-success" [href]="queja.wa_url" target="_blank" rel="noopener">Abrir WhatsApp</a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="ed-modal-bg" *ngIf="open" (click)="close()">
@@ -134,6 +171,7 @@ export class AsistenteLogsPage implements OnInit {
   items: LogItem[] = [];
   stats = { total: 0, sin_producto: 0, whatsapp: 0 };
   open: ProdChip | null = null;
+  queja: LogItem | null = null;
   loading = false;
 
   ngOnInit() {
@@ -154,7 +192,12 @@ export class AsistenteLogsPage implements OnInit {
 
   close() {
     this.open = null;
+    this.queja = null;
     this.loading = false;
+  }
+
+  openQueja(r: LogItem) {
+    this.queja = r;
   }
 
   openProd(p: ProdChip) {
