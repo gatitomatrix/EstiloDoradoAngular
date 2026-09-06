@@ -5,8 +5,7 @@ export interface TarifaEnvio {
   etiqueta: string;
 }
 
-const COBERTURA =
-  'Lima Metropolitana y Callao; Cerro de Pasco (provincia Pasco); Huancayo (Chilca, El Tambo y Huancayo)';
+const COBERTURA = 'Lima – Callao, Huancayo y Pasco';
 
 const HUANCAYO_DISTRITOS = ['CHILCA', 'EL TAMBO', 'HUANCAYO'];
 
@@ -55,12 +54,12 @@ export function estimarEnvio(
     return { costo: 0, zona: 'fuera', etiqueta: `Fuera de cobertura. Enviamos a ${COBERTURA}` };
   }
   if (d.includes('JUNIN') || p === 'HUANCAYO') {
-    return { costo: 8, zona: 'huancayo', etiqueta: 'Huancayo · estimado Shalom' };
+    return { costo: 8, zona: 'huancayo', etiqueta: 'Huancayo · S/ 8' };
   }
   if (d.includes('PASCO') || p === 'PASCO') {
-    return { costo: 14, zona: 'pasco', etiqueta: 'Pasco / Cerro de Pasco · estimado Shalom' };
+    return { costo: 4, zona: 'pasco', etiqueta: 'Pasco local · S/ 4' };
   }
-  return { costo: 18, zona: 'lima', etiqueta: 'Lima Metropolitana / Callao · estimado Shalom' };
+  return { costo: 10, zona: 'lima', etiqueta: 'Lima – Callao · S/ 10' };
 }
 
 export const DIRECCION_TIENDA =

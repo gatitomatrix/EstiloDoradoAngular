@@ -25,17 +25,20 @@ export class ConfirmarEntregaComponent {
   get discount() { return this.checkout.value.discount; }
   get total() { return this.subtotal + this.fee - this.discount; }
 
-  get address() { return this.checkout.value.address?.full || '–'; }
+  get address() {
+    if (this.selected === 'STORE_PICKUP') return TEXTO_RECOJO;
+    return this.checkout.savedExpress?.full || this.checkout.value.address?.full || '–';
+  }
   get mode() { return this.checkout.value.mode; }
   readonly direccionTienda = DIRECCION_TIENDA;
 
   get feeLabel(): string {
-    const a = this.checkout.value.address;
+    const a = this.checkout.savedExpress || this.checkout.value.address;
     return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).etiqueta;
   }
 
   get expressFee(): number {
-    const a = this.checkout.value.address;
+    const a = this.checkout.savedExpress || this.checkout.value.address;
     return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).costo;
   }
 
@@ -67,9 +70,18 @@ export class ConfirmarEntregaComponent {
     this.checkout.setCosts(0, 0);
   }
   onSelectExpress() {
+    const saved = this.checkout.savedExpress;
+    if (!saved) {
+      this.router.navigateByUrl('/entrega');
+      return;
+    }
     this.selected = 'EXPRESS';
+    this.checkout.setAddress(saved);
     this.checkout.setMode('EXPRESS');
-    this.checkout.setCosts(this.expressFee, 0);
+    this.checkout.setCosts(
+      estimarEnvio(saved.departamento, saved.provincia, saved.distrito).costo,
+      0,
+    );
   }
   irAPagar() {
   this.router.navigateByUrl('/pago');

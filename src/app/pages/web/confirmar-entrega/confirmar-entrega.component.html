@@ -45,7 +45,7 @@
           <div class="mb-2 small">Vendido por <em style="color:#9C7B2F">Estilo Dorado</em></div>
 
           <!-- Retiro en tienda -->
-          <label class="ed-radio">
+          <label class="ed-radio" [class.ed-radio--on]="selected==='STORE_PICKUP'">
             <input type="radio" name="ship" [checked]="selected==='STORE_PICKUP'" (change)="onSelectPickup()">
             <div class="ed-radio__body">
               <div class="fw-semibold">Retiro en tienda</div>
@@ -53,17 +53,19 @@
               <div class="small mt-1" style="color:#8a6d1d;">📍 {{ direccionTienda }}</div>
               <div class="ed-price">S/ 0</div>
             </div>
+            <div class="ed-check" *ngIf="selected==='STORE_PICKUP'" aria-hidden="true">✓</div>
           </label>
 
           <!-- Envío Express -->
-          <label class="ed-radio">
+          <label class="ed-radio" [class.ed-radio--on]="selected==='EXPRESS'">
             <input type="radio" name="ship" [checked]="selected==='EXPRESS'" (change)="onSelectExpress()">
             <div class="ed-radio__body">
               <div class="fw-semibold">Envío a dirección</div>
-              <div class="text-muted small">Estimado tipo Shalom según departamento/provincia (Huancayo, Junín, Lima o resto del Perú).</div>
+              <div class="text-muted small">Solo Lima – Callao, Huancayo y Pasco.</div>
               <div class="ed-price">S/ {{ expressFee | number:'1.2-2' }}</div>
               <div class="small text-muted">{{ feeLabel }}</div>
             </div>
+            <div class="ed-check" *ngIf="selected==='EXPRESS'" aria-hidden="true">✓</div>
           </label>
         </div>
       </div>

@@ -35,6 +35,15 @@ export class CheckoutService {
     this.persist();
   }
 
+  /** Dirección de envío ya confirmada (no el recojo en tienda). */
+  get savedExpress(): Address | null {
+    const ok = (a?: Partial<Address> | null): a is Address =>
+      !!a && !!a.via && a.via !== 'Retiro en tienda' && !!a.departamento && !!a.provincia;
+    if (ok(this.state.draft)) return this.state.draft as Address;
+    if (ok(this.state.address)) return this.state.address!;
+    return null;
+  }
+
   setAddress(addr: Address) {
     this.state.address = { ...addr, full: addr.full || `${addr.via} ${addr.numero}, ${addr.distrito}, ${addr.provincia}, ${addr.departamento}` };
     if (addr.via !== 'Retiro en tienda') {

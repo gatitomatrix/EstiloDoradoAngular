@@ -3,7 +3,9 @@
 .ed-step--mute{opacity:.35}
 .ed-line{flex:1;height:2px;background:#e5e7eb}
 
-.ed-radio{display:flex;gap:10px;border:1px solid #eee;border-radius:12px;padding:12px 14px;margin-bottom:12px;cursor:pointer}
+.ed-radio{display:flex;gap:10px;align-items:center;border:1px solid #eee;border-radius:12px;padding:12px 14px;margin-bottom:12px;cursor:pointer}
 .ed-radio input{margin-top:4px}
+.ed-radio--on{border-color:#d4af37;background:#fbf6e8;box-shadow:0 0 0 2px rgba(212,175,55,.28)}
 .ed-radio__body{flex:1;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
 .ed-price{grid-column:2/3;font-weight:600}
+.ed-check{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#d4af37;color:#2d2418;display:flex;align-items:center;justify-content:center;font-weight:800}
