@@ -66,11 +66,16 @@ export class ResumenPedidoComponent implements AfterViewInit {
         confirmButtonColor: '#d4af37' });
       return;
     }
-    fetch(url, { method: 'HEAD', mode: 'cors' }).then(res => {
-      if (res.ok) window.open(url, '_blank');
-      else Swal.fire({ icon: 'warning', title: `${tipo} no encontrado`,
-        text: `El archivo ${tipo} aún no está disponible o fue eliminado.`,
-        confirmButtonColor: '#d4af37' });
+    fetch(url, { method: 'GET', mode: 'cors' }).then(async res => {
+      if (!res.ok) {
+        Swal.fire({ icon: 'warning', title: `${tipo} no encontrado`,
+          text: `El archivo ${tipo} aún no está disponible o fue eliminado.`,
+          confirmButtonColor: '#d4af37' });
+        return;
+      }
+      const blob = await res.blob();
+      const u = URL.createObjectURL(blob);
+      window.open(u, '_blank');
     }).catch(() => {
       Swal.fire({ icon: 'error', title: 'Error de conexión',
         text: `No se pudo conectar para descargar el archivo ${tipo}.`,
