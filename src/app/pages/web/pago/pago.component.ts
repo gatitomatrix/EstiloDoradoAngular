@@ -1,6 +1,6 @@
 import { Component, inject, AfterViewInit, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -24,7 +24,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'ed-web-pago',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BarraSuperiorComponent, FranjaMarcaComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BarraSuperiorComponent, FranjaMarcaComponent],
   templateUrl: './pago.component.html',
   styleUrls: ['./pago.component.css']
 })
@@ -40,6 +40,16 @@ export class PagoComponent implements AfterViewInit {
   orderSrv = inject(OrderService);
   private zone = inject(NgZone);
   procesandoPago = false;
+  otroCorreo = false;
+  correoPago = '';
+
+  get correoCuenta(): string {
+    return (this.auth.user?.email || '').trim();
+  }
+
+  get correoCulqi(): string {
+    return this.otroCorreo ? this.correoPago.trim() : this.correoCuenta;
+  }
 
   // Modal selector de comprobante
   @ViewChild('docModal') docModalRef!: ElementRef<HTMLDivElement>;
@@ -107,6 +117,7 @@ export class PagoComponent implements AfterViewInit {
       return;
     }
     this.pay.setHasMethod(true);
+    this.correoPago = this.correoCuenta;
     // limpiar selección de doc en esta pantalla
     this.pay.clearInvoice();
     this.pay.clearBoleta();
@@ -179,19 +190,33 @@ export class PagoComponent implements AfterViewInit {
     }
   }
 
+  onToggleOtroCorreo() {
+    if (this.otroCorreo && !this.correoPago) {
+      this.correoPago = this.correoCuenta;
+    }
+  }
+
   pagarConCulqi() {
     if (typeof (window as any).Culqi === 'undefined') {
       alert('No se cargó Culqi. Revisa que el script esté en index.html');
       return;
     }
-    const userEmail = this.auth.user?.email || 'cliente@correo.com';
+    const email = this.correoCulqi;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Indica un correo válido para el pago.');
+      return;
+    }
+    Culqi.publicKey = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
     Culqi.settings({
       title: 'Estilo Dorado',
       currency: 'PEN',
       description: 'Compra en Estilo Dorado',
       amount: Math.round(this.total * 100),
-      email: userEmail
+      email,
     });
+    try {
+      Culqi.options({ lang: 'es' });
+    } catch {}
     Culqi.open();
   }
 
