@@ -185,7 +185,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
     this.refrescarKPIs();
     this.cargarStock();
-    this.reportes.financiero(30).subscribe({
+    this.reportes.financiero(this.rango30()).subscribe({
       next: (fin) => {
         this.finPendiente = fin;
         if (this.viewReady) this.pintarGraficos(fin);
@@ -225,6 +225,15 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   hoyISO() {
     return new Date().toISOString().split('T')[0];
+  }
+
+  private rango30() {
+    const p = (n: number) => String(n).padStart(2, '0');
+    const ymd = (d: Date) => `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    const hasta = new Date();
+    const desde = new Date();
+    desde.setDate(desde.getDate() - 29);
+    return { desde: ymd(desde), hasta: ymd(hasta) };
   }
 
   ngOnDestroy() {
