@@ -173,11 +173,14 @@ export class PagoComponent implements AfterViewInit {
   }
 
   private handleCulqiResult() {
-    const C = (window as any).Culqi;
+    this.handleCulqiFrom((window as any).Culqi);
+  }
+
+  private handleCulqiFrom(C: any) {
     try { C?.close?.(); } catch {}
     if (C?.token?.id) {
       this.procesandoPago = true;
-      this.postCulqiToken(C.token.id, C.token.email || (this.auth.user?.email ?? 'cliente@correo.com'));
+      this.postCulqiToken(C.token.id, C.token.email || this.correoCulqi || (this.auth.user?.email ?? 'cliente@correo.com'));
       return;
     }
     if (C?.order?.id) {
@@ -197,26 +200,56 @@ export class PagoComponent implements AfterViewInit {
   }
 
   pagarConCulqi() {
-    if (typeof (window as any).Culqi === 'undefined') {
-      alert('No se cargó Culqi. Revisa que el script esté en index.html');
-      return;
-    }
     const email = this.correoCulqi;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       alert('Indica un correo válido para el pago.');
       return;
     }
-    Culqi.publicKey = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
+    const pk = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
+    const amount = Math.round(this.total * 100);
+    const Ctor = (window as any).CulqiCheckout;
+
+    if (typeof Ctor === 'function') {
+      const checkout = new Ctor(pk, {
+        settings: {
+          title: 'Estilo Dorado',
+          currency: 'PEN',
+          amount,
+        },
+        client: { email },
+        options: {
+          lang: 'es',
+          installments: false,
+          modal: true,
+          paymentMethods: { tarjeta: true, yape: true },
+        },
+        appearance: {
+          hiddenEmail: true,
+          theme: 'default',
+          defaultStyle: {
+            bannerColor: '#2D2418',
+            buttonBackground: '#D4AF37',
+            buttonTextColor: '#2D2418',
+          },
+        },
+      });
+      checkout.culqi = () => this.zone.run(() => this.handleCulqiFrom(checkout));
+      checkout.open();
+      return;
+    }
+
+    if (typeof (window as any).Culqi === 'undefined') {
+      alert('No se cargó Culqi. Revisa que el script esté en index.html');
+      return;
+    }
+    Culqi.publicKey = pk;
     Culqi.settings({
       title: 'Estilo Dorado',
       currency: 'PEN',
       description: 'Compra en Estilo Dorado',
-      amount: Math.round(this.total * 100),
+      amount,
       email,
     });
-    try {
-      Culqi.options({ lang: 'es' });
-    } catch {}
     Culqi.open();
   }
 
