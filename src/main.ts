@@ -23,7 +23,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
   const path = (window.location?.pathname || '').toLowerCase();
 
-  if (path.startsWith('/admin')) {
+  if (path.startsWith('/panel-ed-k7m2')) {
     const ADMIN_KEYS = ['ed_admin_token', 'ed_admin_roles', 'ed_admin_user'];
     ADMIN_KEYS.forEach(k => { try { sessionStorage.removeItem(k); } catch {} });
   } else {

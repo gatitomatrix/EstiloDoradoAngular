@@ -64,7 +64,7 @@ type Item = {
               <span>👎 {{ p.dislikes }}</span>
               <span>🛒 {{ p.carritos }}</span>
             </div>
-            <a class="btn btn-sm btn-dark mt-2" [routerLink]="['/admin/productos', p.id]">Ver en catálogo</a>
+            <a class="btn btn-sm btn-dark mt-2" [routerLink]="['/panel-ed-k7m2/productos', p.id]">Ver en catálogo</a>
           </div>
         </article>
       </div>

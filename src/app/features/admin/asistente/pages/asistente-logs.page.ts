@@ -101,7 +101,7 @@ type Ficha = {
       <p class="text-muted">
         Las quejas y el WhatsApp van aquí. Clic en el nombre del cliente para ver sus compras pagadas.
         El ranking de productos consultados está en
-        <a routerLink="/admin/interes-dori">Interés Dori</a>.
+        <a routerLink="/panel-ed-k7m2/interes-dori">Interés Dori</a>.
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="card p-3"><strong>{{ stats.total }}</strong><div class="small">Consultas</div></div>
@@ -175,7 +175,7 @@ type Ficha = {
           </div>
           <p class="text-muted small" *ngIf="!fichaLoad && !ficha.pedidos.length">Aún no tiene pedidos pagados.</p>
           <div class="d-flex gap-2 mt-3">
-            <a class="btn btn-sm btn-dark" [routerLink]="['/admin/clientes', ficha.id_cliente]" (click)="close()">Ficha completa</a>
+            <a class="btn btn-sm btn-dark" [routerLink]="['/panel-ed-k7m2/clientes', ficha.id_cliente]" (click)="close()">Ficha completa</a>
             <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>
           </div>
         </div>
@@ -217,7 +217,7 @@ type Ficha = {
             <a
               *ngIf="open.id"
               class="btn btn-sm btn-dark"
-              [routerLink]="['/admin/productos', open.id]"
+              [routerLink]="['/panel-ed-k7m2/productos', open.id]"
               (click)="close()"
             >Ver en catálogo</a>
             <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>

@@ -178,13 +178,13 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   private lastToastEstado = 'pendiente';
 
   goPendientes() {
-    this.router.navigate(['/admin/pedidos'], {
+    this.router.navigate(['/panel-ed-k7m2/pedidos'], {
       queryParams: { estado: this.lastToastEstado || 'pendiente' },
     });
   }
 
   goDori() {
-    this.router.navigate(['/admin/consultas-dori']);
+    this.router.navigate(['/panel-ed-k7m2/consultas-dori']);
   }
 
   toastCta(message: { summary?: string; key?: string }): string {
@@ -259,7 +259,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
 
   private rebuildMenu(pending: number) {
     this.menu = [
-      { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/admin/dashboard'] },
+      { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/panel-ed-k7m2/dashboard'] },
       {
         label: 'Ventas',
         icon: 'pi pi-shopping-cart',
@@ -267,27 +267,27 @@ export class AdminShellComponent implements OnInit, OnDestroy {
           {
             label: 'Pedidos',
             icon: 'pi pi-list',
-            routerLink: ['/admin/pedidos'],
+            routerLink: ['/panel-ed-k7m2/pedidos'],
             badge: pending > 0 ? String(pending) : undefined,
             badgeStyleClass: 'p-badge-warn',
           },
-          { label: 'Inventario', icon: 'pi pi-box', routerLink: ['/admin/inventario'] },
+          { label: 'Inventario', icon: 'pi pi-box', routerLink: ['/panel-ed-k7m2/inventario'] },
         ],
       },
       {
         label: 'Catálogo',
         icon: 'pi pi-database',
         items: [
-          { label: 'Productos', icon: 'pi pi-tags', routerLink: ['/admin/productos'] },
-          { label: 'Promociones', icon: 'pi pi-percentage', routerLink: ['/admin/promociones'] },
-          { label: 'Categorías', icon: 'pi pi-sitemap', routerLink: ['/admin/categorias'] },
-          { label: 'Proveedores', icon: 'pi pi-truck', routerLink: ['/admin/proveedores'] },
+          { label: 'Productos', icon: 'pi pi-tags', routerLink: ['/panel-ed-k7m2/productos'] },
+          { label: 'Promociones', icon: 'pi pi-percentage', routerLink: ['/panel-ed-k7m2/promociones'] },
+          { label: 'Categorías', icon: 'pi pi-sitemap', routerLink: ['/panel-ed-k7m2/categorias'] },
+          { label: 'Proveedores', icon: 'pi pi-truck', routerLink: ['/panel-ed-k7m2/proveedores'] },
         ],
       },
-      { label: 'Clientes', icon: 'pi pi-users', routerLink: ['/admin/clientes'] },
-      { label: 'Consultas Dori', icon: 'pi pi-comments', routerLink: ['/admin/consultas-dori'] },
-      { label: 'Interés Dori', icon: 'pi pi-heart', routerLink: ['/admin/interes-dori'] },
-      { label: 'Reportes', icon: 'pi pi-chart-bar', routerLink: ['/admin/reportes'] },
+      { label: 'Clientes', icon: 'pi pi-users', routerLink: ['/panel-ed-k7m2/clientes'] },
+      { label: 'Consultas Dori', icon: 'pi pi-comments', routerLink: ['/panel-ed-k7m2/consultas-dori'] },
+      { label: 'Interés Dori', icon: 'pi pi-heart', routerLink: ['/panel-ed-k7m2/interes-dori'] },
+      { label: 'Reportes', icon: 'pi pi-chart-bar', routerLink: ['/panel-ed-k7m2/reportes'] },
     ];
   }
 
@@ -314,9 +314,9 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   logout() {
     this.realtime.stop();
     this.auth.logout().subscribe({
-      next: () => this.router.navigateByUrl('/admin/login'),
-      error: () => this.router.navigateByUrl('/admin/login'),
-      complete: () => this.router.navigateByUrl('/admin/login'),
+      next: () => this.router.navigateByUrl('/panel-ed-k7m2/login'),
+      error: () => this.router.navigateByUrl('/panel-ed-k7m2/login'),
+      complete: () => this.router.navigateByUrl('/panel-ed-k7m2/login'),
     });
   }
 }

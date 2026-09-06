@@ -6,7 +6,7 @@ const KEY = 'ed_return_url';
 @Injectable({ providedIn: 'root' })
 export class ReturnUrlService {
   set(url: string | null | undefined) {
-    if (!url || url === '/' || url.startsWith('/admin') || url.startsWith('/login')) {
+    if (!url || url === '/' || url.startsWith('/panel-ed-k7m2') || url.startsWith('/admin') || url.startsWith('/login')) {
       sessionStorage.removeItem(KEY);
       return;
     }
@@ -21,7 +21,7 @@ export class ReturnUrlService {
   consume(fallback = '/'): string {
     const u = sessionStorage.getItem(KEY);
     sessionStorage.removeItem(KEY);
-    if (!u || u.startsWith('/admin') || u === '/login' || u === '/registro') {
+    if (!u || u.startsWith('/panel-ed-k7m2') || u.startsWith('/admin') || u === '/login' || u === '/registro') {
       return fallback;
     }
     return u;

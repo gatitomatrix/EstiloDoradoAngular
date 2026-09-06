@@ -91,7 +91,7 @@ export class AdminLoginPage {
       next: () => {
         this.loading.set(false);
         this.ui.ok('Bienvenido');
-        this.router.navigateByUrl('/admin');
+        this.router.navigateByUrl('/panel-ed-k7m2');
       },
       error: (err) => {
         this.loading.set(false);

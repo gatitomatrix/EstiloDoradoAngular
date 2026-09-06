@@ -8,5 +8,5 @@ export const adminAuthGuard: CanMatchFn = (): boolean | UrlTree => {
   const router = inject(Router);
   return auth.isAuthenticated()
     ? true
-    : router.createUrlTree(['/admin/login']);   // 👈 redirección “oficial”
+    : router.parseUrl('/panel-ed-k7m2/login');
 };

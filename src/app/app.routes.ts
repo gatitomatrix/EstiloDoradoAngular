@@ -1,5 +1,7 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes, type CanMatchFn } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { ADMIN_PANEL_PATH } from './core/admin-panel.path';
 import { HomeComponent } from './pages/web/home/home.component';
 import { DetalleComponent } from './pages/web/detalle/detalle.component';
 import { CarritoComponent } from './pages/web/carrito/carrito.component';
@@ -8,6 +10,8 @@ import { RecuperarComponent } from './pages/web/recuperar/recuperar.component';
 import { MiCuentaComponent } from './pages/web/mi-cuenta/mi-cuenta.component';
 import { RestablecerComponent } from './pages/web/restablecer/restablecer.component';
 import { PrivacidadComponent } from './pages/web/privacidad/privacidad.component';
+
+const bounceOldAdmin: CanMatchFn = () => inject(Router).parseUrl('/');
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -56,9 +60,14 @@ export const routes: Routes = [
   },
 
   {
-    path: 'admin',
+    path: ADMIN_PANEL_PATH,
     loadChildren: () =>
       import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
+  {
+    path: 'admin',
+    canMatch: [bounceOldAdmin],
+    children: [{ path: '**', component: HomeComponent }],
   },
   { path: '**', redirectTo: '' },
 ];

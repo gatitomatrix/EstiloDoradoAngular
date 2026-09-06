@@ -18,8 +18,8 @@ import { AdminProductosService, Producto } from '../services/admin-productos.ser
   template: `
     <div class="p-3 ed-detail">
       <div class="mb-3 d-flex gap-2 flex-wrap">
-        <a routerLink="/admin/consultas-dori" class="btn btn-sm btn-outline-secondary">← Consultas Dori</a>
-        <a routerLink="/admin/productos" class="btn btn-sm btn-outline-secondary">Catálogo</a>
+        <a routerLink="/panel-ed-k7m2/consultas-dori" class="btn btn-sm btn-outline-secondary">← Consultas Dori</a>
+        <a routerLink="/panel-ed-k7m2/productos" class="btn btn-sm btn-outline-secondary">Catálogo</a>
       </div>
 
       <p *ngIf="err()" class="text-danger">{{ err() }}</p>
@@ -65,6 +65,6 @@ export class ProductoDetailPage implements OnInit {
   }
 
   editar(id: number) {
-    this.router.navigate(['/admin/productos'], { queryParams: { editar: id } });
+    this.router.navigate(['/panel-ed-k7m2/productos'], { queryParams: { editar: id } });
   }
 }

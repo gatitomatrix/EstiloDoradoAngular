@@ -95,7 +95,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private openFromEvent = () => this.toggle(true);
 
   private syncRoute(url: string) {
-    this.visible = !url.startsWith('/admin');
+    this.visible = !url.startsWith('/panel-ed-k7m2');
     if (!this.visible) this.open = false;
   }
 

@@ -216,11 +216,11 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
       queryParams.fecha_desde = this.hoyISO();
       queryParams.fecha_hasta = this.hoyISO();
     }
-    this.router.navigate(['/admin/pedidos'], { queryParams });
+    this.router.navigate(['/panel-ed-k7m2/pedidos'], { queryParams });
   }
 
   goProductosStock() {
-    this.router.navigate(['/admin/productos'], { queryParams: { stock_bajo: 1 } });
+    this.router.navigate(['/panel-ed-k7m2/productos'], { queryParams: { stock_bajo: 1 } });
   }
 
   hoyISO() {
