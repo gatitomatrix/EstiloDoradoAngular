@@ -234,7 +234,7 @@ export class InventarioListPage implements OnInit {
       id_producto: Number(this.mov.id_producto),
       cantidad: this.modo === 'ajuste' && this.mov.sentido === '-' ? -qty : qty,
       observacion: this.mov.observacion?.trim() || (this.modo === 'entrada' ? 'Ingreso de mercadería' : 'Ajuste'),
-      referencia_tipo: this.modo === 'entrada' ? 'compra' : 'ajuste',
+      referencia_tipo: (this.modo === 'entrada' ? 'compra' : 'ajuste') as 'compra' | 'ajuste',
       fecha: this.mov.fecha || undefined,
     };
     const req$ = this.modo === 'entrada' ? this.api.entrada(payload) : this.api.ajuste(payload);
