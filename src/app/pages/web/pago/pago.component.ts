@@ -321,7 +321,10 @@ export class PagoComponent implements AfterViewInit {
           state: { comprobante: res.comprobante, ventaOk: true }
         });
       },
-      error: () => alert('Pago OK, pero hubo un problema creando el pedido/boleta.')
+      error: (err) => {
+        const msg = err?.error?.message || err?.message || 'Error al registrar el pedido.';
+        alert('Pago OK, pero hubo un problema creando el pedido/boleta: ' + msg);
+      }
     });
   }
 
