@@ -42,6 +42,8 @@ export class PagoComponent implements AfterViewInit {
   procesandoPago = false;
   otroCorreo = false;
   correoPago = '';
+  rucEstado = '';
+  private rucTimer: ReturnType<typeof setTimeout> | null = null;
 
   get correoCuenta(): string {
     return (this.auth.user?.email || '').trim();
@@ -451,6 +453,43 @@ export class PagoComponent implements AfterViewInit {
     const el = e.target as HTMLInputElement;
     const v = el.value.replace(/\D/g, '').slice(0, 11);
     this.facturaForm.patchValue({ ruc: v }, { emitEvent: false }); el.value = v;
+    if (this.rucTimer) clearTimeout(this.rucTimer);
+    if (v.length === 11) {
+      this.rucTimer = setTimeout(() => this.buscarRuc(v), 300);
+    } else {
+      this.rucEstado = v.length ? 'Completa los 11 dígitos para autocompletar.' : '';
+    }
+  }
+
+  private matchDep(name?: string | null): string {
+    if (!name) return '';
+    const n = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    return this.deps.find(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === n) || '';
+  }
+
+  private buscarRuc(ruc: string) {
+    this.rucEstado = 'Buscando RUC…';
+    this.http.get<{ ok: boolean; data?: any }>(`${environment.apiBaseUrl}/consulta-ruc/${ruc}`).subscribe({
+      next: (r) => {
+        const d = r?.data;
+        if (!d) {
+          this.rucEstado = 'No se encontró. Completa a mano.';
+          return;
+        }
+        const dep = this.matchDep(d.departamento);
+        this.facturaForm.patchValue({
+          razonSocial: d.razon_social || '',
+          direccion: d.direccion || '',
+          ...(dep ? { departamento: dep } : {}),
+        });
+        this.rucEstado = d.estado && String(d.estado).toUpperCase() !== 'ACTIVO'
+          ? `Encontrado (${d.estado}). Revisa y elige provincia/distrito.`
+          : 'Datos completados. Elige provincia y distrito.';
+      },
+      error: () => {
+        this.rucEstado = 'No se encontró. Completa a mano.';
+      }
+    });
   }
   onDniInput(e: Event) {
     const el = e.target as HTMLInputElement;

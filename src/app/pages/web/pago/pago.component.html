@@ -204,6 +204,7 @@
       <div class="mb-2"><label class="form-label">RUC</label>
         <input class="form-control" maxlength="11" formControlName="ruc" (input)="onRucInput($event)"
           inputmode="numeric" placeholder="11 dígitos">
+        <div class="form-text" *ngIf="rucEstado">{{ rucEstado }}</div>
         <div class="invalid-feedback d-block" *ngIf="facturaForm.controls['ruc'].invalid && facturaForm.touched">Ingresa RUC</div>
       </div>
       <div class="mb-2"><label class="form-label">Razón Social</label>
