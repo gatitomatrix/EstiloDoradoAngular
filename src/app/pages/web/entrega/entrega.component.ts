@@ -120,9 +120,11 @@ export class EntregaComponent {
     this.addrForm.get('numero')!.valueChanges.subscribe(() => this.persistDraft());
 
     const st = history.state as any;
-    if (st?.openAddress) this.openAddressModal(true);
-    else {
-      const saved = this.checkout.value.address || this.checkout.value.draft;
+    if (st?.openAddress) {
+      this.openAddressModal(true);
+    } else {
+      this.openPickup();
+      const saved = this.checkout.value.draft;
       if (saved?.lat && saved?.lng) {
         this.lastCoords = { lat: Number(saved.lat), lng: Number(saved.lng) };
       }

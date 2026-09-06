@@ -357,6 +357,7 @@ export class PagoComponent implements AfterViewInit {
     this.orderSrv.confirmar(body).subscribe({
       next: (res) => {
         this.cart.clear();
+        this.checkout.reset();
         this.pendingCharge = null;
         // cierra modal Culqi si siguiera abierto
         try { if ((window as any).Culqi?.close) (window as any).Culqi.close(); } catch {}
@@ -390,6 +391,7 @@ export class PagoComponent implements AfterViewInit {
     this.orderSrv.confirmar(body).subscribe({
       next: (res) => {
         this.cart.clear();
+        this.checkout.reset();
         this.router.navigate(['/resumen', res.id_pedido], { state: { ventaOk: true } });
       },
       error: (err) => {
