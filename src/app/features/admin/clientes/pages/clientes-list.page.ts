@@ -10,12 +10,7 @@ import { AdminClientesService } from '../services/admin-clientes.service';
   imports: [CommonModule, FormsModule],
   template: `
   <div class="p-3">
-    <h2 class="mb-3">Clientes (ADMIN)</h2>
-
-    <!-- Botón nuevo -->
-    <div class="mb-3 text-end">
-      <button class="btn btn-primary" (click)="openCrear()">Nuevo Cliente</button>
-    </div>
+    <h2 class="mb-3">Clientes</h2>
 
     <!-- Tabla -->
     <div class="table-responsive">
