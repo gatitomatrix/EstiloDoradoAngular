@@ -16,13 +16,13 @@ export class AdminInventarioService {
   }
 
   // Ahora aceptan fecha e id_empleado opcionales
-  entrada(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
+  entrada(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
     return this.http.post(`${this.base}/inventario/entrada`, payload);
   }
-  salida(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
+  salida(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
     return this.http.post(`${this.base}/inventario/salida`, payload);
   }
-  ajuste(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
+  ajuste(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
     return this.http.post(`${this.base}/inventario/ajuste`, payload);
   }
 }

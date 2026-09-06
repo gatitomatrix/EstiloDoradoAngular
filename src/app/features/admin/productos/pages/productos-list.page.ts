@@ -226,8 +226,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-4">
-                    <label class="form-label">Stock</label>
-                    <input pInputText type="number" min="0" step="1" [(ngModel)]="form.stock" name="c_stock" required class="form-control"/>
+                    <label class="form-label">Stock inicial</label>
+                    <input pInputText type="number" min="0" step="1" [(ngModel)]="form.stock" name="c_stock" class="form-control"/>
+                    <small class="text-muted">Se registra como ingreso en Inventario. Luego el stock solo se mueve ahí.</small>
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Categoría</label>
@@ -348,8 +349,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
                 <div class="row mt-2 g-3">
                   <div class="col-md-4">
-                    <label class="form-label">Stock</label>
-                    <input pInputText type="number" min="0" step="1" [(ngModel)]="form.stock" name="e_stock" required class="form-control"/>
+                    <label class="form-label">Stock actual</label>
+                    <input pInputText type="number" [(ngModel)]="form.stock" name="e_stock" class="form-control" readonly/>
+                    <small class="text-muted">Solo lectura. Ingresos y ajustes se hacen en Inventario.</small>
                   </div>
                   <div class="col-md-4">
                     <label class="form-label">Categoría</label>

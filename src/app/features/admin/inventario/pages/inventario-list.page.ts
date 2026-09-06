@@ -12,7 +12,18 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
   imports: [CommonModule, FormsModule],
   template: `
   <div class="p-3">
-    <h2 class="mb-3">Inventario</h2>
+    <h2 class="mb-2">Inventario</h2>
+    <p class="text-muted small mb-3">
+      El stock de productos solo cambia aquí. Las ventas <strong>reservan</strong> unidades;
+      la <strong>salida</strong> se confirma cuando el pedido se marca como entregado.
+    </p>
+
+    <div class="alert alert-warning py-2" *ngIf="criticos().length">
+      <strong>Reposición:</strong>
+      <span *ngFor="let c of criticos(); let last = last">
+        {{ c.nombre }} ({{ c.stock }})<span *ngIf="!last"> · </span>
+      </span>
+    </div>
 
     <form class="row g-2 mb-3 align-items-end" (ngSubmit)="buscar()">
       <div class="col-sm-2">
@@ -20,14 +31,18 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
         <select class="form-select" [(ngModel)]="q.tipo" name="tipo">
           <option [ngValue]="undefined">Todos</option>
           <option value="entrada">Entrada</option>
+          <option value="reserva">Reserva</option>
           <option value="salida">Salida</option>
+          <option value="liberacion">Liberación</option>
+          <option value="devolucion">Devolución</option>
+          <option value="ajuste">Ajuste</option>
         </select>
       </div>
-      <div class="col-sm-3">
+      <div class="col-sm-2">
         <label class="form-label small">Desde</label>
         <input type="date" class="form-control" [(ngModel)]="q.fecha_desde" name="desde">
       </div>
-      <div class="col-sm-3">
+      <div class="col-sm-2">
         <label class="form-label small">Hasta</label>
         <input type="date" class="form-control" [(ngModel)]="q.fecha_hasta" name="hasta">
       </div>
@@ -35,15 +50,14 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
         <label class="form-label small">Resultados</label>
         <select class="form-select" [(ngModel)]="q.per_page" name="per_page">
           <option [ngValue]="-1">Todos</option>
-          <option [ngValue]="10">10</option>
           <option [ngValue]="25">25</option>
           <option [ngValue]="50">50</option>
-          <option [ngValue]="100">100</option>
         </select>
       </div>
-      <div class="col-sm-2 d-flex gap-2">
-        <button class="btn btn-dark flex-fill">Filtrar</button>
-        <button type="button" class="btn btn-outline-dark" (click)="openModal()">Ajustar</button>
+      <div class="col-sm-4 d-flex gap-2">
+        <button class="btn btn-dark">Filtrar</button>
+        <button type="button" class="btn btn-warning" (click)="openModal('entrada')">Registrar ingreso</button>
+        <button type="button" class="btn btn-outline-dark" (click)="openModal('ajuste')">Ajuste</button>
       </div>
     </form>
 
@@ -54,110 +68,83 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
             <th>ID</th>
             <th>Fecha</th>
             <th>Tipo</th>
-            <th>ID Prod.</th>
             <th>Producto</th>
             <th>Cantidad</th>
-            <th>Ref</th>
+            <th>Motivo / ref.</th>
             <th>Empleado</th>
-            <th>Roles</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let m of rows()">
             <td>{{ m.id_movimiento }}</td>
             <td>{{ m.fecha | date:'short' }}</td>
-            <td class="text-capitalize">{{ m.tipo_movimiento }}</td>
-            <td>{{ m.id_producto }}</td>
-            <td>{{ m.producto_nombre }}</td>
+            <td>{{ etiquetaTipo(m.tipo_movimiento) }}</td>
+            <td>{{ m.producto_nombre }} <span class="text-muted">#{{ m.id_producto }}</span></td>
             <td>{{ m.cantidad }}</td>
             <td>
-              {{ m.referencia_tipo || '-' }}
-              <ng-container *ngIf="m.referencia_id"> #{{ m.referencia_id }}</ng-container>
+              {{ m.observacion || '—' }}
+              <div class="small text-muted" *ngIf="m.referencia_tipo">
+                {{ m.referencia_tipo }}<ng-container *ngIf="m.referencia_id"> #{{ m.referencia_id }}</ng-container>
+              </div>
             </td>
-            <td>{{ m.empleado_nombre || '-' }}</td>
-            <td>{{ (m.empleado_roles || '').split(',').join(', ') }}</td>
+            <td>{{ m.empleado_nombre || '—' }}</td>
+          </tr>
+          <tr *ngIf="!rows().length">
+            <td colspan="7" class="text-muted">Sin movimientos en este filtro. Prueba “Todos” y deja las fechas vacías.</td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <div class="small text-muted">Realtime stock ticks: {{tick()}}</div>
   </div>
 
-  <!-- Modal simple (Bootstrap-like) -->
   <div class="modal-backdrop fade show" *ngIf="modalOpen"></div>
   <div class="modal d-block" tabindex="-1" *ngIf="modalOpen">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <form (ngSubmit)="submitMovimiento()">
           <div class="modal-header">
-            <h5 class="modal-title">Actualizar inventario</h5>
+            <h5 class="modal-title">{{ modo === 'ajuste' ? 'Ajuste de inventario' : 'Registrar ingreso' }}</h5>
             <button type="button" class="btn-close" (click)="closeModal()"></button>
           </div>
           <div class="modal-body">
+            <p class="small text-muted" *ngIf="modo === 'entrada'">
+              Compra o llegada a tienda. Sube el stock y queda en el kardex como entrada.
+            </p>
+            <p class="small text-muted" *ngIf="modo === 'ajuste'">
+              Merma, rotura o conteo físico. El motivo es obligatorio. Las salidas de venta se generan al marcar el pedido como entregado.
+            </p>
             <div class="row g-3">
-              <div class="col-md-6">
+              <div class="col-md-8">
                 <label class="form-label">Producto</label>
-                <select class="form-select" [(ngModel)]="mov.id_producto" name="id_producto" required (change)="syncProductoId()">
+                <select class="form-select" [(ngModel)]="mov.id_producto" name="id_producto" required>
                   <option [ngValue]="undefined">Seleccione...</option>
-                  <option *ngFor="let p of productos()" [ngValue]="p.id_producto">{{ p.nombre }}</option>
+                  <option *ngFor="let p of productos()" [ngValue]="p.id_producto">{{ p.nombre }} (stock {{ p.stock }})</option>
                 </select>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">ID</label>
-                <input class="form-control" [value]="mov.id_producto || ''" readonly>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Tipo</label>
-                <select class="form-select" [(ngModel)]="mov.tipo" name="tipo" required>
-                  <option [ngValue]="undefined">Seleccione...</option>
-                  <option value="entrada">Entrada</option>
-                  <option value="salida">Salida</option>
+                <label class="form-label">Cantidad</label>
+                <input type="number" class="form-control" [(ngModel)]="mov.cantidad" name="cantidad" required min="1">
+              </div>
+              <div class="col-md-4" *ngIf="modo === 'ajuste'">
+                <label class="form-label">Sentido</label>
+                <select class="form-select" [(ngModel)]="mov.sentido" name="sentido">
+                  <option value="-">Merma / baja</option>
+                  <option value="+">Sobra / alta</option>
                 </select>
               </div>
-
-              <div class="col-md-3">
-                <label class="form-label">Cantidad</label>
-                <input type="number" class="form-control" [(ngModel)]="mov.cantidad" name="cantidad" required>
-              </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <label class="form-label">Fecha</label>
                 <input type="date" class="form-control" [(ngModel)]="mov.fecha" name="fecha">
               </div>
-              <div class="col-md-6">
-                <label class="form-label">Observación</label>
-                <input type="text" class="form-control" [(ngModel)]="mov.observacion" name="observacion" placeholder="Opcional">
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Referencia tipo</label>
-                <select class="form-select" [(ngModel)]="mov.referencia_tipo" name="referencia_tipo">
-                  <option [ngValue]="undefined">-</option>
-                  <option value="pedido">pedido</option>
-                  <option value="ajuste">ajuste</option>
-                  <option value="otro">otro</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Referencia ID</label>
-                <input type="number" class="form-control" [(ngModel)]="mov.referencia_id" name="referencia_id" placeholder="N° pedido u otro">
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Rol</label>
-                <select class="form-select" [(ngModel)]="mov.rol" name="rol" (change)="syncEmpleadoId()">
-                  <option [ngValue]="undefined">Seleccione...</option>
-                  <option *ngFor="let r of roles" [ngValue]="r.value">{{ r.label }}</option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">ID empleado</label>
-                <input type="number" class="form-control" [(ngModel)]="mov.id_empleado" name="id_empleado" readonly>
+              <div class="col-12">
+                <label class="form-label">Motivo</label>
+                <input type="text" class="form-control" [(ngModel)]="mov.observacion" name="observacion"
+                  [placeholder]="modo === 'ajuste' ? 'Ej. rotura, conteo físico' : 'Ej. compra a proveedor'">
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-dark" [disabled]="saving || !mov.id_producto || !mov.tipo || !mov.cantidad">Aplicar</button>
+            <button class="btn btn-dark" [disabled]="saving || !mov.id_producto || !mov.cantidad">Guardar</button>
             <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
           </div>
         </form>
@@ -175,42 +162,37 @@ export class InventarioListPage implements OnInit {
   private rt  = inject(RealtimeService);
   private prodApi = inject(AdminProductosService);
 
-  q: any = { page: 1, per_page: -1, tipo: undefined, fecha_desde: undefined, fecha_hasta: undefined };
+  q: any = { page: 1, per_page: 25, tipo: undefined, fecha_desde: undefined, fecha_hasta: undefined };
   rows = signal<any[]>([]);
-  tick = signal(0);
-
+  criticos = signal<any[]>([]);
   productos = signal<Producto[]>([]);
 
-  // Modal state
   modalOpen = false;
   saving = false;
-  mov: any = {
-    id_producto: undefined,
-    tipo: undefined as 'entrada'|'salida'|undefined,
-    cantidad: undefined,
-    fecha: undefined as string | undefined,
-    observacion: '',
-    referencia_tipo: undefined as 'pedido'|'ajuste'|'otro'|undefined,
-    referencia_id: undefined as number | undefined,
-    rol: undefined as 'ADMIN'|'STOCK'|undefined,
-    id_empleado: undefined as number | undefined,
-  };
-
-  roles = [
-    { label: 'ADMIN', value: 'ADMIN', id: 1 },
-    { label: 'STOCK', value: 'STOCK', id: 3 },
-  ];
+  modo: 'entrada' | 'ajuste' = 'entrada';
+  mov: any = this.emptyMov();
 
   ngOnInit() {
     this.buscar();
     this.cargarProductos();
     this.rt.connectSSE();
-    this.rt.onStockUpdated().subscribe(() => { this.tick.update(v => v + 1); this.buscar(); });
-    this.rt.onStockAlertLow().subscribe(() => { this.tick.update(v => v + 1); this.buscar(); });
+    this.rt.onStockUpdated().subscribe(() => { this.buscar(); this.cargarProductos(); });
+    this.rt.onStockAlertLow().subscribe(() => { this.buscar(); });
+  }
+
+  etiquetaTipo(t: string) {
+    const map: Record<string, string> = {
+      entrada: 'Entrada',
+      reserva: 'Reserva (pedido)',
+      salida: 'Salida (entregado)',
+      liberacion: 'Liberación',
+      devolucion: 'Devolución',
+      ajuste: 'Ajuste',
+    };
+    return map[t] || t;
   }
 
   cargarProductos() {
-    // Trae todos los productos para el combo
     this.prodApi.list({ per_page: -1, sort: 'nombre', order: 'asc' })
       .subscribe(res => this.productos.set(res?.data ?? res ?? []));
   }
@@ -218,71 +200,54 @@ export class InventarioListPage implements OnInit {
   buscar() {
     const params = {
       page: this.q.page,
-      per_page: this.q.per_page,           // -1 => backend trae todo
+      per_page: this.q.per_page,
       tipo_movimiento: this.q.tipo,
       desde: this.q.fecha_desde,
       hasta: this.q.fecha_hasta
     };
-    this.api.list(params).subscribe(res => this.rows.set(res?.data ?? []));
+    this.api.list(params).subscribe(res => {
+      this.rows.set(res?.data ?? []);
+      this.criticos.set(res?.criticos ?? []);
+    });
   }
 
-  openModal() {
-    this.resetMov();
+  emptyMov() {
+    return { id_producto: undefined, cantidad: undefined, fecha: undefined, observacion: '', sentido: '-' };
+  }
+
+  openModal(modo: 'entrada' | 'ajuste') {
+    this.modo = modo;
+    this.mov = this.emptyMov();
     this.modalOpen = true;
   }
-  closeModal() {
-    this.modalOpen = false;
-  }
-  resetMov() {
-    this.mov = {
-      id_producto: undefined,
-      tipo: undefined,
-      cantidad: undefined,
-      fecha: undefined,
-      observacion: '',
-      referencia_tipo: undefined,
-      referencia_id: undefined,
-      rol: undefined,
-      id_empleado: undefined,
-    };
-  }
-  syncProductoId() {
-    // ya está en mov.id_producto; este método queda por si quieres lógica adicional
-  }
-  syncEmpleadoId() {
-    const found = this.roles.find(r => r.value === this.mov.rol);
-    this.mov.id_empleado = found ? found.id : undefined;
-  }
+  closeModal() { this.modalOpen = false; }
 
   submitMovimiento() {
-    if (!this.mov?.id_producto || !this.mov?.tipo || !this.mov?.cantidad) return;
-
+    if (!this.mov?.id_producto || !this.mov?.cantidad) return;
+    if (this.modo === 'ajuste' && !(this.mov.observacion || '').trim()) {
+      alert('En un ajuste el motivo es obligatorio.');
+      return;
+    }
     this.saving = true;
-
-    const basePayload = {
+    const qty = Math.abs(Number(this.mov.cantidad));
+    const payload = {
       id_producto: Number(this.mov.id_producto),
-      cantidad: Number(this.mov.cantidad),
-      observacion: this.mov.observacion?.trim() || undefined,
-      referencia_tipo: this.mov.referencia_tipo || undefined,
-      referencia_id: this.mov.referencia_id ? Number(this.mov.referencia_id) : undefined,
+      cantidad: this.modo === 'ajuste' && this.mov.sentido === '-' ? -qty : qty,
+      observacion: this.mov.observacion?.trim() || (this.modo === 'entrada' ? 'Ingreso de mercadería' : 'Ajuste'),
+      referencia_tipo: this.modo === 'entrada' ? 'compra' : 'ajuste',
       fecha: this.mov.fecha || undefined,
-      id_empleado: this.mov.id_empleado || undefined,
     };
-
-    const req$ = this.mov.tipo === 'entrada'
-      ? this.api.entrada(basePayload)
-      : this.api.salida(basePayload);
-
+    const req$ = this.modo === 'entrada' ? this.api.entrada(payload) : this.api.ajuste(payload);
     req$.subscribe({
       next: () => {
         this.saving = false;
         this.closeModal();
         this.buscar();
+        this.cargarProductos();
       },
       error: (e) => {
         this.saving = false;
-        console.error(e);
-        alert('No se pudo aplicar el movimiento.');
+        alert(e?.error?.message || 'No se pudo guardar el movimiento.');
       }
     });
   }
