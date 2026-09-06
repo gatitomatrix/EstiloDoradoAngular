@@ -94,6 +94,10 @@ export class ConfirmarEntregaComponent {
       0,
     );
   }
+  cambiarDireccion() {
+    this.router.navigate(['/entrega'], { state: { openAddress: true } });
+  }
+
   irAPagar() {
     if (this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address)) {
       this.router.navigateByUrl('/pago');

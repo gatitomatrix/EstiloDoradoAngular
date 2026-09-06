@@ -64,6 +64,9 @@
                             <div class="text-muted small mt-1">
                               Solo Lima – Callao, Huancayo y Pasco.
                             </div>
+                            <div class="small mt-1" *ngIf="envioListo" style="color:#8a6d1d;">
+                              📍 {{ addressFull }}
+                            </div>
                         </div>
                         <div class="ed-check" *ngIf="mode === 'EXPRESS' && envioListo" aria-hidden="true">✓</div>
                     </div>
@@ -99,8 +102,8 @@
     </div>
 </div>
 
-<!-- MODAL Direccion -->
-<div class="modal fade show d-block" *ngIf="showAddressModal" (click)="closeModal()">
+<!-- MODAL Direccion: no cerrar al clic del fondo (el combo Lima dispara click en el overlay). -->
+<div class="modal fade show d-block" *ngIf="showAddressModal">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" (click)="$event.stopPropagation()">
         <div class="modal-content" style="border-radius:16px;">
             <div class="modal-header">

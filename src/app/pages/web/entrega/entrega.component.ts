@@ -58,6 +58,7 @@ export class EntregaComponent {
   get total() { return this.subtotal + this.fee - this.discount; }
   get enablePay() { return this.mode === 'STORE_PICKUP' || this.mode === 'EXPRESS' || this.showAddressModal; }
   get envioListo() { return this.checkout.envioListo(this.checkout.value.address); }
+  get addressFull() { return this.checkout.value.address?.full || ''; }
   get payLabel() {
     if (this.mode === 'STORE_PICKUP') return 'Ir a pagar';
     if (this.envioListo) return 'Ir a pagar';
@@ -275,7 +276,7 @@ export class EntregaComponent {
       if (!v.via?.trim() || !v.numero?.trim()) {
         this.addrForm.get('via')?.markAsTouched();
         this.addrForm.get('numero')?.markAsTouched();
-        this.fase = 'ubigeo';
+        alert('Para domicilio escribe calle y número, luego Ir al mapa.');
         return;
       }
       this.continuarDireccion();
@@ -314,20 +315,47 @@ export class EntregaComponent {
     this.fase = 'mapa';
     this.stepMap = true;
 
-    const q = this.buildQueryFromForm();
-    const res = await this.geocode.searchAddress(q);
+    const point = await this.geocodeBest();
+    this.lastCoords = { lat: point.lat, lng: point.lng };
+    setTimeout(() => this.initMap(point.lat, point.lng), 80);
+  }
 
-    let lat = -12.06866, lng = -75.21027; // Huancayo fallback
-    if (res) { lat = res.lat; lng = res.lon; }
+  private fallbackCoords(dep?: string | null, prov?: string | null, dist?: string | null): { lat: number; lng: number } {
+    const z = zonaEnvio(dep, prov, dist);
+    if (z === 'lima') {
+      const d = (dist || '').toUpperCase();
+      if (d.includes('CALLAO') || (dep || '').toUpperCase().includes('CALLAO')) {
+        return { lat: -12.05659, lng: -77.11814 };
+      }
+      return { lat: -12.04637, lng: -77.04279 };
+    }
+    if (z === 'pasco') return { lat: -10.66848, lng: -76.25688 };
+    return { lat: -12.06866, lng: -75.21027 };
+  }
 
-    this.lastCoords = { lat, lng };
-    setTimeout(() => this.initMap(lat, lng), 0);
+  private async geocodeBest(): Promise<{ lat: number; lng: number }> {
+    const v = this.addrForm.value;
+    const queries = [
+      this.buildQueryFromForm(),
+      [v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
+      [v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
+    ];
+    for (const q of queries) {
+      const res = await this.geocode.searchAddress(q);
+      if (res) return { lat: res.lat, lng: res.lon };
+    }
+    return this.fallbackCoords(v.departamento, v.provincia, v.distrito);
   }
 
   private initMap(lat: number, lng: number) {
+    const el = document.getElementById('edMap');
+    if (!el) {
+      setTimeout(() => this.initMap(lat, lng), 80);
+      return;
+    }
     if (this.map) { this.map.remove(); this.map = undefined; }
 
-    this.map = L.map('edMap', { zoomControl: true }).setView([lat, lng], 16);
+    this.map = L.map(el, { zoomControl: true }).setView([lat, lng], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '&copy; OpenStreetMap'
@@ -342,9 +370,6 @@ export class EntregaComponent {
 
     this.marker = L.marker([lat, lng], { draggable: true, icon }).addTo(this.map);
 
-    // Autocompletar inmediatamente al abrir el mapa
-    this.fillFromReverse(lat, lng);
-
     this.marker.on('dragend', async () => {
       const pos = this.marker!.getLatLng();
       this.lastCoords = { lat: pos.lat, lng: pos.lng };
@@ -358,7 +383,7 @@ export class EntregaComponent {
       await this.fillFromReverse(pos.lat, pos.lng);
     });
 
-    this.map.invalidateSize();
+    setTimeout(() => this.map?.invalidateSize(), 120);
   }
 
   // === Normalizador y matching suave ===
@@ -440,20 +465,15 @@ export class EntregaComponent {
 
     this.lastDisplay = r.display || undefined;
 
-    // Vía
-    const via = (r.via ?? this.addrForm.value.via ?? '').toString().trim();
-
-    // Número: 1) house_number, 2) display_name, 3) lo que ya había escrito, 4) '0'
+    const viaUser = (this.addrForm.value.via ?? '').toString().trim();
+    const numUser = (this.addrForm.value.numero ?? '').toString().trim();
+    const via = viaUser || (r.via ?? '').toString().trim();
     const numFromReverse = (r.numero ?? '').toString().trim();
     const numFromDisplay = this.guessNumberFromDisplay(this.lastDisplay, via);
-    const prev = (this.addrForm.value.numero ?? '').toString().trim();
-    const numero = numFromReverse || numFromDisplay || prev || '0';
+    const numero = numUser || numFromReverse || numFromDisplay || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
     this.persistDraft();
-
-    // Dpto/Prov/Dist
-    await this.applyUbigeoFromReverse(r.departamento, r.provincia, r.distrito);
   }
 
   // ---------- CONFIRMAR ----------
