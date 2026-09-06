@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment';
 
 const API = `${environment.apiBaseUrl}/admin`;
 
+export type RangoReporte = { desde: string; hasta: string };
+
 @Injectable({ providedIn: 'root' })
 export class AdminReportesService {
   private http = inject(HttpClient);
@@ -15,29 +17,29 @@ export class AdminReportesService {
   downloadProductos(ext: 'xlsx'|'csv'|'pdf', params?: any): Observable<Blob> {
     return this.http.get(`${API}/reportes/productos.${ext}`, { params, responseType: 'blob' });
   }
-  downloadPedidos(ext: 'xlsx'|'csv'|'pdf', params?: any): Observable<Blob> {
-    return this.http.get(`${API}/reportes/pedidos.${ext}`, { params, responseType: 'blob' });
+  downloadPedidos(ext: 'xlsx'|'csv'|'pdf', params?: RangoReporte): Observable<Blob> {
+    return this.http.get(`${API}/reportes/pedidos.${ext}`, { params: params as any, responseType: 'blob' });
   }
   downloadInventario(ext: 'xlsx'|'csv'|'pdf', params?: any): Observable<Blob> {
     return this.http.get(`${API}/reportes/inventario.${ext}`, { params, responseType: 'blob' });
   }
 
-  financiero(dias: 7 | 30 | 90) {
-    return this.http.get<FinancieroResumen>(`${API}/reportes/financiero`, { params: { dias } });
+  financiero(rango: RangoReporte) {
+    return this.http.get<FinancieroResumen>(`${API}/reportes/financiero`, { params: rango as any });
   }
 
-  downloadFinanciero(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
-    return this.http.get(`${API}/reportes/financiero.${ext}`, { params: { dias }, responseType: 'blob' });
+  downloadFinanciero(ext: 'xlsx'|'csv'|'pdf', rango: RangoReporte): Observable<Blob> {
+    return this.http.get(`${API}/reportes/financiero.${ext}`, { params: rango as any, responseType: 'blob' });
   }
 
-  downloadVentasDia(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
-    return this.http.get(`${API}/reportes/ventas-dia.${ext}`, { params: { dias }, responseType: 'blob' });
+  downloadVentasDia(ext: 'xlsx'|'csv'|'pdf', rango: RangoReporte): Observable<Blob> {
+    return this.http.get(`${API}/reportes/ventas-dia.${ext}`, { params: rango as any, responseType: 'blob' });
   }
-  downloadFormaPago(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
-    return this.http.get(`${API}/reportes/forma-pago.${ext}`, { params: { dias }, responseType: 'blob' });
+  downloadFormaPago(ext: 'xlsx'|'csv'|'pdf', rango: RangoReporte): Observable<Blob> {
+    return this.http.get(`${API}/reportes/forma-pago.${ext}`, { params: rango as any, responseType: 'blob' });
   }
-  downloadTopProductos(ext: 'xlsx'|'csv'|'pdf', dias: 7 | 30 | 90): Observable<Blob> {
-    return this.http.get(`${API}/reportes/top-productos.${ext}`, { params: { dias }, responseType: 'blob' });
+  downloadTopProductos(ext: 'xlsx'|'csv'|'pdf', rango: RangoReporte): Observable<Blob> {
+    return this.http.get(`${API}/reportes/top-productos.${ext}`, { params: rango as any, responseType: 'blob' });
   }
 
   downloadStockBajo(ext: 'xlsx'|'csv'|'pdf'): Observable<Blob> {

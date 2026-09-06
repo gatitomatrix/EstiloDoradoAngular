@@ -1,10 +1,11 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdminReportesService, FinancieroResumen } from '../../../../core/services/admin-reportes.service';
+import { FormsModule } from '@angular/forms';
+import { AdminReportesService, FinancieroResumen, RangoReporte } from '../../../../core/services/admin-reportes.service';
 
 type ReportKey = 'clientes' | 'productos' | 'pedidos' | 'inventario' | 'financiero' | 'stock_bajo';
 type ReportExt = 'csv' | 'xlsx' | 'pdf';
-type Periodo = 7 | 30 | 90;
+type Atajo = 7 | 30 | 90 | 'mes';
 
 interface ReportGroup {
   key: ReportKey;
@@ -17,7 +18,7 @@ interface ReportGroup {
 @Component({
   standalone: true,
   selector: 'app-reportes',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
   <div class="ed-rep">
     <header class="ed-rep-head">
@@ -36,16 +37,27 @@ interface ReportGroup {
           <h3 class="ed-fin-title">Resumen financiero</h3>
           <p class="ed-fin-sub">
             Solo pedidos cobrados (pagado, enviado o entregado).
-            <span *ngIf="fin()">{{ fin()!.desde }} → {{ fin()!.hasta }}</span>
+            <strong *ngIf="fin()"> {{ etiquetaRango() }}</strong>
           </p>
         </div>
         <div class="ed-fin-periods" role="group" aria-label="Periodo">
-          <button type="button" *ngFor="let d of periodos" class="ed-chip"
-            [class.ed-chip--on]="periodo() === d" (click)="setPeriodo(d)">
-            {{ d }} días
+          <button type="button" *ngFor="let d of atajos" class="ed-chip"
+            [class.ed-chip--on]="atajo() === d" (click)="setAtajo(d)">
+            {{ d === 'mes' ? 'Este mes' : d + ' días' }}
           </button>
         </div>
       </div>
+      <form class="ed-fin-range" (ngSubmit)="aplicarRango()">
+        <label class="ed-fin-date">
+          <span>Desde</span>
+          <input type="date" [(ngModel)]="desde" name="desde">
+        </label>
+        <label class="ed-fin-date">
+          <span>Hasta</span>
+          <input type="date" [(ngModel)]="hasta" name="hasta">
+        </label>
+        <button type="submit" class="ed-chip ed-chip--on">Aplicar</button>
+      </form>
 
       <p class="ed-fin-load" *ngIf="finLoading()">Cargando cifras…</p>
       <p class="ed-fin-err" *ngIf="finErr()">{{ finErr() }}</p>
@@ -357,7 +369,14 @@ interface ReportGroup {
     }
     .ed-fin-title { margin: 0 0 .2rem; font-size: 1.08rem; font-weight: 800; color: #2D2418; }
     .ed-fin-sub { margin: 0; font-size: .84rem; color: #8A7B65; }
-    .ed-fin-periods { display: flex; gap: .4rem; }
+    .ed-fin-periods { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .ed-fin-range {
+      display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; margin: 0 0 .85rem;
+    }
+    .ed-fin-date { display: flex; flex-direction: column; gap: .15rem; font-size: .75rem; color: #8A7B65; font-weight: 600; }
+    .ed-fin-date input {
+      border: 1.5px solid #E7DAC6; border-radius: .55rem; padding: .35rem .5rem; font-size: .85rem; color: #2D2418;
+    }
     .ed-chip {
       border: 1.5px solid #E7DAC6;
       background: #fff;
@@ -454,8 +473,10 @@ export class ReportesPage implements OnInit {
   msgOk = signal(true);
   busyKey = signal<string | null>(null);
 
-  periodos: Periodo[] = [7, 30, 90];
-  periodo = signal<Periodo>(30);
+  atajos: Atajo[] = [7, 30, 90, 'mes'];
+  atajo = signal<Atajo | 'custom'>(30);
+  desde = this.ymd(this.haceDias(29));
+  hasta = this.ymd(new Date());
   fin = signal<FinancieroResumen | null>(null);
   finLoading = signal(false);
   finErr = signal<string | undefined>(undefined);
@@ -489,16 +510,51 @@ export class ReportesPage implements OnInit {
     this.loadFin();
   }
 
-  setPeriodo(d: Periodo) {
-    if (this.periodo() === d) return;
-    this.periodo.set(d);
+  setAtajo(d: Atajo) {
+    this.atajo.set(d);
+    if (d === 'mes') {
+      const n = new Date();
+      this.desde = this.ymd(new Date(n.getFullYear(), n.getMonth(), 1));
+      this.hasta = this.ymd(n);
+    } else {
+      this.hasta = this.ymd(new Date());
+      this.desde = this.ymd(this.haceDias(d - 1));
+    }
     this.loadFin();
+  }
+
+  aplicarRango() {
+    this.atajo.set('custom');
+    this.loadFin();
+  }
+
+  etiquetaRango(): string {
+    const a = this.fin()?.desde || this.desde;
+    const b = this.fin()?.hasta || this.hasta;
+    return this.fmt(a) + ' → ' + this.fmt(b);
+  }
+
+  private rango(): RangoReporte {
+    return { desde: this.desde, hasta: this.hasta };
+  }
+  private ymd(d: Date) {
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+  private haceDias(n: number) {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d;
+  }
+  private fmt(ymd: string) {
+    const m = String(ymd).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : ymd;
   }
 
   loadFin() {
     this.finLoading.set(true);
     this.finErr.set(undefined);
-    this.api.financiero(this.periodo()).subscribe({
+    this.api.financiero(this.rango()).subscribe({
       next: (res) => {
         this.fin.set(res);
         this.finLoading.set(false);
@@ -535,7 +591,7 @@ export class ReportesPage implements OnInit {
     {
       key: 'pedidos',
       label: 'Pedidos',
-      desc: 'Órdenes con cliente, estado, total y forma de pago.',
+      desc: 'Órdenes del rango de fechas de arriba (cliente, estado, total y pago).',
       icon: '🛒',
       accent: '#2E7D4F',
     },
@@ -567,9 +623,9 @@ export class ReportesPage implements OnInit {
     this.busyKey.set(key);
     this.msg.set(undefined);
     const map = {
-      ventas_dia: () => this.api.downloadVentasDia(ext, this.periodo()),
-      forma_pago: () => this.api.downloadFormaPago(ext, this.periodo()),
-      top_productos: () => this.api.downloadTopProductos(ext, this.periodo()),
+      ventas_dia: () => this.api.downloadVentasDia(ext, this.rango()),
+      forma_pago: () => this.api.downloadFormaPago(ext, this.rango()),
+      top_productos: () => this.api.downloadTopProductos(ext, this.rango()),
     };
     map[tipo]().subscribe({
       next: (blob) => {
@@ -600,9 +656,9 @@ export class ReportesPage implements OnInit {
     const map: Record<ReportKey, () => ReturnType<AdminReportesService['downloadClientes']>> = {
       clientes: () => this.api.downloadClientes(ext),
       productos: () => this.api.downloadProductos(ext),
-      pedidos: () => this.api.downloadPedidos(ext),
+      pedidos: () => this.api.downloadPedidos(ext, this.rango()),
       inventario: () => this.api.downloadInventario(ext),
-      financiero: () => this.api.downloadFinanciero(ext, this.periodo()),
+      financiero: () => this.api.downloadFinanciero(ext, this.rango()),
       stock_bajo: () => this.api.downloadStockBajo(ext),
     };
 
