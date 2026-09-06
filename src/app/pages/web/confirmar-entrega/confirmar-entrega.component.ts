@@ -58,7 +58,7 @@ export class ConfirmarEntregaComponent {
 
    /** habilita el botón cuando ya hay un modo de entrega elegido */
   get resumenOk(): boolean {
-    return this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.value.mode === 'EXPRESS';
+    return this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address);
   }
 
   ngOnInit() {
@@ -95,6 +95,10 @@ export class ConfirmarEntregaComponent {
     );
   }
   irAPagar() {
-  this.router.navigateByUrl('/pago');
-}
+    if (this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address)) {
+      this.router.navigateByUrl('/pago');
+      return;
+    }
+    this.router.navigate(['/entrega'], { state: { openAddress: true } });
+  }
 }

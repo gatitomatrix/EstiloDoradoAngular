@@ -42,11 +42,26 @@ export class CheckoutService {
 
   /** Dirección de envío ya confirmada (no el recojo en tienda). */
   get savedExpress(): Address | null {
-    const ok = (a?: Partial<Address> | null): a is Address =>
-      !!a && !!a.via && a.via !== 'Retiro en tienda' && !!a.departamento && !!a.provincia;
-    if (ok(this.state.draft)) return this.state.draft as Address;
-    if (ok(this.state.address)) return this.state.address!;
-    return null;
+    const a = this.state.address;
+    return this.envioListo(a) ? a! : null;
+  }
+
+  /** Agencia o domicilio ya elegido (no solo el tipo "Envío"). */
+  envioListo(a?: Address | null): boolean {
+    if (!a || a.via === 'Retiro en tienda') return false;
+    if (!a.departamento || !a.provincia || !a.distrito) return false;
+    if (a.envioTipo === 'AGENCIA') {
+      return !!(a.agenciaNombre || a.agenciaId || (a.via && a.via.trim()));
+    }
+    if (a.envioTipo === 'DOMICILIO') {
+      return !!(a.via && String(a.via).trim());
+    }
+    return false;
+  }
+
+  get puedePagar(): boolean {
+    if (this.state.mode === 'STORE_PICKUP') return true;
+    return this.state.mode === 'EXPRESS' && this.envioListo(this.state.address);
   }
 
   setAddress(addr: Address) {

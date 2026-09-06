@@ -56,7 +56,13 @@ export class EntregaComponent {
   get fee() { return this.checkout.value.fee; }
   get discount() { return this.checkout.value.discount; }
   get total() { return this.subtotal + this.fee - this.discount; }
-  get enablePay() { return this.checkout.value.mode !== 'NONE'; }
+  get enablePay() { return this.mode === 'STORE_PICKUP' || this.mode === 'EXPRESS' || this.showAddressModal; }
+  get envioListo() { return this.checkout.envioListo(this.checkout.value.address); }
+  get payLabel() {
+    if (this.mode === 'STORE_PICKUP') return 'Ir a pagar';
+    if (this.envioListo) return 'Ir a pagar';
+    return 'Elegir lugar de envío';
+  }
   get mode() { return this.checkout.value.mode; }
 
   // Formulario paso 1
@@ -137,6 +143,18 @@ export class EntregaComponent {
   }
 
   openExpress() { this.openAddressModal(true); }
+
+  goPay() {
+    if (this.mode === 'STORE_PICKUP') {
+      this.router.navigateByUrl('/pago');
+      return;
+    }
+    if (this.envioListo) {
+      this.router.navigateByUrl('/pago');
+      return;
+    }
+    this.openAddressModal(true);
+  }
 
   get esPasco(): boolean {
     return zonaEnvio(this.addrForm.value.departamento, this.addrForm.value.provincia, this.addrForm.value.distrito) === 'pasco';

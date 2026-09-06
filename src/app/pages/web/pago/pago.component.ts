@@ -116,6 +116,12 @@ export class PagoComponent implements AfterViewInit {
       this.router.navigateByUrl('/carrito');
       return;
     }
+    if (this.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address)) {
+      // ok
+    } else {
+      this.router.navigate(['/entrega'], { state: { openAddress: true } });
+      return;
+    }
     this.pay.setHasMethod(true);
     this.correoPago = this.correoCuenta;
     // limpiar selección de doc en esta pantalla
@@ -200,6 +206,10 @@ export class PagoComponent implements AfterViewInit {
   }
 
   pagarConCulqi() {
+    if (this.mode !== 'STORE_PICKUP' && !this.checkout.envioListo(this.checkout.value.address)) {
+      this.router.navigate(['/entrega'], { state: { openAddress: true } });
+      return;
+    }
     const email = this.correoCulqi;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       alert('Indica un correo válido para el pago.');

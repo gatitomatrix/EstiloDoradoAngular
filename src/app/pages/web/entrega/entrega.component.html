@@ -54,7 +54,7 @@
                     <!-- Envío express -->
                     <div
                       class="ed-option"
-                      [class.ed-option--on]="mode === 'EXPRESS'"
+                      [class.ed-option--on]="(mode === 'EXPRESS' && envioListo) || showAddressModal"
                       (click)="openExpress()"
                     >
                         <div class="ed-icon">🚚</div>
@@ -65,7 +65,7 @@
                               Solo Lima – Callao, Huancayo y Pasco.
                             </div>
                         </div>
-                        <div class="ed-check" *ngIf="mode === 'EXPRESS'" aria-hidden="true">✓</div>
+                        <div class="ed-check" *ngIf="mode === 'EXPRESS' && envioListo" aria-hidden="true">✓</div>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,10 @@
                     <div class="d-flex justify-content-between fw-bold mb-3">
                         <span>Total:</span><span>S/ {{ total | number:'1.2-2' }}</span>
                     </div>
-                    <button class="btn btn-dark w-100" [disabled]="!enablePay" routerLink="/pago">Ir a pagar</button>
+                    <button class="btn btn-dark w-100" [disabled]="mode === 'NONE'" (click)="goPay()">{{ payLabel }}</button>
+                    <div class="small text-muted mt-2" *ngIf="mode !== 'STORE_PICKUP' && !envioListo">
+                      Si eliges envío, primero indica agencia Shalom o domicilio.
+                    </div>
                 </div>
             </div>
         </div>
