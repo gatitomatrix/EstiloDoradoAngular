@@ -350,6 +350,7 @@ export class PagoComponent implements AfterViewInit {
         distrito: addr.distrito,
       } : undefined,
       items,
+      telefono: this.checkout.telefono || undefined,
       comprobante: tipo,
       ...(tipo === 'FA' ? { factura: factura! } : { boleta: boleta! })
     };
@@ -385,6 +386,7 @@ export class PagoComponent implements AfterViewInit {
     const body: ConfirmarReq = {
       forma_pago: 'efectivo',
       direccion_entrega: direccion,
+      telefono: this.checkout.telefono || undefined,
       items
     };
 

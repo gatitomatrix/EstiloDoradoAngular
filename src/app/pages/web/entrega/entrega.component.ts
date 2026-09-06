@@ -9,7 +9,7 @@ import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
 import { cubreEnvio, filtrarProvinciasEnvio, filtrarDistritosEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA, zonaEnvio, costoEnvio } from '../../../core/utils/tarifa-envio';
-import { AgenciaShalom, buscarAgenciasShalom, ResultadoAgencias } from '../../../core/utils/agencias-shalom';
+import { AuthService } from '../../../services/auth/auth.service';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -29,6 +29,7 @@ export class EntregaComponent {
   private router = inject(Router);
   private ubigeo = inject(UbigeoService);
   private geocode = inject(GeocodingService);
+  private auth = inject(AuthService);
 
   departamentos: string[] = [];
   provincias: string[] = [];
@@ -58,6 +59,8 @@ export class EntregaComponent {
   get total() { return this.subtotal + this.fee - this.discount; }
   get enablePay() { return this.mode === 'STORE_PICKUP' || this.mode === 'EXPRESS' || this.showAddressModal; }
   get envioListo() { return this.checkout.envioListo(this.checkout.value.address); }
+  get telefonoOk() { return this.checkout.telefonoOk; }
+  get telefono() { return this.checkout.telefono; }
   get addressFull() { return this.checkout.value.address?.full || ''; }
   get payLabel() {
     if (this.mode === 'STORE_PICKUP') return 'Ir a pagar';
@@ -120,6 +123,10 @@ export class EntregaComponent {
     this.addrForm.get('numero')!.valueChanges.subscribe(() => this.persistDraft());
 
     const st = history.state as any;
+    if (!this.checkout.telefono) {
+      const fromProfile = (this.auth.user?.telefono || '').replace(/\D/g, '').slice(0, 9);
+      if (fromProfile) this.checkout.setTelefono(fromProfile);
+    }
     if (st?.openAddress) {
       this.openAddressModal(true);
     } else {
@@ -153,6 +160,10 @@ export class EntregaComponent {
       return;
     }
     if (this.envioListo) {
+      if (!this.telefonoOk) {
+        alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
+        return;
+      }
       this.router.navigateByUrl('/pago');
       return;
     }
@@ -237,6 +248,14 @@ export class EntregaComponent {
     } else {
       this.restoring = false;
     }
+  }
+
+  onPhoneInput(ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    let d = el.value.replace(/\D/g, '');
+    if (d.length > 9) d = d.slice(0, 9);
+    el.value = d;
+    this.checkout.setTelefono(d);
   }
 
   closeModal() { this.showAddressModal = false; }

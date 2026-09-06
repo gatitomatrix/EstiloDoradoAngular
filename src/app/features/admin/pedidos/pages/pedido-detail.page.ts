@@ -42,7 +42,8 @@ import { PedidoComprobantesWidget } from '../widgets/pedido-comprobantes.widget'
       </div>
       <div class="col-12 md:col-4">
         <p-card header="Resumen">
-          <div>Cliente: <strong>{{pedido().cliente?.nombre}}</strong></div>
+          <div>Cliente: <strong>{{pedido().cliente?.nombre || pedido().cliente_nombre}}</strong></div>
+          <div>Celular: <strong>{{pedido().telefono_contacto || pedido().cliente?.telefono || '—'}}</strong></div>
           <div>Estado: <strong>{{pedido().estado}}</strong></div>
           <div>Total: <strong>{{pedido().totales?.total ?? pedido().total | number:'1.2-2'}}</strong></div>
         </p-card>

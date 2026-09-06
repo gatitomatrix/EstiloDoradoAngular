@@ -25,6 +25,7 @@ export interface CheckoutState {
   draft?: Partial<Address> | null;
   fee: number;       // costo de entrega
   discount: number;  // descuento aplicado
+  telefono?: string;
 }
 
 const KEY = 'ed_checkout_state';
@@ -61,7 +62,21 @@ export class CheckoutService {
 
   get puedePagar(): boolean {
     if (this.state.mode === 'STORE_PICKUP') return true;
-    return this.state.mode === 'EXPRESS' && this.envioListo(this.state.address);
+    return this.state.mode === 'EXPRESS' && this.envioListo(this.state.address) && this.telefonoOk;
+  }
+
+  get telefono(): string {
+    return (this.state.telefono || '').replace(/\D/g, '').slice(0, 9);
+  }
+
+  get telefonoOk(): boolean {
+    return /^9\d{8}$/.test(this.telefono);
+  }
+
+  setTelefono(raw: string) {
+    const d = (raw || '').replace(/\D/g, '').slice(0, 9);
+    this.state.telefono = d;
+    this.persist();
   }
 
   setAddress(addr: Address) {
@@ -84,7 +99,7 @@ export class CheckoutService {
   }
 
   reset() {
-    this.state = { mode: 'NONE', fee: 0, discount: 0, draft: this.state.draft ?? null };
+    this.state = { mode: 'NONE', fee: 0, discount: 0, draft: this.state.draft ?? null, telefono: this.state.telefono };
     this.persist();
   }
 
