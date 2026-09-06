@@ -20,8 +20,11 @@ import { UiService } from '../../../../core/services/ui.service';
       <div class="card p-4" *ngIf="form as f">
         <div class="form-check form-switch mb-3">
           <input class="form-check-input" type="checkbox" id="act" [(ngModel)]="f.activo" />
-          <label class="form-check-label" for="act">Campaña activa</label>
+          <label class="form-check-label" for="act">Campaña activa (encendida / apagada)</label>
         </div>
+        <p class="small text-muted mb-3">
+          Para cancelar: apaga este interruptor o pulsa <strong>Apagar campaña</strong> y luego se guarda solo.
+        </p>
         <div class="mb-3">
           <label class="form-label">Título interno</label>
           <input class="form-control" [(ngModel)]="f.titulo" maxlength="120" />
@@ -49,9 +52,20 @@ import { UiService } from '../../../../core/services/ui.service';
           Si un producto tiene su propio %, se aplica el mayor entre el producto y esta campaña.
           Culqi cobra el precio ya rebajado. Precio de lista no se modifica.
         </p>
-        <button class="btn btn-dark mt-3" type="button" [disabled]="saving()" (click)="save()">
-          {{ saving() ? 'Guardando…' : 'Guardar promoción' }}
-        </button>
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-dark" type="button" [disabled]="saving()" (click)="save()">
+            {{ saving() ? 'Guardando…' : 'Guardar promoción' }}
+          </button>
+          <button
+            *ngIf="f.activo"
+            class="btn btn-outline-danger"
+            type="button"
+            [disabled]="saving()"
+            (click)="apagar()"
+          >
+            Apagar campaña
+          </button>
+        </div>
       </div>
     </section>
   `,
@@ -100,6 +114,20 @@ export class PromocionesPage implements OnInit {
       error: (e) => {
         this.saving.set(false);
         this.ui.err(e?.error?.message || 'No se pudo guardar');
+      },
+    });
+  }
+
+  apagar() {
+    if (!this.form) return;
+    this.form.activo = false;
+    this.saving.set(true);
+    this.http.put(this.base, this.form).subscribe({
+      next: () => { this.saving.set(false); this.ui.ok('Campaña apagada. La cinta y el % de tienda ya no aplican.'); },
+      error: (e) => {
+        this.form && (this.form.activo = true);
+        this.saving.set(false);
+        this.ui.err(e?.error?.message || 'No se pudo apagar');
       },
     });
   }
