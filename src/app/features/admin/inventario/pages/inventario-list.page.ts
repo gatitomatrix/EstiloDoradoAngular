@@ -136,6 +136,11 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
                 <label class="form-label">Fecha</label>
                 <input type="date" class="form-control" [(ngModel)]="mov.fecha" name="fecha">
               </div>
+              <div class="col-md-8" *ngIf="modo === 'entrada'">
+                <label class="form-label">Referencia de compra</label>
+                <input type="text" class="form-control" [(ngModel)]="mov.referencia_compra" name="referencia_compra"
+                  placeholder="Ej. Factura F001-123 o guía (opcional)">
+              </div>
               <div class="col-12">
                 <label class="form-label">Motivo</label>
                 <input type="text" class="form-control" [(ngModel)]="mov.observacion" name="observacion"
@@ -212,7 +217,13 @@ export class InventarioListPage implements OnInit {
   }
 
   emptyMov() {
-    return { id_producto: undefined, cantidad: undefined, fecha: undefined, observacion: '', sentido: '-' };
+    return { id_producto: undefined, cantidad: undefined, fecha: this.hoy(), observacion: '', sentido: '-', referencia_compra: '' };
+  }
+
+  hoy() {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
   openModal(modo: 'entrada' | 'ajuste') {
@@ -230,10 +241,12 @@ export class InventarioListPage implements OnInit {
     }
     this.saving = true;
     const qty = Math.abs(Number(this.mov.cantidad));
+    const motivo = this.mov.observacion?.trim() || (this.modo === 'entrada' ? 'Ingreso de mercadería' : 'Ajuste');
+    const ref = (this.mov.referencia_compra || '').trim();
     const payload = {
       id_producto: Number(this.mov.id_producto),
       cantidad: this.modo === 'ajuste' && this.mov.sentido === '-' ? -qty : qty,
-      observacion: this.mov.observacion?.trim() || (this.modo === 'entrada' ? 'Ingreso de mercadería' : 'Ajuste'),
+      observacion: this.modo === 'entrada' && ref ? `${motivo} · Ref. compra: ${ref}` : motivo,
       referencia_tipo: (this.modo === 'entrada' ? 'compra' : 'ajuste') as 'compra' | 'ajuste',
       fecha: this.mov.fecha || undefined,
     };

@@ -490,10 +490,13 @@ export class ProductosListPage implements OnInit {
     const dd = String(d.getDate()).padStart(2,'0');
     return `${d.getFullYear()}-${mm}-${dd}`;
   }
-  formatFecha(ymd?: string) {
-    const str = ymd || this.todayYmd();
-    const [y,m,d] = str.split('-');
-    return (y && m && d) ? `${d}/${m}/${y}` : '';
+  formatFecha(raw?: string | null) {
+    if (!raw) return '';
+    const s = String(raw).replace('T', ' ').trim();
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    if (!m) return s;
+    const fecha = `${m[3]}/${m[2]}/${m[1]}`;
+    return m[4] ? `${fecha} ${m[4]}:${m[5]}` : fecha;
   }
 
   openCreate() {
@@ -542,7 +545,6 @@ export class ProductosListPage implements OnInit {
     const isEdit = !!base?.id_producto;
 
     if (isEdit) {
-      if (!base.updated_at) base.updated_at = this.todayYmd(); // primera actualización
       payload = {
         nombre: base.nombre,
         descripcion: base.descripcion,
@@ -556,8 +558,7 @@ export class ProductosListPage implements OnInit {
         id_proveedor: base.id_proveedor,
         estado: base.estado,
         imagen_url: base.imagen_url,
-        slug: base.slug,
-        updated_at: base.updated_at
+        slug: base.slug
       };
     } else {
       payload = {
