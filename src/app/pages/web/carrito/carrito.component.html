@@ -38,6 +38,9 @@
       </div>
 
       <div class="ed-item__price">
+        <div class="ed-item__unit" *ngIf="it.precioLista && it.precioLista > it.precio">
+          <s>S/ {{ it.precioLista | number:'1.2-2' }}</s>
+        </div>
         <div class="ed-item__unit">S/ {{ it.precio | number:'1.2-2' }}</div>
         <div class="ed-item__subtotal">S/ {{ (it.precio * it.qty) | number:'1.2-2' }}</div>
         <button class="ed-link" (click)="remove(it)">Eliminar</button>
@@ -51,9 +54,9 @@
       <h2>Resumen de la orden</h2>
       <div class="ed-summary__row">
         <span>Productos ({{ items.length }})</span>
-        <strong>S/ {{ subtotal | number:'1.2-2' }}</strong>
+        <strong>S/ {{ listado | number:'1.2-2' }}</strong>
       </div>
-      <div class="ed-summary__row">
+      <div class="ed-summary__row" *ngIf="descuentos > 0">
         <span>Descuentos * Promoción</span>
         <strong class="ed-green">− S/ {{ descuentos | number:'1.2-2' }}</strong>
       </div>

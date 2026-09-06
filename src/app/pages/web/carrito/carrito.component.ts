@@ -47,11 +47,14 @@ export class CarritoComponent implements OnInit, OnDestroy {
   get subtotal(): number {
     return this.cart.getSubtotal();
   }
+  get listado(): number {
+    return this.cart.getListado();
+  }
   get descuentos(): number {
     return this.cart.getDescuentos();
   }
   get total(): number {
-    return this.subtotal - this.descuentos;
+    return this.subtotal;
   }
   get canContinue(): boolean {
     return this.items.length > 0;
