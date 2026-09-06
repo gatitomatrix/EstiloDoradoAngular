@@ -481,7 +481,29 @@ export class PagoComponent implements AfterViewInit {
         this.provs = p;
         this.ubigeo.getDistritos(bol.departamento, bol.provincia).subscribe(d => this.dists = d);
       });
-    } else { this.provs = []; this.dists = []; }
+    } else {
+      const u = this.auth.user;
+      const addr = this.checkout.value.address;
+      const nombre = [u?.nombre, u?.apellido].filter(Boolean).join(' ').trim();
+      this.boletaForm.patchValue({
+        nombres: nombre,
+        direccion: addr?.full || addr?.via || u?.direccion || '',
+        departamento: addr?.departamento || '',
+        provincia: addr?.provincia || '',
+        distrito: addr?.distrito || '',
+      }, { emitEvent: false });
+      if (addr?.departamento) {
+        this.ubigeo.getProvincias(addr.departamento).subscribe(p => {
+          this.provs = p;
+          if (addr.provincia) {
+            this.ubigeo.getDistritos(addr.departamento, addr.provincia).subscribe(d => this.dists = d);
+          }
+        });
+      } else {
+        this.provs = [];
+        this.dists = [];
+      }
+    }
     this.showBoleta = true;
   }
 
