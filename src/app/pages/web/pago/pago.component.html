@@ -30,8 +30,8 @@
         <div>
           <div class="fw-semibold">Pagos con Culqi</div>
           <small>
-            <strong>Pagar con Culqi</strong> abre la ventana oficial (tarjeta o Yape de prueba).
-            Efectivo solo si elegiste recojo en tienda.
+            <strong>Pagar con Culqi</strong> pide boleta o factura y luego abre la ventana oficial (tarjeta o Yape).
+            El efectivo al recoger no emite comprobante en la web.
           </small>
         </div>
       </div>
@@ -45,16 +45,21 @@
         </div>
       </div>
 
-      <!-- Opción EFECTIVO -->
-      <div class="card shadow-sm mb-3">
+      <!-- Opción recojo -->
+      <div class="card shadow-sm mb-3" *ngIf="canCash">
         <div class="card-body">
-          <h5 class="mb-2">¿Efectivo (retiro en tienda)?</h5>
+          <h5 class="mb-2">Retiro en tienda</h5>
           <p class="text-muted mb-2">
-            Si tu opción es retiro en tienda puedes pagar en efectivo al recoger.
-            <strong>No se emiten comprobantes electrónicos (PDF/XML/CDR) en esta modalidad; si lo necesitas, puedes solicitarlo en tienda.</strong>
-            El plazo máximo de recojo es de 1 a 2 días. Transcurrido ese tiempo, el pedido se cancela para evitar inconvenientes.
+            Puedes pagar en <strong>efectivo al recoger</strong> o <strong>ahora con Culqi</strong> (tarjeta o Yape) y pasar a recoger.
           </p>
-          <p class="small mb-0" style="color:#8a6d1d;" *ngIf="canCash">
+          <p class="text-muted mb-2">
+            El plazo máximo de recojo es de <strong>1 a 2 días</strong>. Pasado ese tiempo el pedido se cancela.
+          </p>
+          <p class="text-muted mb-2">
+            Si pagas con Culqi, emitimos tu <strong>boleta o factura</strong> electrónica.
+            Si pagas en efectivo, el comprobante se solicita en tienda.
+          </p>
+          <p class="small mb-0" style="color:#8a6d1d;">
             📍 Recoge en: {{ direccionTienda }}
           </p>
         </div>
@@ -116,21 +121,7 @@
         </div>
       </div>
 
-      <!-- Solicitudes de comprobante (solo para Culqi; efectivo no emite) -->
-      <div class="card shadow-sm mt-3">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div>¿Necesitas factura electrónica?</div>
-            <button class="btn btn-outline-primary btn-sm" (click)="openFactura()">Solicitar</button>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <div>¿Necesitas boleta electrónica?</div>
-            <button class="btn btn-outline-primary btn-sm" (click)="openBoleta()">Solicitar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Datos guardados -->
+      <!-- Datos de comprobante (solo si ya eligió BO/FA para Culqi) -->
       <div *ngIf="pay.invoice$ | async as inv" class="card shadow-sm mt-3">
         <div class="card-body">
           <div class="fw-semibold mb-1">Datos de Factura Electrónica</div>
@@ -318,11 +309,11 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 id="docLabel" class="modal-title">¿Qué deseas emitir?</h5>
+        <h5 id="docLabel" class="modal-title">¿Boleta o factura?</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <p class="text-muted">Elige el tipo de comprobante para continuar.</p>
+        <p class="text-muted">Elige el comprobante. Luego se abre Culqi (tarjeta o Yape).</p>
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-dark w-100" (click)="pickDoc('BO')">Boleta electrónica</button>
           <button type="button" class="btn btn-outline-dark w-100" (click)="pickDoc('FA')">Factura electrónica</button>

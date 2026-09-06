@@ -215,6 +215,26 @@ export class PagoComponent implements AfterViewInit {
       alert('Indica un correo válido para el pago.');
       return;
     }
+    if (this.docListo()) {
+      this.abrirCulqi();
+      return;
+    }
+    this.selectedDoc = null;
+    this.openDocModal();
+  }
+
+  private docListo(): boolean {
+    if (this.selectedDoc === 'FA') return !!this.pay.currentInvoice();
+    if (this.selectedDoc === 'BO') return !!this.pay.currentBoleta();
+    const fa = this.pay.currentInvoice();
+    const bo = this.pay.currentBoleta();
+    if (fa && !bo) { this.selectedDoc = 'FA'; return true; }
+    if (bo && !fa) { this.selectedDoc = 'BO'; return true; }
+    return false;
+  }
+
+  private abrirCulqi() {
+    const email = this.correoCulqi;
     const pk = environment.culqiPublicKey || 'pk_test_vJYOwLgj0Zghy6SF';
     const amount = Math.round(this.total * 100);
     const Ctor = (window as any).CulqiCheckout;
@@ -287,40 +307,28 @@ export class PagoComponent implements AfterViewInit {
 
   async onCulqiSuccess(payload: { id: string; method: 'tarjeta' | 'yape' }) {
     this.pendingCharge = payload;
-
-    const factura = this.pay.currentInvoice();
-    const boleta = this.pay.currentBoleta();
-
-    // Si no hay datos, pedir selección
-    if (!factura && !boleta) {
-      this.selectedDoc = null;
+    if (!this.docListo()) {
       this.openDocModal();
       return;
     }
-
-    // Si hay ambos y no hay selección explícita
-    if (factura && boleta && !this.selectedDoc) {
-      this.openDocModal();
-      return;
-    }
-
-    const tipo: 'FA' | 'BO' = this.selectedDoc ?? (factura ? 'FA' : 'BO');
+    const tipo: 'FA' | 'BO' = this.selectedDoc ?? (this.pay.currentInvoice() ? 'FA' : 'BO');
     this.finalizeOrder(tipo);
   }
 
   pickDoc(tipo: 'FA' | 'BO') {
     this.selectedDoc = tipo;
-
     const factura = this.pay.currentInvoice();
     const boleta = this.pay.currentBoleta();
 
     if (tipo === 'FA' && !factura) { this.closeDocModal(); this.openFactura(); return; }
     if (tipo === 'BO' && !boleta) { this.closeDocModal(); this.openBoleta(); return; }
 
+    this.closeDocModal();
     if (this.pendingCharge) {
-      this.closeDocModal();
       this.finalizeOrder(tipo);
+      return;
     }
+    this.abrirCulqi();
   }
 
   /** CULQI: crea pedido en backend */
@@ -473,10 +481,10 @@ export class PagoComponent implements AfterViewInit {
 
     this.pay.saveInvoice(this.facturaForm.value as InvoiceData);
     this.selectedDoc = 'FA';
-    alert('Datos de facturación guardados');
     this.closeDrawers();
 
     if (this.pendingCharge) this.finalizeOrder('FA');
+    else this.abrirCulqi();
   }
 
   guardarBoleta() {
@@ -491,10 +499,10 @@ export class PagoComponent implements AfterViewInit {
 
     this.pay.saveBoleta(this.boletaForm.value as BoletaData);
     this.selectedDoc = 'BO';
-    alert('Datos de boleta guardados');
     this.closeDrawers();
 
     if (this.pendingCharge) this.finalizeOrder('BO');
+    else this.abrirCulqi();
   }
 
   openFactura() {
