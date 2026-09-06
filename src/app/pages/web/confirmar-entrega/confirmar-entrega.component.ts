@@ -5,7 +5,7 @@ import { CheckoutService } from '../../../services/checkout/checkout.service';
 import { CartService } from '../../../services/cart/cart.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
-import { estimarEnvio, DIRECCION_TIENDA, TEXTO_RECOJO } from '../../../core/utils/tarifa-envio';
+import { DIRECCION_TIENDA, TEXTO_RECOJO, costoEnvio } from '../../../core/utils/tarifa-envio';
 
 @Component({
   selector: 'ed-web-confirmar-entrega',
@@ -34,12 +34,23 @@ export class ConfirmarEntregaComponent {
 
   get feeLabel(): string {
     const a = this.checkout.savedExpress || this.checkout.value.address;
-    return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).etiqueta;
+    if (a?.envioTipo === 'AGENCIA') {
+      return a.agenciaNombre ? `Shalom ${a.agenciaNombre} · S/ 12` : 'Shalom agencia · S/ 12';
+    }
+    if (a?.envioTipo === 'DOMICILIO') {
+      return costoEnvio(a?.departamento, a?.provincia, a?.distrito, 'DOMICILIO').etiqueta;
+    }
+    return costoEnvio(a?.departamento, a?.provincia, a?.distrito).etiqueta;
   }
 
   get expressFee(): number {
+    return this.checkout.value.fee || this.expressFeeCalc;
+  }
+
+  private get expressFeeCalc(): number {
     const a = this.checkout.savedExpress || this.checkout.value.address;
-    return estimarEnvio(a?.departamento, a?.provincia, a?.distrito).costo;
+    const tipo = a?.envioTipo === 'DOMICILIO' ? 'DOMICILIO' : 'AGENCIA';
+    return costoEnvio(a?.departamento, a?.provincia, a?.distrito, tipo).costo;
   }
 
   // Radio buttons
@@ -79,7 +90,7 @@ export class ConfirmarEntregaComponent {
     this.checkout.setAddress(saved);
     this.checkout.setMode('EXPRESS');
     this.checkout.setCosts(
-      estimarEnvio(saved.departamento, saved.provincia, saved.distrito).costo,
+      costoEnvio(saved.departamento, saved.provincia, saved.distrito, saved.envioTipo === 'DOMICILIO' ? 'DOMICILIO' : 'AGENCIA').costo,
       0,
     );
   }

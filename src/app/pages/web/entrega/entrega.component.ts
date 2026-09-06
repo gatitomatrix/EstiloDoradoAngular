@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../../services/cart/cart.service';
 import { CheckoutService } from '../../../services/checkout/checkout.service';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
-import { estimarEnvio, cubreEnvio, filtrarProvinciasEnvio, filtrarDistritosEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
+import { cubreEnvio, filtrarProvinciasEnvio, filtrarDistritosEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA, zonaEnvio, costoEnvio } from '../../../core/utils/tarifa-envio';
+import { AgenciaShalom, buscarAgenciasShalom, ResultadoAgencias } from '../../../core/utils/agencias-shalom';
 
 // widgets
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
@@ -17,7 +18,7 @@ import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/
 @Component({
   selector: 'ed-web-entrega',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BarraSuperiorComponent, FranjaMarcaComponent, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, BarraSuperiorComponent, FranjaMarcaComponent, RouterLink],
   templateUrl: './entrega.component.html',
   styleUrls: ['./entrega.component.css']
 })
@@ -42,6 +43,10 @@ export class EntregaComponent {
   // UI
   showAddressModal = false;
   stepMap = false;
+  fase: 'ubigeo' | 'agencia' | 'mapa' = 'ubigeo';
+  quiereDomicilio = false;
+  agenciasRes: ResultadoAgencias | null = null;
+  agenciaSel: AgenciaShalom | null = null;
   submitting = false;
   cobertura = TEXTO_COBERTURA;
   direccionTienda = DIRECCION_TIENDA;
@@ -59,8 +64,8 @@ export class EntregaComponent {
     departamento: ['', Validators.required],
     provincia: ['', Validators.required],
     distrito: ['', Validators.required],
-    via: ['', Validators.required],
-    numero: ['', Validators.required],
+    via: [''],
+    numero: [''],
   });
 
   // ---------- INIT ----------
@@ -133,6 +138,18 @@ export class EntregaComponent {
 
   openExpress() { this.openAddressModal(true); }
 
+  get esPasco(): boolean {
+    return zonaEnvio(this.addrForm.value.departamento, this.addrForm.value.provincia, this.addrForm.value.distrito) === 'pasco';
+  }
+
+  get tarifaAgencia() {
+    return costoEnvio(this.addrForm.value.departamento, this.addrForm.value.provincia, this.addrForm.value.distrito, 'AGENCIA');
+  }
+
+  get tarifaDomicilio() {
+    return costoEnvio(this.addrForm.value.departamento, this.addrForm.value.provincia, this.addrForm.value.distrito, 'DOMICILIO');
+  }
+
   private persistDraft() {
     if (this.restoring) return;
     const v = this.addrForm.getRawValue();
@@ -148,7 +165,12 @@ export class EntregaComponent {
   }
 
   private openAddressModal(prefill: boolean) {
-    this.stepMap = false; this.showAddressModal = true;
+    this.fase = 'ubigeo';
+    this.stepMap = false;
+    this.quiereDomicilio = false;
+    this.agenciasRes = null;
+    this.agenciaSel = null;
+    this.showAddressModal = true;
     if (!prefill) return;
 
     const a = (this.checkout.value.draft || this.checkout.value.address) as any;
@@ -199,8 +221,79 @@ export class EntregaComponent {
   closeModal() { this.showAddressModal = false; }
 
   // ---------- GEOCODING ----------
+  continuarUbigeo() {
+    const v = this.addrForm.value;
+    if (!v.departamento || !v.provincia || !v.distrito) {
+      this.addrForm.markAllAsTouched();
+      return;
+    }
+    if (!cubreEnvio(v.departamento, v.provincia, v.distrito)) {
+      alert(TEXTO_COBERTURA);
+      return;
+    }
+    if (this.esPasco) {
+      this.quiereDomicilio = true;
+      if (!v.via?.trim() || !v.numero?.trim()) {
+        this.addrForm.get('via')?.markAsTouched();
+        this.addrForm.get('numero')?.markAsTouched();
+        return;
+      }
+      this.continuarDireccion();
+      return;
+    }
+    this.agenciasRes = buscarAgenciasShalom(v.departamento, v.provincia, v.distrito);
+    this.agenciaSel = this.agenciasRes.agencias[0] || null;
+    this.fase = 'agencia';
+  }
+
+  elegirAgencia(a: AgenciaShalom) {
+    this.agenciaSel = a;
+  }
+
+  continuarDesdeAgencia() {
+    if (!this.agenciaSel) return;
+    if (this.quiereDomicilio) {
+      const v = this.addrForm.value;
+      if (!v.via?.trim() || !v.numero?.trim()) {
+        this.addrForm.get('via')?.markAsTouched();
+        this.addrForm.get('numero')?.markAsTouched();
+        this.fase = 'ubigeo';
+        return;
+      }
+      this.continuarDireccion();
+      return;
+    }
+    this.guardarAgencia();
+  }
+
+  private guardarAgencia() {
+    const v = this.addrForm.value;
+    const a = this.agenciaSel!;
+    this.checkout.setMode('EXPRESS');
+    this.checkout.setAddress({
+      departamento: v.departamento!,
+      provincia: v.provincia!,
+      distrito: v.distrito!,
+      via: a.nombre,
+      numero: 'S/N',
+      full: `${a.nombre} — ${a.direccion} (${a.distrito})`,
+      envioTipo: 'AGENCIA',
+      agenciaId: a.id,
+      agenciaNombre: a.nombre,
+      agenciaDireccion: a.direccion,
+    } as any);
+    this.checkout.setCosts(this.tarifaAgencia.costo, 0);
+    this.showAddressModal = false;
+    this.router.navigateByUrl('/confirmar-entrega');
+  }
+
   async continuarDireccion() {
-    if (this.addrForm.invalid) { this.addrForm.markAllAsTouched(); return; }
+    const v = this.addrForm.value;
+    if (!v.departamento || !v.provincia || !v.distrito || !v.via?.trim() || !v.numero?.trim()) {
+      this.addrForm.markAllAsTouched();
+      return;
+    }
+    this.fase = 'mapa';
     this.stepMap = true;
 
     const q = this.buildQueryFromForm();
@@ -370,10 +463,13 @@ export class EntregaComponent {
       numero,
       lat: this.lastCoords?.lat,
       lng: this.lastCoords?.lng,
-      full: this.composeFullAddress(v.via!, numero, v.distrito!, v.provincia!, v.departamento!)
+      full: this.composeFullAddress(v.via!, numero, v.distrito!, v.provincia!, v.departamento!),
+      envioTipo: 'DOMICILIO',
+      agenciaId: this.agenciaSel?.id,
+      agenciaNombre: this.agenciaSel?.nombre,
+      agenciaDireccion: this.agenciaSel?.direccion,
     } as any);
-    const tarifa = estimarEnvio(v.departamento, v.provincia, v.distrito);
-    this.checkout.setCosts(tarifa.costo, 0);
+    this.checkout.setCosts(costoEnvio(v.departamento, v.provincia, v.distrito, 'DOMICILIO').costo, 0);
 
     this.showAddressModal = false;
     this.router.navigateByUrl('/confirmar-entrega');

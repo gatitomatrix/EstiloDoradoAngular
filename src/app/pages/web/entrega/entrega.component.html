@@ -59,8 +59,8 @@
                     >
                         <div class="ed-icon">🚚</div>
                         <div class="ed-body">
-                            <div class="fw-semibold">Envío Express</div>
-                            <div class="text-muted small">Ingresa tu dirección para conocer disponibilidad</div>
+                            <div class="fw-semibold">Envío</div>
+                            <div class="text-muted small">Agencia Shalom o domicilio (Pasco: solo domicilio S/ 5)</div>
                             <div class="text-muted small mt-1">
                               Solo Lima – Callao, Huancayo y Pasco.
                             </div>
@@ -102,14 +102,21 @@
         <div class="modal-content" style="border-radius:16px;">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <span class="me-2">📍</span>{{ !stepMap ? 'Ingresa tu dirección' : 'Confirma tu dirección' }}
+                    <span class="me-2">📍</span>
+                    <ng-container [ngSwitch]="fase">
+                      <span *ngSwitchCase="'agencia'">Agencia Shalom</span>
+                      <span *ngSwitchCase="'mapa'">Confirma tu dirección</span>
+                      <span *ngSwitchDefault>¿A dónde enviamos?</span>
+                    </ng-container>
                 </h5>
                 <button type="button" class="btn-close" (click)="closeModal()"></button>
             </div>
 
             <div class="modal-body">
-                <!-- ...dentro del modal, Paso 1 (form) -->
-                <form *ngIf="!stepMap" [formGroup]="addrForm" class="row g-3">
+                <form *ngIf="fase === 'ubigeo'" [formGroup]="addrForm" class="row g-3">
+                    <div class="col-12" *ngIf="esPasco">
+                      <div class="alert alert-warning py-2 mb-0">En Cerro de Pasco no usamos Shalom. Entrega a domicilio <strong>S/ 5</strong>.</div>
+                    </div>
                     <div class="col-md-4">
                         <label class="form-label">Departamento</label>
                         <select class="form-select" formControlName="departamento">
@@ -134,23 +141,48 @@
                         </select>
                     </div>
 
-                    <div class="col-md-8">
+                    <div class="col-md-8" *ngIf="esPasco || quiereDomicilio">
                         <label class="form-label">Avenida / Calle / Jirón</label>
                         <input class="form-control" formControlName="via" placeholder="Ingresa el nombre de la vía">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4" *ngIf="esPasco || quiereDomicilio">
                         <label class="form-label">Número</label>
                         <input class="form-control" formControlName="numero" placeholder="Número">
                     </div>
                 </form>
 
-                <!-- Paso 2: MAPA -->
-                <div *ngIf="stepMap">
-                    <div class="alert alert-warning py-2">Fija la ubicación exacta en el mapa.</div>
+                <div *ngIf="fase === 'agencia' && agenciasRes">
+                  <p class="small text-muted" *ngIf="agenciasRes.exacto">Agencias Shalom en {{ agenciasRes.distritoPedido }}. Recojo en agencia <strong>S/ 12</strong>.</p>
+                  <div class="alert alert-info py-2" *ngIf="!agenciasRes.exacto">
+                    No hay agencia Shalom en {{ agenciasRes.distritoPedido }}. Te sugerimos las de
+                    <strong>{{ agenciasRes.distritoSugerido }}</strong> (más cercano).
+                  </div>
+                  <label class="ed-radio mb-2" *ngFor="let a of agenciasRes.agencias" [class.ed-radio--on]="agenciaSel?.id === a.id" (click)="elegirAgencia(a)">
+                    <input type="radio" name="ag" [checked]="agenciaSel?.id === a.id">
+                    <div>
+                      <div class="fw-semibold">{{ a.nombre }}</div>
+                      <div class="small text-muted">{{ a.direccion }} · {{ a.distrito }}</div>
+                    </div>
+                  </label>
+                  <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="domi" [(ngModel)]="quiereDomicilio">
+                    <label class="form-check-label" for="domi">
+                      Quiero entrega a domicilio (+ S/ {{ tarifaDomicilio.costo - tarifaAgencia.costo }}) · total S/ {{ tarifaDomicilio.costo }}
+                    </label>
+                  </div>
+                  <div class="row g-2 mt-2" *ngIf="quiereDomicilio" [formGroup]="addrForm">
+                    <div class="col-md-8">
+                      <input class="form-control" formControlName="via" placeholder="Calle / avenida">
+                    </div>
+                    <div class="col-md-4">
+                      <input class="form-control" formControlName="numero" placeholder="Número">
+                    </div>
+                  </div>
+                </div>
 
-                    <!-- Contenedor del mapa (Leaflet necesita tamaño fijo) -->
+                <div *ngIf="fase === 'mapa'">
+                    <div class="alert alert-warning py-2">Fija la ubicación exacta en el mapa. Entrega a domicilio.</div>
                     <div id="edMap" style="height:320px;border:1px solid #dde;border-radius:8px" class="mb-3"></div>
-
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <div class="small text-muted">Dirección</div>
@@ -160,15 +192,18 @@
                                 {{ addrForm.value.departamento }}
                             </div>
                         </div>
-                        <button class="btn btn-outline-secondary" (click)="stepMap=false">✏️ Editar</button>
+                        <button class="btn btn-outline-secondary" (click)="fase = esPasco ? 'ubigeo' : 'agencia'; stepMap=false">✏️ Editar</button>
                     </div>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button *ngIf="!stepMap" class="btn btn-primary" (click)="continuarDireccion()">Confirmar
-                    dirección</button>
-                <button *ngIf="stepMap" class="btn btn-dark" (click)="confirmarYGuardar()">Confirmar y Guardar</button>
+                <button *ngIf="fase === 'ubigeo'" class="btn btn-primary" (click)="continuarUbigeo()">Continuar</button>
+                <button *ngIf="fase === 'agencia'" class="btn btn-outline-secondary" (click)="fase='ubigeo'">Atrás</button>
+                <button *ngIf="fase === 'agencia'" class="btn btn-dark" (click)="continuarDesdeAgencia()">
+                  {{ quiereDomicilio ? 'Ir al mapa' : 'Recoger en agencia S/ 12' }}
+                </button>
+                <button *ngIf="fase === 'mapa'" class="btn btn-dark" (click)="confirmarYGuardar()">Confirmar y Guardar</button>
             </div>
         </div>
     </div>

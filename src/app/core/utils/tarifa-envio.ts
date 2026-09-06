@@ -1,12 +1,14 @@
-/** Estimado tipo Shalom. Cobertura: Lima Metropolitana, Callao, Pasco y Huancayo (3 distritos). */
+/** Envío: Pasco domicilio S/5 (sin Shalom). Huancayo/Lima–Callao: agencia S/12 + extra domicilio. */
 export interface TarifaEnvio {
   costo: number;
   zona: string;
   etiqueta: string;
 }
 
-const COBERTURA = 'Lima – Callao, Huancayo y Pasco';
+export type ZonaEnvio = 'pasco' | 'huancayo' | 'lima' | 'fuera';
+export type TipoEnvio = 'AGENCIA' | 'DOMICILIO';
 
+const COBERTURA = 'Lima – Callao, Huancayo y Pasco';
 const HUANCAYO_DISTRITOS = ['CHILCA', 'EL TAMBO', 'HUANCAYO'];
 
 export function cubreEnvio(
@@ -31,6 +33,53 @@ export function cubreEnvio(
   return false;
 }
 
+export function zonaEnvio(
+  departamento?: string | null,
+  provincia?: string | null,
+  distrito?: string | null,
+): ZonaEnvio {
+  if (!cubreEnvio(departamento, provincia, distrito)) return 'fuera';
+  const d = norm(departamento);
+  const p = norm(provincia);
+  if (d.includes('PASCO') || p === 'PASCO') return 'pasco';
+  if (d.includes('JUNIN') || p === 'HUANCAYO') return 'huancayo';
+  return 'lima';
+}
+
+export function usaShalom(departamento?: string | null, provincia?: string | null): boolean {
+  return zonaEnvio(departamento, provincia) !== 'pasco' && zonaEnvio(departamento, provincia) !== 'fuera';
+}
+
+export function extraDomicilio(zona: ZonaEnvio): number {
+  if (zona === 'pasco') return 5;
+  if (zona === 'huancayo') return 5;
+  if (zona === 'lima') return 10;
+  return 0;
+}
+
+export function costoEnvio(
+  departamento?: string | null,
+  provincia?: string | null,
+  distrito?: string | null,
+  tipo: TipoEnvio = 'AGENCIA',
+): TarifaEnvio {
+  const zona = zonaEnvio(departamento, provincia, distrito);
+  if (zona === 'fuera') {
+    return { costo: 0, zona, etiqueta: `Fuera de cobertura. Enviamos a ${COBERTURA}` };
+  }
+  if (zona === 'pasco') {
+    return { costo: 5, zona, etiqueta: 'Pasco · domicilio S/ 5 (sin Shalom)' };
+  }
+  if (tipo === 'AGENCIA') {
+    const donde = zona === 'huancayo' ? 'Huancayo' : 'Lima – Callao';
+    return { costo: 12, zona, etiqueta: `${donde} · Shalom agencia S/ 12` };
+  }
+  if (zona === 'huancayo') {
+    return { costo: 17, zona, etiqueta: 'Huancayo · Shalom + domicilio S/ 12 + 5' };
+  }
+  return { costo: 22, zona, etiqueta: 'Lima – Callao · Shalom + domicilio S/ 12 + 10' };
+}
+
 export function filtrarProvinciasEnvio(departamento: string, todas: string[]): string[] {
   return todas.filter((p) => cubreEnvio(departamento, p));
 }
@@ -43,23 +92,14 @@ export function filtrarDistritosEnvio(
   return todas.filter((di) => cubreEnvio(departamento, provincia, di));
 }
 
+/** Compat: agencia si hay Shalom, domicilio en Pasco. */
 export function estimarEnvio(
   departamento?: string | null,
   provincia?: string | null,
   distrito?: string | null,
 ): TarifaEnvio {
-  const d = norm(departamento);
-  const p = norm(provincia);
-  if (!cubreEnvio(departamento, provincia, distrito)) {
-    return { costo: 0, zona: 'fuera', etiqueta: `Fuera de cobertura. Enviamos a ${COBERTURA}` };
-  }
-  if (d.includes('JUNIN') || p === 'HUANCAYO') {
-    return { costo: 8, zona: 'huancayo', etiqueta: 'Huancayo · S/ 8' };
-  }
-  if (d.includes('PASCO') || p === 'PASCO') {
-    return { costo: 4, zona: 'pasco', etiqueta: 'Pasco local · S/ 4' };
-  }
-  return { costo: 10, zona: 'lima', etiqueta: 'Lima – Callao · S/ 10' };
+  const zona = zonaEnvio(departamento, provincia, distrito);
+  return costoEnvio(departamento, provincia, distrito, zona === 'pasco' ? 'DOMICILIO' : 'AGENCIA');
 }
 
 export const DIRECCION_TIENDA =

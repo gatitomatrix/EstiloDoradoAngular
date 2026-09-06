@@ -1,16 +1,21 @@
 import { Injectable } from '@angular/core';
 
 export type DeliveryMode = 'NONE' | 'STORE_PICKUP' | 'EXPRESS';
+export type TipoEnvio = 'AGENCIA' | 'DOMICILIO';
 
 export interface Address {
   departamento: string;
   provincia: string;
   distrito: string;
-  via: string;      // avenida/calle/jirón
+  via: string;      // avenida/calle/jirón o nombre de agencia
   numero: string;
   full?: string;    // texto completo generado
   lat?: number;
   lng?: number;
+  envioTipo?: TipoEnvio;
+  agenciaId?: string;
+  agenciaNombre?: string;
+  agenciaDireccion?: string;
 }
 
 export interface CheckoutState {
