@@ -36,13 +36,12 @@
         </div>
       </div>
 
-      <!-- Mensaje Reparto Express -->
-      <div class="alert alert-dark d-flex align-items-start gap-3">
-        <i class="bi bi-shield-lock fs-4"></i>
+      <div class="alert alert-dark d-flex align-items-start gap-3" *ngIf="mode === 'EXPRESS'">
+        <i class="bi bi-truck fs-4"></i>
         <div>
-          <div class="fw-semibold">Envío Express</div>
-          <small>Recuerda que al aceptar el Envío Express, tu pedido llegará en un plazo de 1 a 2 días a tu direccion. 
-          La unica opción de pago es con <strong>Culqui.</strong> Para un envío y pago seguro para tu tranquilidad.</small>
+          <div class="fw-semibold">Envío</div>
+          <small>Tu pedido se envía por Shalom (agencia o domicilio). El pago es con
+          <strong>Culqi</strong> (tarjeta o Yape).</small>
         </div>
       </div>
 
