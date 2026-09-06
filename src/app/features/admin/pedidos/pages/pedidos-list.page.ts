@@ -65,7 +65,6 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
 
       <div class="col-sm-2 d-flex gap-2">
         <button class="btn btn-dark flex-fill">Filtrar</button>
-        <button type="button" class="btn btn-primary" (click)="openCrear()">CREAR PEDIDO</button>
       </div>
     </form>
 
