@@ -295,10 +295,17 @@ export class PagoComponent implements AfterViewInit {
     const factura = this.pay.currentInvoice();
     const boleta = this.pay.currentBoleta();
 
+    const addr = this.checkout.value.address;
     const body: ConfirmarReq = {
       forma_pago: payload.method,           // 'tarjeta' | 'yape'
       culqi_id: payload.id,
       direccion_entrega: direccion || null,
+      envio_tipo: addr?.envioTipo === 'DOMICILIO' ? 'DOMICILIO' : 'AGENCIA',
+      ubigeo: addr ? {
+        departamento: addr.departamento,
+        provincia: addr.provincia,
+        distrito: addr.distrito,
+      } : undefined,
       items,
       comprobante: tipo,
       ...(tipo === 'FA' ? { factura: factura! } : { boleta: boleta! })

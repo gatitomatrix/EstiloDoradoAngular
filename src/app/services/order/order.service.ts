@@ -18,6 +18,8 @@ export interface ConfirmarReq {
   forma_pago: 'tarjeta' | 'yape' | 'efectivo';
   culqi_id?: string;                        // requerido SOLO si no es efectivo
   direccion_entrega?: string | null;
+  envio_tipo?: 'AGENCIA' | 'DOMICILIO';
+  ubigeo?: { departamento?: string; provincia?: string; distrito?: string };
   items: ConfirmarItemReq[];
   comprobante?: DocTipo;                    // solo aplica si no es efectivo
   factura?: InvoiceData;
