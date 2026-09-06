@@ -80,6 +80,7 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
             <th>Estado</th>
             <th>Forma pago</th>
             <th>Dirección entrega</th>
+            <th>Producto</th>
             <th>Total</th>
             <th>Tipo CPE</th>
             <th>PDF</th>
@@ -88,7 +89,7 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
         </thead>
         <tbody>
           <tr *ngIf="!rows().length">
-            <td colspan="10" class="text-center text-muted py-4">
+            <td colspan="11" class="text-center text-muted py-4">
               No hay pedidos con estos filtros.
             </td>
           </tr>
@@ -107,7 +108,21 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
               </span>
             </td>
             <td class="text-capitalize">{{ p.forma_pago || '-' }}</td>
-            <td class="text-truncate" style="max-width:360px" [title]="p.direccion_entrega || '-'">{{ p.direccion_entrega || '-' }}</td>
+            <td class="text-truncate" style="max-width:280px" [title]="p.direccion_entrega || '-'">{{ p.direccion_entrega || '-' }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2" *ngIf="p.items?.length; else sinProd">
+                <img [src]="p.items[0].imagen_url || 'assets/img/no-image.png'" alt=""
+                     style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #eee">
+                <div style="min-width:0">
+                  <div class="text-truncate" style="max-width:180px" [title]="p.producto_label">{{ p.items[0].nombre }} ×{{ p.items[0].cantidad }}</div>
+                  <div class="small text-muted">
+                    {{ p.items[0].categoria || '—' }}
+                    <span *ngIf="p.items.length>1"> · +{{ p.items.length-1 }} más</span>
+                  </div>
+                </div>
+              </div>
+              <ng-template #sinProd><span class="text-muted">—</span></ng-template>
+            </td>
             <td>{{ p.total | number:'1.2-2' }}</td>
             <td>{{ p.comprobante_tipo || '-' }}</td>
             <td>
@@ -117,8 +132,7 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
               <span *ngIf="!p.pdf_url" class="text-muted">—</span>
             </td>
             <td class="text-end">
-              <button class="btn btn-sm btn-outline-secondary me-1" (click)="openEditar(p)"><i class="pi pi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" (click)="eliminar(p)"><i class="pi pi-trash"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="openEditar(p)" title="Editar / cancelar"><i class="pi pi-pencil"></i></button>
             </td>
           </tr>
         </tbody>
@@ -180,6 +194,19 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
               <div class="col-12">
                 <label class="form-label">Dirección entrega</label>
                 <input class="form-control" [value]="edit.direccion_entrega || '-'" readonly>
+              </div>
+              <div class="col-12" *ngIf="edit.items?.length">
+                <label class="form-label">Productos a entregar</label>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex align-items-center gap-2 p-2 border rounded" *ngFor="let it of edit.items">
+                    <img [src]="it.imagen_url || 'assets/img/no-image.png'" alt=""
+                         style="width:56px;height:56px;object-fit:cover;border-radius:8px">
+                    <div>
+                      <div class="fw-semibold">{{ it.nombre }}</div>
+                      <div class="small text-muted">{{ it.categoria || 'Sin categoría' }} · {{ it.cantidad }} und.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -456,7 +483,8 @@ export class PedidosListPage implements OnInit {
       direccion_entrega: p.direccion_entrega,
       estado: p.estado,
       forma_pago: p.forma_pago ?? undefined,
-      fecha_pedido: p.fecha_pedido ? this.toYYYYMMDD(new Date(p.fecha_pedido)) : this.toYYYYMMDD(new Date())
+      fecha_pedido: p.fecha_pedido ? this.toYYYYMMDD(new Date(p.fecha_pedido)) : this.toYYYYMMDD(new Date()),
+      items: p.items || []
     };
     this.editOpen = true;
   }
@@ -544,15 +572,6 @@ export class PedidosListPage implements OnInit {
     this.api.create(payload).subscribe({
       next: () => { this.savingCreate = false; this.createOpen = false; this.buscar(); },
       error: (e) => { this.savingCreate = false; this.alertHttp(e, 'No se pudo crear'); }
-    });
-  }
-
-  // === Eliminar ===
-  eliminar(p:any){
-    if (!confirm(`¿Eliminar el pedido #${p.id_pedido}?`)) return;
-    this.api.remove(p.id_pedido).subscribe({
-      next: () => this.buscar(),
-      error: (e) => this.alertHttp(e, 'No se pudo eliminar')
     });
   }
 
