@@ -36,6 +36,7 @@ export class DetalleComponent implements OnInit, OnDestroy {
   prod: ProductDetail | null = null;
   imagenes: string[] = [];
   sub?: Subscription;
+  motivoDescuento = '';
 
   ngOnInit(): void {
     this.sub = this.route.paramMap.subscribe((params) => {
@@ -57,6 +58,10 @@ export class DetalleComponent implements OnInit, OnDestroy {
         this.prod = p;
         this.imagenes = p.imagen ? [p.imagen] : ['/images/productos/placeholder.jpg'];
         this.loading = false;
+        this.productService.getPromoActiva().subscribe({
+          next: (promo) => { this.motivoDescuento = this.armarMotivo(p, promo); },
+          error: () => { this.motivoDescuento = this.armarMotivo(p, null); },
+        });
       },
       error: (err) => {
         console.error(err);
@@ -88,5 +93,17 @@ export class DetalleComponent implements OnInit, OnDestroy {
 
   irHome() {
     this.router.navigateByUrl('/');
+  }
+
+  private armarMotivo(
+    p: ProductDetail,
+    promo: { activa?: boolean; texto?: string; porcentaje?: number } | null,
+  ): string {
+    const lista = p.precioLista ?? p.precio;
+    if (!(lista > p.precio)) return '';
+    if (promo?.activa && promo.texto?.trim()) return promo.texto.trim();
+    const pct = Number(p.descuentoPct || 0);
+    if (pct > 0) return `Oferta de este producto: ${pct}% de descuento.`;
+    return 'Precio promocional.';
   }
 }

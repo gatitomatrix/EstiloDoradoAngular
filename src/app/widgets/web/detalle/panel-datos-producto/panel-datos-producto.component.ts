@@ -21,6 +21,7 @@ export class PanelDatosProductoComponent {
   @Input() stock = 0;                 // 👈 lo usaremos para el máximo
   @Input() precio = 0;
   @Input() precioLista = 0;
+  @Input() motivoDescuento = '';
   @Input() rating = 4;
 
   @Output() seguirComprando = new EventEmitter<void>(); // 👈 para volver a home

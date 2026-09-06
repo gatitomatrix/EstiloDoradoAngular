@@ -22,6 +22,7 @@
         <small class="d-block text-muted" *ngIf="precioLista > precio">
           <s>S/. {{ precioLista | number:'1.2-2' }}</s>
         </small>
+        <p class="ed-det__promo" *ngIf="precioLista > precio && motivoDescuento">{{ motivoDescuento }}</p>
     </div>
 
     <div class="ed-det__actions">

@@ -69,6 +69,13 @@
   margin-top: 4px;
 }
 .ed-det__price small { color: #777; margin-right: 6px; }
+.ed-det__promo {
+  margin: 6px 0 0;
+  font-size: .92rem;
+  font-weight: 600;
+  color: #8a6d1d;
+  line-height: 1.35;
+}
 
 /* Botones de acción */
 .ed-det__btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }

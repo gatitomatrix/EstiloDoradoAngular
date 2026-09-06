@@ -27,6 +27,7 @@
         [stock]="prod.stock ?? 0"
         [precio]="prod.precio"
         [precioLista]="prod.precioLista || prod.precio"
+        [motivoDescuento]="motivoDescuento"
         [rating]="4"
         (agregarCarrito)="onAddToCart($event)"
         (seguirComprando)="irHome()"
