@@ -9,6 +9,7 @@ import { UbigeoService } from '../../../services/ubigeo/ubigeo.service';
 import { GeocodingService } from '../../../services/geocoding/geocoding.service';
 import { firstValueFrom } from 'rxjs';
 import { cubreEnvio, filtrarProvinciasEnvio, filtrarDistritosEnvio, TEXTO_COBERTURA, TEXTO_RECOJO, DIRECCION_TIENDA, zonaEnvio, costoEnvio } from '../../../core/utils/tarifa-envio';
+import { AgenciaShalom, buscarAgenciasShalom, ResultadoAgencias } from '../../../core/utils/agencias-shalom';
 import { AuthService } from '../../../services/auth/auth.service';
 
 // widgets
