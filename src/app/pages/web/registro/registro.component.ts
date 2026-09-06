@@ -135,8 +135,7 @@ export class RegistroComponent {
       .subscribe({
         next: () => {
           this.submitting = false;
-          const dest = this.returnUrl.consume('/');
-          this.router.navigateByUrl(dest);
+          this.router.navigateByUrl(this.destinoTrasRegistro());
         },
         error: (e) => {
           this.submitting = false;
@@ -167,8 +166,7 @@ export class RegistroComponent {
             return;
           }
           this.auth.applyExternalLogin(res);
-          const dest = this.returnUrl.consume('/');
-          this.router.navigateByUrl(dest);
+          this.router.navigateByUrl(this.destinoTrasRegistro());
         },
         error: (e) => {
           this.googleLoading = false;
@@ -186,5 +184,20 @@ export class RegistroComponent {
     this.router.navigateByUrl('/').then(() => {
       window.dispatchEvent(new CustomEvent('ed-open-login'));
     });
+  }
+
+  /** Primera cuenta: tienda. Solo si venía del checkout se retoma la compra. */
+  private destinoTrasRegistro(): string {
+    const u = this.returnUrl.peek() || '';
+    if (
+      u.startsWith('/entrega') ||
+      u.startsWith('/pago') ||
+      u.startsWith('/carrito') ||
+      u.startsWith('/confirmar-entrega')
+    ) {
+      return this.returnUrl.consume('/');
+    }
+    this.returnUrl.clear();
+    return '/';
   }
 }
