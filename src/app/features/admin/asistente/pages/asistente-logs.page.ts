@@ -47,6 +47,7 @@ type Ficha = {
   nombre: string;
   email?: string | null;
   telefono?: string | null;
+  telefono?: string | null;
   n_pedidos: number;
   total_gastado: string;
   ultimo_pedido?: string | null;
@@ -73,23 +74,37 @@ type Ficha = {
     .ed-chip:hover { filter: brightness(1.15); }
     .ed-modal-bg {
       position: fixed; inset: 0; background: rgba(20,12,4,.55);
-      z-index: 80; display: flex; align-items: center; justify-content: center; padding: 16px;
+      z-index: 80; display: flex; align-items: flex-start; justify-content: center;
+      padding: 24px 16px; overflow: auto;
     }
     .ed-modal {
       background: #fffaf2; border-radius: 16px; max-width: 440px; width: 100%;
       box-shadow: 0 16px 48px rgba(0,0,0,.25); overflow: hidden;
+      margin: auto;
     }
-    .ed-modal.ed-ficha { max-width: 520px; }
+    .ed-modal.ed-ficha {
+      max-width: 520px;
+      max-height: calc(100vh - 48px);
+      display: flex; flex-direction: column;
+    }
     .ed-name {
       border: 0; background: none; padding: 0; text-align: left; color: #3d2a12;
       font-weight: 700; text-decoration: underline; cursor: pointer;
     }
     .ed-name:hover { color: #7a5420; }
-    .ed-pedido-mini { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid #ead9c0; }
-    .ed-pedido-mini img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; background: #eee; }
+    .ed-pedido-mini { display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid #ead9c0; }
+    .ed-pedido-mini img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: #eee; flex-shrink: 0; }
     .ed-badge-freq { background: #3d2a12; color: #f6e7c8; border-radius: 999px; padding: 2px 8px; font-size: 11px; }
-    .ed-modal img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
+    .ed-modal > img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
     .ed-modal-body { padding: 16px 18px 18px; }
+    .ed-ficha .ed-modal-body {
+      display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 48px);
+    }
+    .ed-ficha-list {
+      overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+      flex: 1; min-height: 120px; max-height: 55vh; padding-right: 6px;
+    }
+    .ed-ficha-foot { flex-shrink: 0; padding-top: 12px; background: #fffaf2; }
     .ed-modal h3 { margin: 0 0 8px; font-size: 1.15rem; }
     .ed-modal .desc { font-size: 13px; color: #5c4a32; white-space: pre-wrap; }
     .ed-wa { display: inline-block; margin: 4px 8px 8px 0; font-weight: 600; color: #128c7e; text-decoration: underline; }
@@ -169,21 +184,24 @@ type Ficha = {
             <span class="ed-badge-freq" *ngIf="ficha.frecuente">Cliente frecuente</span>
           </h3>
           <p class="ed-queja-meta" *ngIf="ficha.email">{{ ficha.email }}</p>
+          <p class="ed-queja-meta" *ngIf="ficha.telefono">Celular: {{ ficha.telefono }}</p>
           <p class="ed-queja-meta">
             {{ ficha.n_pedidos }} pedido(s) pagados · S/ {{ ficha.total_gastado }}
             <span *ngIf="ficha.ultimo_pedido"> · último {{ ficha.ultimo_pedido }}</span>
           </p>
           <p class="small text-muted" *ngIf="fichaLoad">Cargando compras…</p>
-          <div *ngFor="let p of ficha.pedidos" class="ed-pedido-mini">
-            <img *ngIf="p.items[0]?.imagen_url" [src]="p.items[0].imagen_url" alt="" />
-            <div>
-              <strong>Pedido #{{ p.id_pedido }}</strong>
-              <div class="small text-muted">{{ p.fecha }} · S/ {{ p.total }} · {{ p.estado }}</div>
-              <div class="small">{{ itemsTxt(p) }}</div>
+          <div class="ed-ficha-list" (wheel)="$event.stopPropagation()">
+            <div *ngFor="let p of ficha.pedidos" class="ed-pedido-mini">
+              <img *ngIf="p.items[0]?.imagen_url" [src]="p.items[0].imagen_url" alt="" />
+              <div>
+                <strong>Pedido #{{ p.id_pedido }}</strong>
+                <div class="small text-muted">{{ p.fecha }} · S/ {{ p.total }} · {{ p.estado }}</div>
+                <div class="small">{{ itemsTxt(p) }}</div>
+              </div>
             </div>
+            <p class="text-muted small" *ngIf="!fichaLoad && !ficha.pedidos.length">Aún no tiene pedidos pagados.</p>
           </div>
-          <p class="text-muted small" *ngIf="!fichaLoad && !ficha.pedidos.length">Aún no tiene pedidos pagados.</p>
-          <div class="d-flex gap-2 mt-3">
+          <div class="d-flex gap-2 ed-ficha-foot">
             <a class="btn btn-sm btn-dark" [routerLink]="['/panel-ed-k7m2/clientes', ficha.id_cliente]" (click)="close()">Ficha completa</a>
             <button type="button" class="btn btn-sm btn-outline-secondary" (click)="close()">Cerrar</button>
           </div>
