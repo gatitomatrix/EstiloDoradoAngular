@@ -102,7 +102,7 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
           </tr>
           <tr *ngFor="let p of rows()" [class.table-warning]="esDelFiltro(p)">
             <td>#{{p.id_pedido}}</td>
-            <td>{{ toDDMMYYYY(p.fecha_pedido) }}</td>
+            <td>{{ toFechaHora(p.fecha_pedido) }}</td>
             <td>{{ shortCliente(p.cliente_nombre) }}</td>
             <td>
               <span class="badge"
@@ -179,8 +179,8 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Fecha pedido</label>
-                <input type="date" class="form-control" [(ngModel)]="edit.fecha_pedido" name="e_fecha" required>
+                <label class="form-label">Fecha del pedido</label>
+                <input class="form-control" [value]="toFechaHora(edit.fecha_pedido)" readonly>
               </div>
 
               <div class="col-md-4">
@@ -215,10 +215,16 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
                   </div>
                 </div>
               </div>
+              <div class="col-12" *ngIf="historial.length">
+                <label class="form-label">Historial de estados</label>
+                <ul class="small mb-0 ps-3">
+                  <li *ngFor="let h of historial">
+                    {{ toFechaHora(h.fecha) }}:
+                    {{ h.estado_anterior || '—' }} → <strong>{{ h.estado_nuevo }}</strong>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" [disabled]="savingEdit">Guardar</button>
             <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cancelar</button>
           </div>
         </form>
@@ -407,6 +413,7 @@ export class PedidosListPage implements OnInit {
   editOpen = false;
   savingEdit = false;
   edit: any = {};
+  historial: any[] = [];
 
   // Crear
   createOpen = false;
@@ -470,6 +477,13 @@ export class PedidosListPage implements OnInit {
     const day = d.getDate().toString().padStart(2,'0');
     return `${y}-${m}-${day}`;
   }
+  toFechaHora(input: any): string {
+    if (!input) return '';
+    const s = String(input).replace('T', ' ');
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    if (!m) return this.toDDMMYYYY(input);
+    return m[4] ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : `${m[3]}/${m[2]}/${m[1]}`;
+  }
   toDDMMYYYY(input: any): string {
     if (!input) return '';
     const s = String(input);
@@ -499,10 +513,15 @@ export class PedidosListPage implements OnInit {
       direccion_entrega: p.direccion_entrega,
       estado: p.estado,
       forma_pago: p.forma_pago ?? undefined,
-      fecha_pedido: p.fecha_pedido ? this.toYYYYMMDD(new Date(p.fecha_pedido)) : this.toYYYYMMDD(new Date()),
+      fecha_pedido: p.fecha_pedido,
       items: p.items || []
     };
+    this.historial = [];
     this.editOpen = true;
+    this.api.historial(p.id_pedido).subscribe({
+      next: (res: any) => this.historial = res?.data ?? res ?? [],
+      error: () => this.historial = [],
+    });
   }
   closeEditar(){ this.editOpen = false; }
 
@@ -510,7 +529,6 @@ export class PedidosListPage implements OnInit {
     if (!this.edit?.id_pedido) return;
     this.savingEdit = true;
     const payload = {
-      fecha_pedido: this.edit.fecha_pedido, // yyyy-mm-dd
       estado: this.edit.estado,
       forma_pago: this.edit.forma_pago ?? null
     };

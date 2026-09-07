@@ -41,7 +41,10 @@
         <span class="ed-mc-badge">Producto: {{ p.producto_label }}</span>
       </div>
       <div class="ed-mc-head__mid">
-        <span class="ed-mc-label"><b>Fecha:</b> {{ p.fecha_pedido | date:'short' }}</span>
+        <span class="ed-mc-label"><b>Pedido:</b> {{ fmtFechaHora(p.fecha_pedido) }}</span>
+        <span class="ed-mc-label" *ngIf="p.fecha_estado">
+          <b>{{ p.estado }}:</b> {{ fmtFechaHora(p.fecha_estado) }}
+        </span>
         <span class="ed-mc-chip"
           [class.ok]="p.estado==='entregado' || p.estado==='pagado'"
           [class.warn]="p.estado==='pendiente'"

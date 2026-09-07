@@ -70,4 +70,12 @@ export class MisComprasComponent implements OnInit {
   verResumen(p: PedidoListItem) {
     this.router.navigate(['/resumen', p.id_pedido]);
   }
+
+  fmtFechaHora(raw?: string | null) {
+    if (!raw) return '—';
+    const s = String(raw).replace('T', ' ');
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    if (!m) return s;
+    return m[4] ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : `${m[3]}/${m[2]}/${m[1]}`;
+  }
 }

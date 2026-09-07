@@ -30,6 +30,7 @@ export interface ConfirmarReq {
 export interface PedidoListItem {
   id_pedido: number;
   fecha_pedido: string;
+  fecha_estado?: string | null;
   estado: string;
   total: number;
   forma_pago: 'tarjeta' | 'yape' | 'efectivo';
