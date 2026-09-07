@@ -34,9 +34,10 @@
 </div>
 
 <div *ngIf="!loading && !error && filtered.length > 0" class="ed-mc-list">
-  <article class="ed-mc-card" *ngFor="let p of filtered">
+  <article class="ed-mc-card" *ngFor="let p of filtered" [class.ed-mc-card--on]="highlightId === p.id_pedido">
     <header class="ed-mc-head">
       <div class="ed-mc-head__left">
+        <img *ngIf="p.imagen_url" class="ed-mc-thumb" [src]="p.imagen_url" alt="" />
         <span class="ed-mc-badge">Pedido: #{{ p.id_pedido }}</span>
         <span class="ed-mc-badge">Producto: {{ p.producto_label }}</span>
       </div>

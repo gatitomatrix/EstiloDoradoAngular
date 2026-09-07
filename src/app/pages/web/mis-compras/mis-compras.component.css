@@ -32,6 +32,10 @@
   border-bottom:1px solid #f0f2f5;
 }
 .ed-mc-head__left{ display:flex; align-items:center; gap:8px }
+.ed-mc-thumb{
+  width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid #eee; flex-shrink:0;
+}
+.ed-mc-card--on{ outline:2px solid #d4af37; }
 .ed-mc-head__mid{ display:flex; align-items:center; gap:12px; justify-content:center }
 .ed-mc-head__right{ text-align:right }
 

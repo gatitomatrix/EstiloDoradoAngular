@@ -36,6 +36,7 @@ export interface PedidoListItem {
   forma_pago: 'tarjeta' | 'yape' | 'efectivo';
   direccion_entrega: string | null;
   producto_label: string;         // << nombre del producto (+N)
+  imagen_url?: string | null;
   comprobante_tipo: 'FA' | 'BO' | 'EF' | null;
   comprobante_serie: string | null;
   comprobante_numero: number | null;

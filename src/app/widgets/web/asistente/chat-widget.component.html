@@ -21,7 +21,7 @@
               @if (m.products?.length) {
                 <div class="ed-cards">
                   @for (p of m.products; track p.id) {
-                    @if (m.action?.type === 'whatsapp') {
+                    @if (m.action?.type === 'whatsapp' || p.info_only) {
                       <article class="ed-card ed-card--info">
                         <div class="ed-card__main">
                           <img
@@ -91,7 +91,7 @@
                         </div>
                       </div>
                       <div class="ed-card__actions">
-                        <button type="button" class="ed-ghost" (click)="viewOrder(o); $event.stopPropagation()">Ver</button>
+                        <button type="button" class="ed-ghost" (click)="goPath('/mis-compras?pedido=' + o.id_pedido); $event.stopPropagation()">Ver</button>
                         @if (m.action?.type !== 'navigate') {
                           <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">Este es</button>
                         }

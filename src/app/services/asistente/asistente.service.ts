@@ -11,6 +11,7 @@ export interface AsistenteProducto {
   stock: number;
   imagen_url?: string;
   cantidad?: number;
+  info_only?: boolean;
 }
 
 export interface AsistenteAction {

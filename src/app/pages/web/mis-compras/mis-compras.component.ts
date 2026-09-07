@@ -4,7 +4,7 @@ import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-super
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { OrderService, PedidoListItem } from '../../../services/order/order.service';
 
 @Component({
@@ -18,11 +18,13 @@ export class MisComprasComponent implements OnInit {
   private auth = inject(AuthService);
   private order = inject(OrderService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = true;
   error: string | null = null;
 
   data: PedidoListItem[] = [];
+  highlightId: number | null = null;
 
   filtroId?: number;
   rango: 'last' | '3m' | '1y' = '1y'; // por defecto
@@ -35,7 +37,15 @@ export class MisComprasComponent implements OnInit {
     }
 
     this.order.listMine().subscribe({
-      next: (res) => { this.data = res; this.loading = false; },
+      next: (res) => {
+        this.data = res;
+        this.loading = false;
+        const q = Number(this.route.snapshot.queryParamMap.get('pedido'));
+        if (q > 0) {
+          this.filtroId = q;
+          this.highlightId = q;
+        }
+      },
       error: () => { this.error = 'No se pudieron cargar tus pedidos.'; this.loading = false; }
     });
   }
@@ -43,6 +53,7 @@ export class MisComprasComponent implements OnInit {
   limpiar(): void {
     this.filtroId = undefined;
     this.rango = '1y';
+    this.highlightId = null;
   }
 
   get filtered(): PedidoListItem[] {
