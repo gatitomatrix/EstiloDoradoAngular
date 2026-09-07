@@ -98,8 +98,8 @@
                       </div>
                     </article>
                   }
-                  @if (m.action?.type === 'navigate' && m.action.url) {
-                    <button type="button" class="ed-gold" (click)="goPath(m.action.url)">{{ m.action.label || 'Ver todos' }}</button>
+                  @if (m.action?.type === 'navigate' && m.action?.url) {
+                    <button type="button" class="ed-gold" (click)="goPath(m.action!.url!)">{{ m.action!.label || 'Ver todos' }}</button>
                   }
                   @if (m.action?.type !== 'navigate') {
                     <button type="button" class="ed-ghost" (click)="send('otro')">Otro / WhatsApp</button>

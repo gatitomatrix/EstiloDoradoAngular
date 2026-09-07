@@ -47,7 +47,6 @@ type Ficha = {
   nombre: string;
   email?: string | null;
   telefono?: string | null;
-  telefono?: string | null;
   n_pedidos: number;
   total_gastado: string;
   ultimo_pedido?: string | null;
