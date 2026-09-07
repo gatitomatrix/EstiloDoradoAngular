@@ -71,40 +71,68 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   } | null = null;
   orderLoading = false;
   private sub?: Subscription;
+  private authSub?: Subscription;
+  private pausedForPago = false;
+  private wasLoggedIn = false;
+  private readonly storeKey = 'ed_dori_sesion';
 
   ngOnInit() {
+    this.wasLoggedIn = this.auth.isLoggedIn;
     this.syncRoute(this.router.url);
     this.sub = this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => this.syncRoute(e.urlAfterRedirects));
+    this.authSub = this.auth.user$.subscribe((u) => {
+      const now = !!u;
+      if (now && !this.wasLoggedIn) this.onLoggedInGuide();
+      this.wasLoggedIn = now;
+    });
 
     window.addEventListener('ed-open-asistente', this.openFromEvent);
-    this.msgs = [
-      {
-        from: 'bot',
-        text: 'Hola, soy Dori. ¿Te ayudo a elegir un regalo? Dime qué buscas o para quién es.',
-      },
-    ];
+    if (!this.restore()) {
+      this.msgs = [
+        {
+          from: 'bot',
+          text: 'Hola, soy Dori. ¿Te ayudo a elegir un regalo? Dime qué buscas o para quién es.',
+        },
+      ];
+    }
   }
 
   ngOnDestroy() {
     this.sub?.unsubscribe();
+    this.authSub?.unsubscribe();
     window.removeEventListener('ed-open-asistente', this.openFromEvent);
   }
 
   private openFromEvent = () => this.toggle(true);
 
   private syncRoute(url: string) {
-    this.visible = !url.startsWith('/panel-ed-k7m2');
-    if (!this.visible) this.open = false;
+    const path = (url || '').split('?')[0];
+    this.visible = !path.startsWith('/panel-ed-k7m2');
+    const enPago = /\/pago|culqi|pagar-pedido/.test(path);
+    if (!this.visible) {
+      this.open = false;
+      return;
+    }
+    if (enPago) {
+      if (this.open) this.pausedForPago = true;
+      this.open = false;
+    } else if (this.pausedForPago) {
+      this.open = true;
+      this.pausedForPago = false;
+      this.persist();
+    }
   }
 
   toggle(force?: boolean) {
     this.open = force ?? !this.open;
     if (this.open) {
       this.showHint = false;
+      this.pausedForPago = false;
       setTimeout(() => this.scroll(), 50);
     }
+    this.persist();
   }
 
   hideHint(ev?: Event) {
@@ -139,6 +167,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         }
         this.sending = false;
         this.scroll();
+        this.persist();
       },
       error: (err: { error?: { reply?: string; message?: string } }) => {
         const msg =
@@ -190,11 +219,12 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     });
     this.msgs.push({
       from: 'bot',
-      text: `${a.nombre} se agregó al carrito. Puedes seguir comprando o ir al carrito.`,
+      text: `${a.nombre} se agregó al carrito. Siguiente: carrito → entrega (recojo o envío) → pago. Si aún no inicias sesión, te lo pediremos al pagar. Yo me quedo aquí.`,
     });
     this.ui.ok(`${a.nombre} agregado al carrito`, 'Carrito', { link: '/carrito', cta: 'Ver carrito' });
     this.http.post(`${environment.apiBaseUrl}/asistente/feedback`, { id_producto: a.id, voto: 'add' }).subscribe({ error: () => {} });
     this.scroll();
+    this.persist();
   }
 
   decline() {
@@ -207,7 +237,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   }
 
   goCart() {
-    this.open = false;
+    this.open = true;
+    this.persist();
     this.router.navigateByUrl('/carrito');
   }
 
@@ -317,7 +348,47 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private afterChatLogin() {
     this.loginBusy = false;
     this.showLogin = false;
-    this.send('ya inicié sesión');
+    this.open = true;
+    this.persist();
+  }
+
+  private onLoggedInGuide() {
+    this.open = true;
+    this.msgs.push({
+      from: 'bot',
+      text: 'Listo, ya estás dentro. Puedes agregar al carrito, elegir recojo o envío y pagar. Sigo en esta ventana; en el pago me minimizo para no tapar Culqi o Yape.',
+    });
+    this.persist();
+    this.scroll();
+  }
+
+  private persist() {
+    try {
+      sessionStorage.setItem(this.storeKey, JSON.stringify({
+        msgs: this.msgs.slice(-40),
+        offered: this.offered,
+        awaiting: this.awaiting,
+        complaint: this.complaint,
+        open: this.open,
+      }));
+    } catch { /* cuota */ }
+  }
+
+  private restore(): boolean {
+    try {
+      const raw = sessionStorage.getItem(this.storeKey);
+      if (!raw) return false;
+      const d = JSON.parse(raw);
+      if (!Array.isArray(d?.msgs) || !d.msgs.length) return false;
+      this.msgs = d.msgs;
+      this.offered = d.offered || [];
+      this.awaiting = d.awaiting || null;
+      this.complaint = d.complaint || null;
+      this.open = !!d.open;
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private scroll() {
