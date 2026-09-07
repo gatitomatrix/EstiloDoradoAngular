@@ -491,11 +491,23 @@ export class ProductosListPage implements OnInit {
   }
   formatFecha(raw?: string | null) {
     if (!raw) return '';
-    const s = String(raw).replace('T', ' ').trim();
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
-    if (!m) return s;
-    const fecha = `${m[3]}/${m[2]}/${m[1]}`;
-    return m[4] ? `${fecha} ${m[4]}:${m[5]}` : fecha;
+    const s = String(raw).trim();
+    let iso = s;
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+      iso = s.replace(' ', 'T') + '-05:00';
+    }
+    const d = new Date(iso);
+    if (!isNaN(d.getTime()) && /\d{2}:\d{2}/.test(s)) {
+      const parts = new Intl.DateTimeFormat('es-PE', {
+        timeZone: 'America/Lima',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).formatToParts(d);
+      const g = (t: string) => parts.find(p => p.type === t)?.value || '';
+      return `${g('day')}/${g('month')}/${g('year')} ${g('hour')}:${g('minute')}`;
+    }
+    const m = s.replace('T', ' ').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
   }
 
   openCreate() {
