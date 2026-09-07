@@ -225,6 +225,9 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
                 </ul>
               </div>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" [disabled]="savingEdit">Guardar</button>
             <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cancelar</button>
           </div>
         </form>
