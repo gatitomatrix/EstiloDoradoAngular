@@ -361,7 +361,6 @@ export class EntregaComponent {
     const v = this.addrForm.value;
     const queries = [
       this.buildQueryFromForm(),
-      [v.numero?.trim(), v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
       [v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
       [v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
     ];
@@ -380,7 +379,7 @@ export class EntregaComponent {
     }
     if (this.map) { this.map.remove(); this.map = undefined; }
 
-    this.map = L.map(el, { zoomControl: true }).setView([lat, lng], 18);
+    this.map = L.map(el, { zoomControl: true }).setView([lat, lng], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '&copy; OpenStreetMap'
@@ -490,12 +489,10 @@ export class EntregaComponent {
 
     this.lastDisplay = r.display || undefined;
 
-    const viaUser = (this.addrForm.value.via ?? '').toString().trim();
+    const viaRev = (r.via ?? '').toString().trim();
     const numUser = (this.addrForm.value.numero ?? '').toString().trim();
-    const via = viaUser || (r.via ?? '').toString().trim();
-    const numFromReverse = (r.numero ?? '').toString().trim();
-    const numFromDisplay = this.guessNumberFromDisplay(this.lastDisplay, via);
-    const numero = numUser || numFromReverse || numFromDisplay || '0';
+    const via = viaRev || (this.addrForm.value.via ?? '').toString().trim();
+    const numero = numUser || (r.numero ?? '').toString().trim() || this.guessNumberFromDisplay(this.lastDisplay, via) || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
     this.persistDraft();
