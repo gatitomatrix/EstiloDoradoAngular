@@ -23,7 +23,7 @@ type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?:
     <div class="ed-kpi-grid">
       <button type="button" class="ed-kpi ed-kpi-btn" (click)="goPedidos({ hoy: true })">
         <i class="pi pi-shopping-bag ed-kpi-icon"></i>
-        <div class="ed-kpi-label">Pedidos (hoy)</div>
+        <div class="ed-kpi-label">Pedidos (hoy {{ hoyLabel() }})</div>
         <div class="ed-kpi-value">{{ kpis().pedidosHoy }}</div>
         <div class="ed-kpi-cta">Ver pedidos de hoy →</div>
       </button>
@@ -224,7 +224,14 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   hoyISO() {
-    return new Date().toISOString().split('T')[0];
+    const p = (n: number) => String(n).padStart(2, '0');
+    const d = new Date();
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+
+  hoyLabel() {
+    const [y, m, d] = this.hoyISO().split('-');
+    return `${d}/${m}`;
   }
 
   private rango30() {

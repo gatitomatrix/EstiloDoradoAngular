@@ -69,6 +69,14 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
     </form>
 
     <!-- Tabla pedidos -->
+    <div class="alert py-2 px-3 mb-2" *ngIf="q.fecha_desde || q.estado"
+         style="background:#FFF8E6;border:1px solid #E8C547;color:#5C4A12;">
+      Mostrando {{ total() }} pedido{{ total() === 1 ? '' : 's' }}
+      <span *ngIf="q.fecha_desde"> del {{ toDDMMYYYY(q.fecha_desde) }}</span>
+      <span *ngIf="q.fecha_hasta && q.fecha_hasta !== q.fecha_desde"> al {{ toDDMMYYYY(q.fecha_hasta) }}</span>
+      <span *ngIf="q.estado"> · estado <strong>{{ q.estado }}</strong></span>
+      <span *ngIf="!q.estado && q.fecha_desde"> · todos los estados</span>
+    </div>
     <div class="table-responsive">
       <table class="table table-sm align-middle">
         <thead>
@@ -92,7 +100,7 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
               No hay pedidos con estos filtros.
             </td>
           </tr>
-          <tr *ngFor="let p of rows()">
+          <tr *ngFor="let p of rows()" [class.table-warning]="esDelFiltro(p)">
             <td>#{{p.id_pedido}}</td>
             <td>{{ toDDMMYYYY(p.fecha_pedido) }}</td>
             <td>{{ shortCliente(p.cliente_nombre) }}</td>
@@ -414,10 +422,11 @@ export class PedidosListPage implements OnInit {
       const estado = qp.get('estado');
       const fd = qp.get('fecha_desde');
       const fh = qp.get('fecha_hasta');
-      if (estado) this.q.estado = estado;
-      if (fd) this.q.fecha_desde = fd;
-      if (fh) this.q.fecha_hasta = fh;
+      this.q.estado = estado || undefined;
+      this.q.fecha_desde = fd || undefined;
+      this.q.fecha_hasta = fh || undefined;
       this.q.page = 1;
+      if (fd && fh && fd === fh) this.q.per_page = -1;
       this.buscar();
     });
 
@@ -463,12 +472,20 @@ export class PedidosListPage implements OnInit {
   }
   toDDMMYYYY(input: any): string {
     if (!input) return '';
+    const s = String(input);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
     const d = new Date(input);
-    if (isNaN(d.getTime())) return input;
+    if (isNaN(d.getTime())) return s;
     const dd = d.getDate().toString().padStart(2,'0');
     const mm = (d.getMonth()+1).toString().padStart(2,'0');
     const yy = d.getFullYear();
     return `${dd}/${mm}/${yy}`;
+  }
+  esDelFiltro(p: any): boolean {
+    if (!this.q.fecha_desde) return false;
+    const f = String(p?.fecha_pedido || '').slice(0, 10);
+    return f === this.q.fecha_desde || f === this.q.fecha_hasta;
   }
   nullify<T>(v: T): T | null {
     return (v === undefined || v === '' || v === null) ? null : v;
