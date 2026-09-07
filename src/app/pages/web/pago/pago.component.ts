@@ -462,9 +462,20 @@ export class PagoComponent implements AfterViewInit {
   }
 
   private matchDep(name?: string | null): string {
+    return this.matchName(this.deps, name);
+  }
+
+  private matchName(list: string[], name?: string | null): string {
     if (!name) return '';
-    const n = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    return this.deps.find(d => d.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === n) || '';
+    const n = this.norm(name);
+    const exact = list.find(d => this.norm(d) === n);
+    if (exact) return exact;
+    const contains = list.find(d => this.norm(d).includes(n) || n.includes(this.norm(d)));
+    return contains || '';
+  }
+
+  private norm(s: string): string {
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   }
 
   private buscarRuc(ruc: string) {
@@ -480,11 +491,33 @@ export class PagoComponent implements AfterViewInit {
         this.facturaForm.patchValue({
           razonSocial: d.razon_social || '',
           direccion: d.direccion || '',
-          ...(dep ? { departamento: dep } : {}),
+          departamento: dep,
+          provincia: '',
+          distrito: '',
+        }, { emitEvent: false });
+        this.provs = [];
+        this.dists = [];
+        if (!dep) {
+          this.rucEstado = 'Datos de SUNAT listos. Elige departamento, provincia y distrito.';
+          return;
+        }
+        this.ubigeo.getProvincias(dep).subscribe((p) => {
+          this.provs = p;
+          const prov = this.matchName(p, d.provincia);
+          this.facturaForm.patchValue({ provincia: prov }, { emitEvent: false });
+          if (!prov) {
+            this.rucEstado = 'Datos completados. Elige provincia y distrito.';
+            return;
+          }
+          this.ubigeo.getDistritos(dep, prov).subscribe((ds) => {
+            this.dists = ds;
+            const dist = this.matchName(ds, d.distrito);
+            this.facturaForm.patchValue({ distrito: dist }, { emitEvent: false });
+            this.rucEstado = dist
+              ? 'Datos de SUNAT completados.'
+              : 'Datos completados. Elige el distrito.';
+          });
         });
-        this.rucEstado = d.estado && String(d.estado).toUpperCase() !== 'ACTIVO'
-          ? `Encontrado (${d.estado}). Revisa y elige provincia/distrito.`
-          : 'Datos completados. Elige provincia y distrito.';
       },
       error: () => {
         this.rucEstado = 'No se encontró. Completa a mano.';
