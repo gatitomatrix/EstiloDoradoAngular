@@ -197,6 +197,12 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
                   <option *ngFor="let f of formasPago" [ngValue]="f">{{f}}</option>
                 </select>
               </div>
+              <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cancelar</button>
+                <button type="button" class="btn btn-warning fw-bold" (click)="guardarEdicion()" [disabled]="savingEdit">
+                  {{ savingEdit ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+              </div>
 
               <div class="col-12">
                 <label class="form-label">Dirección entrega</label>
@@ -225,10 +231,6 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
                 </ul>
               </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" [disabled]="savingEdit">Guardar</button>
-            <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cancelar</button>
           </div>
         </form>
       </div>
