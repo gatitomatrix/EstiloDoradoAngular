@@ -242,6 +242,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/carrito');
   }
 
+  goPath(url: string) {
+    if (!url) return;
+    this.open = true;
+    this.persist();
+    this.router.navigateByUrl(url);
+  }
+
   vote(p: AsistenteProducto, voto: 'up' | 'down') {
     if (!p?.id || this.votes[p.id] === voto) return;
     this.votes[p.id] = voto;

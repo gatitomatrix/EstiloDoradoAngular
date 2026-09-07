@@ -92,11 +92,18 @@
                       </div>
                       <div class="ed-card__actions">
                         <button type="button" class="ed-ghost" (click)="viewOrder(o); $event.stopPropagation()">Ver</button>
-                        <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">Este es</button>
+                        @if (m.action?.type !== 'navigate') {
+                          <button type="button" class="ed-gold" (click)="send('pedido ' + o.id_pedido)">Este es</button>
+                        }
                       </div>
                     </article>
                   }
-                  <button type="button" class="ed-ghost" (click)="send('otro')">Otro / WhatsApp</button>
+                  @if (m.action?.type === 'navigate' && m.action.url) {
+                    <button type="button" class="ed-gold" (click)="goPath(m.action.url)">{{ m.action.label || 'Ver todos' }}</button>
+                  }
+                  @if (m.action?.type !== 'navigate') {
+                    <button type="button" class="ed-ghost" (click)="send('otro')">Otro / WhatsApp</button>
+                  }
                 </div>
               }
 
