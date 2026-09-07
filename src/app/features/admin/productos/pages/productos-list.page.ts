@@ -147,8 +147,7 @@ import { ActivatedRoute, Router } from '@angular/router';
               <span class="badge" [class.text-bg-success]="p.estado==='activo'" [class.text-bg-secondary]="p.estado!=='activo'">{{p.estado}}</span>
             </td>
             <td class="col-actions text-end text-nowrap">
-              <button class="btn btn-sm btn-outline-secondary me-1" (click)="openEdit(p)"><i class="pi pi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" *ngIf="isAdmin()" (click)="remove(p)"><i class="pi pi-trash"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" (click)="openEdit(p)" title="Editar"><i class="pi pi-pencil"></i></button>
             </td>
           </tr>
         </tbody>

@@ -24,7 +24,7 @@ import { AdminClientesService } from '../services/admin-clientes.service';
             <th>Email</th>
             <th>Dirección</th>
             <th>Fecha Registro</th>
-            <th style="width:120px">Acciones</th>
+            <th style="width:80px">Ver</th>
           </tr>
         </thead>
         <tbody>
@@ -35,10 +35,10 @@ import { AdminClientesService } from '../services/admin-clientes.service';
             <td>{{ c.telefono }}</td>
             <td>{{ c.email }}</td>
             <td>{{ c.direccion }}</td>
-            <td>{{ c.created_at | date:'dd/MM/yyyy' }}</td>
+            <td>{{ fmtFecha(c.created_at) }}</td>
             <td>
-              <button class="btn btn-sm btn-outline-secondary me-1" (click)="openEditar(c)">
-                <i class="pi pi-pencil"></i>
+              <button class="btn btn-sm btn-outline-secondary" (click)="openEditar(c)" title="Ver datos">
+                <i class="pi pi-eye"></i>
               </button>
             </td>
           </tr>
@@ -101,56 +101,51 @@ import { AdminClientesService } from '../services/admin-clientes.service';
     </div>
   </div>
 
-  <!-- Modal EDITAR -->
+  <!-- Modal VER -->
   <div class="modal-backdrop fade show" *ngIf="editOpen"></div>
   <div class="modal d-block" tabindex="-1" *ngIf="editOpen">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <form (ngSubmit)="actualizar()">
           <div class="modal-header">
-            <h5 class="modal-title">Actualizar Cliente</h5>
+            <h5 class="modal-title">Datos del cliente</h5>
             <button type="button" class="btn-close" (click)="closeEditar()"></button>
           </div>
           <div class="modal-body">
+            <p class="small text-muted mb-3">Los datos de cuenta los actualiza el cliente en la tienda. Aquí solo se consultan.</p>
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Nombre</label>
-                <input class="form-control" [(ngModel)]="edit.nombre" name="e_nombre"
-                  (input)="onlyLetters($event, 'edit', 'nombre')" placeholder="Solo letras">
+                <input class="form-control" [value]="edit.nombre || ''" readonly>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Apellido</label>
-                <input class="form-control" [(ngModel)]="edit.apellido" name="e_apellido"
-                  (input)="onlyLetters($event, 'edit', 'apellido')" placeholder="Solo letras">
+                <input class="form-control" [value]="edit.apellido || ''" readonly>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Teléfono</label>
-                <input class="form-control" [(ngModel)]="edit.telefono" name="e_telefono"
-                  (input)="onlyPhone($event, 'edit')" inputmode="numeric" maxlength="9" placeholder="9xxxxxxxx">
+                <input class="form-control" [value]="edit.telefono || '—'" readonly>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
-                <input class="form-control" [(ngModel)]="edit.email" name="e_email">
+                <input class="form-control" [value]="edit.email || ''" readonly>
               </div>
               <div class="col-12">
                 <label class="form-label">Dirección</label>
-                <input class="form-control" [(ngModel)]="edit.direccion" name="e_direccion">
+                <input class="form-control" [value]="edit.direccion || '—'" readonly>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Fecha Registro</label>
-                <input class="form-control" [value]="edit.created_at | date:'dd/MM/yyyy'" readonly>
+                <label class="form-label">Fecha registro</label>
+                <input class="form-control" [value]="fmtFecha(edit.created_at)" readonly>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Última actualización</label>
-                <input class="form-control" [value]="fechaHoy" readonly>
+                <input class="form-control" [value]="fmtFecha(edit.updated_at || edit.created_at)" readonly>
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary">Actualizar</button>
-            <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cancelar</button>
+            <button type="button" class="btn btn-outline-secondary" (click)="closeEditar()">Cerrar</button>
           </div>
-        </form>
       </div>
     </div>
   </div>
@@ -167,7 +162,19 @@ export class ClientesListPage {
   editOpen = false;
   nuevo: any = {};
   edit: any = {};
-  fechaHoy = new Date().toISOString().split('T')[0];
+  fechaHoy = this.hoyLocal();
+
+  hoyLocal() {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
+  }
+
+  fmtFecha(raw?: string) {
+    if (!raw) return '—';
+    const m = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(raw);
+  }
 
   onlyLetters(ev: Event, target: 'nuevo' | 'edit', field: 'nombre' | 'apellido') {
     const el = ev.target as HTMLInputElement;
