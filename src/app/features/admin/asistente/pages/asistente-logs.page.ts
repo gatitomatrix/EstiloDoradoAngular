@@ -102,11 +102,20 @@ type Ficha = {
         Las quejas y el WhatsApp van aquí. Clic en el nombre del cliente para ver sus compras pagadas.
         El ranking de productos consultados está en
         <a routerLink="/panel-ed-k7m2/interes-dori">Interés Dori</a>.
+        Invitado = chat sin iniciar sesión (no infla clientes).
       </p>
       <div class="d-flex gap-3 mb-3 flex-wrap">
         <div class="card p-3"><strong>{{ stats.total }}</strong><div class="small">Consultas</div></div>
+        <div class="card p-3"><strong>{{ stats.con_cuenta }}</strong><div class="small">Con cuenta</div></div>
+        <div class="card p-3"><strong>{{ stats.invitados }}</strong><div class="small">Invitados</div></div>
         <div class="card p-3"><strong>{{ stats.sin_producto }}</strong><div class="small">Sin producto en catálogo</div></div>
         <div class="card p-3"><strong>{{ stats.whatsapp }}</strong><div class="small">Pasadas a WhatsApp</div></div>
+      </div>
+      <div class="d-flex gap-2 mb-3 flex-wrap">
+        <button type="button" class="btn btn-sm" [class.btn-dark]="filtro==='all'" [class.btn-outline-secondary]="filtro!=='all'" (click)="setFiltro('all')">Todas</button>
+        <button type="button" class="btn btn-sm" [class.btn-dark]="filtro==='whatsapp'" [class.btn-outline-secondary]="filtro!=='whatsapp'" (click)="setFiltro('whatsapp')">WhatsApp</button>
+        <button type="button" class="btn btn-sm" [class.btn-dark]="filtro==='sin_producto'" [class.btn-outline-secondary]="filtro!=='sin_producto'" (click)="setFiltro('sin_producto')">Sin catálogo</button>
+        <button type="button" class="btn btn-sm" [class.btn-dark]="filtro==='catalogo'" [class.btn-outline-secondary]="filtro!=='catalogo'" (click)="setFiltro('catalogo')">Catálogo</button>
       </div>
       <table class="table table-sm bg-white">
         <thead>
@@ -230,7 +239,8 @@ type Ficha = {
 export class AsistenteLogsPage implements OnInit {
   private http = inject(HttpClient);
   items: LogItem[] = [];
-  stats = { total: 0, sin_producto: 0, whatsapp: 0 };
+  stats = { total: 0, con_cuenta: 0, invitados: 0, sin_producto: 0, whatsapp: 0 };
+  filtro: 'all' | 'whatsapp' | 'sin_producto' | 'catalogo' = 'all';
   open: ProdChip | null = null;
   queja: LogItem | null = null;
   ficha: Ficha | null = null;
@@ -238,10 +248,21 @@ export class AsistenteLogsPage implements OnInit {
   fichaLoad = false;
 
   ngOnInit() {
-    this.http.get<{ items: LogItem[]; stats: { total: number; sin_producto: number; whatsapp: number } }>(`${environment.apiBaseUrl}/admin/asistente-logs`).subscribe({
+    this.cargar();
+  }
+
+  setFiltro(f: 'all' | 'whatsapp' | 'sin_producto' | 'catalogo') {
+    this.filtro = f;
+    this.cargar();
+  }
+
+  cargar() {
+    const params: any = {};
+    if (this.filtro !== 'all') params.tipo = this.filtro;
+    this.http.get<{ items: LogItem[]; stats: typeof this.stats }>(`${environment.apiBaseUrl}/admin/asistente-logs`, { params }).subscribe({
       next: (r) => {
         this.items = r.items || [];
-        this.stats = r.stats || this.stats;
+        this.stats = { ...this.stats, ...(r.stats || {}) };
       },
       error: () => {},
     });
