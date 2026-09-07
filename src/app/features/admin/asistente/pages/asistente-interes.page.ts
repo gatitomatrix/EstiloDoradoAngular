@@ -94,7 +94,7 @@ export class AsistenteInteresPage implements OnInit {
   busy: string | null = null;
 
   ngOnInit() {
-    this.http.get<{ items: Item[]; stats: typeof this.stats }>(`${environment.apiBaseUrl}/admin/asistente-interes`).subscribe({
+    this.http.get<{ items: Item[]; stats: any }>(`${environment.apiBaseUrl}/admin/asistente-interes`).subscribe({
       next: (r) => {
         this.items = r.items || [];
         this.stats = { ...this.stats, ...(r.stats || {}) };

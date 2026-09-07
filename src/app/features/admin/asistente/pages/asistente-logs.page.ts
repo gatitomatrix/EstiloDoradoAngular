@@ -259,7 +259,7 @@ export class AsistenteLogsPage implements OnInit {
   cargar() {
     const params: any = {};
     if (this.filtro !== 'all') params.tipo = this.filtro;
-    this.http.get<{ items: LogItem[]; stats: typeof this.stats }>(`${environment.apiBaseUrl}/admin/asistente-logs`, { params }).subscribe({
+    this.http.get<{ items: LogItem[]; stats: any }>(`${environment.apiBaseUrl}/admin/asistente-logs`, { params }).subscribe({
       next: (r) => {
         this.items = r.items || [];
         this.stats = { ...this.stats, ...(r.stats || {}) };
