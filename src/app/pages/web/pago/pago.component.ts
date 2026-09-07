@@ -360,6 +360,8 @@ export class PagoComponent implements AfterViewInit {
         departamento: addr.departamento,
         provincia: addr.provincia,
         distrito: addr.distrito,
+        lat: addr.lat,
+        lng: addr.lng,
       } : undefined,
       items,
       telefono: this.checkout.telefono || undefined,

@@ -2,12 +2,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { AdminPedidosService } from '../services/admin-pedidos.service';
 import { AdminClientesService } from '../../clientes/services/admin-clientes.service';
 import { AdminProductosService } from '../../productos/services/admin-productos.service';
-// ✅ para llenar el combo de productos
-
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -202,6 +203,16 @@ import { AdminProductosService } from '../../productos/services/admin-productos.
                 <label class="form-label">Dirección entrega</label>
                 <input class="form-control" [value]="edit.direccion_entrega || '-'" readonly>
               </div>
+              <div class="col-12" *ngIf="mapSrc">
+                <label class="form-label">Ubicación en el mapa</label>
+                <p class="small text-muted mb-1">{{ mapNota }}</p>
+                <iframe
+                  [src]="mapSrc"
+                  title="Mapa de entrega"
+                  style="width:100%;height:220px;border:0;border-radius:8px;background:#eee"
+                ></iframe>
+                <a *ngIf="mapLink" class="small d-inline-block mt-1" [href]="mapLink" target="_blank" rel="noopener">Abrir mapa grande</a>
+              </div>
               <div class="col-12" *ngIf="edit.items?.length">
                 <label class="form-label">Productos a entregar</label>
                 <div class="d-flex flex-column gap-2">
@@ -391,6 +402,8 @@ export class PedidosListPage implements OnInit {
   private clientesApi = inject(AdminClientesService);
   private prodsApi = inject(AdminProductosService);
   private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
 
   // Filtros
   q: any = {
@@ -419,6 +432,9 @@ export class PedidosListPage implements OnInit {
   savingEdit = false;
   edit: any = {};
   historial: any[] = [];
+  mapSrc: SafeResourceUrl | null = null;
+  mapLink: string | null = null;
+  mapNota = '';
 
   // Crear
   createOpen = false;
@@ -535,12 +551,57 @@ export class PedidosListPage implements OnInit {
     };
     this.historial = [];
     this.editOpen = true;
+    this.aplicarMapa(p);
     this.api.historial(p.id_pedido).subscribe({
       next: (res: any) => this.historial = res?.data ?? res ?? [],
       error: () => this.historial = [],
     });
   }
-  closeEditar(){ this.editOpen = false; }
+  closeEditar(){
+    this.editOpen = false;
+    this.mapSrc = null;
+    this.mapLink = null;
+    this.mapNota = '';
+  }
+
+  private aplicarMapa(p: any) {
+    this.mapSrc = null;
+    this.mapLink = null;
+    this.mapNota = '';
+    const dir = String(p?.direccion_entrega || '');
+    const retiro = !!p?.es_retiro || /retiro|recojo/i.test(dir);
+    if (retiro) {
+      this.setMap(-10.66848, -76.25688, 'Recojo en tienda (Pasco – Chaupimarca).');
+      return;
+    }
+    const lat = Number(p?.lat_entrega);
+    const lng = Number(p?.lng_entrega);
+    if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) > 0.01 && Math.abs(lng) > 0.01) {
+      this.setMap(lat, lng, 'Pin que dejó el cliente al confirmar la dirección.');
+      return;
+    }
+    const q = dir.replace(/[—–]/g, ',').trim();
+    if (q.length < 8) return;
+    this.http.get<any[]>(`${environment.apiBaseUrl}/geo/search`, { params: { q } }).subscribe({
+      next: (hits) => {
+        const h = Array.isArray(hits) ? hits[0] : null;
+        const glat = Number(h?.lat);
+        const glng = Number(h?.lon ?? h?.lng);
+        if (Number.isFinite(glat) && Number.isFinite(glng)) {
+          this.setMap(glat, glng, 'Aprox. según el texto de la dirección (este pedido no guardó pin).');
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  private setMap(lat: number, lng: number, nota: string) {
+    const d = 0.006;
+    const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d},${lat - d * 0.7},${lng + d},${lat + d * 0.7}&layer=mapnik&marker=${lat},${lng}`;
+    this.mapSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.mapLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`;
+    this.mapNota = nota;
+  }
 
   guardarEdicion() {
     if (!this.edit?.id_pedido) return;

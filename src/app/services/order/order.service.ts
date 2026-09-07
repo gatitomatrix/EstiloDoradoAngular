@@ -20,7 +20,7 @@ export interface ConfirmarReq {
   direccion_entrega?: string | null;
   telefono?: string | null;
   envio_tipo?: 'AGENCIA' | 'DOMICILIO';
-  ubigeo?: { departamento?: string; provincia?: string; distrito?: string };
+  ubigeo?: { departamento?: string; provincia?: string; distrito?: string; lat?: number; lng?: number };
   items: ConfirmarItemReq[];
   comprobante?: DocTipo;                    // solo aplica si no es efectivo
   factura?: InvoiceData;
