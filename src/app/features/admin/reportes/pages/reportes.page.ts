@@ -463,6 +463,10 @@ interface ReportGroup {
     @media (max-width: 800px) {
       .ed-kpi { grid-template-columns: 1fr 1fr; }
       .ed-charts { grid-template-columns: 1fr; }
+      .ed-pay-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 420px) {
+      .ed-kpi { grid-template-columns: 1fr; }
     }
   `],
 })

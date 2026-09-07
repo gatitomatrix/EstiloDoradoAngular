@@ -10,3 +10,8 @@ h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 12px; }
 .ed-reqs li.ok { color:#2e7d32; }
 .ed-btn{ height:44px; border-radius:10px; border:1px solid transparent; cursor:pointer; font-weight:800; display:flex; align-items:center; justify-content:center; }
 .ed-btn--primary{ background:#1f2937; color:#fff; border-color:#1f2937; }
+
+@media (max-width: 576px) {
+  .ed-row { grid-template-columns: 1fr; }
+  .ed-reqs { grid-template-columns: 1fr; }
+}

@@ -139,6 +139,9 @@ type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?:
     @media (max-width: 960px) {
       .ed-dash-charts { grid-template-columns: 1fr; }
     }
+    @media (max-width: 576px) {
+      .ed-dash-canvas-wrap, .ed-dash-canvas-wrap--h { height: 200px; }
+    }
   `],
 })
 export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {

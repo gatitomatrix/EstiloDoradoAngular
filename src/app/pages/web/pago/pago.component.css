@@ -7,6 +7,11 @@
 
 .saved-card{ display:flex; align-items:flex-start; gap:.75rem; padding:.5rem 0; border-bottom:1px solid #eee }
 .saved-card:last-child{ border-bottom:0 }
-.offcanvas{ width: 420px; background: #fff; border-left: 1px solid #e9ecef; }
+.offcanvas{ width: min(420px, 100vw); max-width: 100%; background: #fff; border-left: 1px solid #e9ecef; }
 
 .offcanvas .btn + .btn { margin-top: .25rem; }
+
+@media (max-width: 576px) {
+  .ed-timeline { flex-wrap: wrap; gap: .35rem; }
+  .ed-timeline span { font-size: 12px; }
+}

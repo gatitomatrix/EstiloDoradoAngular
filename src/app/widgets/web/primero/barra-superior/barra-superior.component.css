@@ -65,8 +65,12 @@
   .ed-link-btn { font-size: .95rem; }
 }
 @media (max-width: 680px) {
-  .ed-topbar { grid-template-columns: auto 1fr auto; gap: 10px; }
+  .ed-topbar { grid-template-columns: auto 1fr auto; gap: 8px; padding: 6px 8px; }
   .ed-link-btn { display:none; } /* oculta 'Mis compras' si no entra; sigues accediendo por menú perfil */
+  .ed-logo img { width: 52px !important; height: 52px !important; margin-left: 0 !important; }
+  .ed-search { min-width: 0; }
+  .ed-search input { min-width: 0; font-size: 16px; }
+  .ed-actions { gap: 8px; }
 }
 
 .ed-wa {

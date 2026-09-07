@@ -10,3 +10,10 @@
 .ed-body{flex:1}
 .ed-radio{display:flex;gap:10px;align-items:flex-start;border:1px solid #eee;border-radius:12px;padding:10px 12px;cursor:pointer}
 .ed-radio--on{border-color:#d4af37;background:#fbf6e8}
+.ed-check{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#d4af37;color:#2d2418;display:flex;align-items:center;justify-content:center;font-weight:800}
+
+@media (max-width: 576px) {
+  .ed-option { align-items: flex-start; }
+  .d-flex.align-items-center.gap-3.mb-4 { flex-wrap: wrap; gap: .5rem !important; }
+  .d-flex.align-items-center.gap-3.mb-4 span { font-size: 13px; }
+}

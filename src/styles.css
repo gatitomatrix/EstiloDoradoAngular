@@ -18,6 +18,8 @@ html { scroll-behavior: smooth; }
 body, html {
   background-color: var(--ed-cream) !important;
   color: var(--ed-ink);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Formularios de tienda (registro, recuperar, cuenta) */
@@ -581,5 +583,13 @@ body, html {
   .app-aside {
     position: relative;
     height: auto;
+  }
+  .admin-gold-theme .topbar {
+    flex-wrap: wrap;
+    padding: .7rem .9rem;
+  }
+  .content {
+    padding: .85rem .75rem 1.5rem;
+    overflow-x: auto;
   }
 }
