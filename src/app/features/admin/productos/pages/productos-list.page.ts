@@ -126,7 +126,7 @@ import { ActivatedRoute, Router } from '@angular/router';
         <tbody>
           <tr *ngFor="let p of rows()">
             <td class="col-img">
-              <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb">
+              <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb" loading="lazy" decoding="async" width="56" height="56">
             </td>
             <td class="col-name">
               <div class="ed-prod-title">{{p.nombre}}</div>
@@ -533,6 +533,17 @@ export class ProductosListPage implements OnInit {
     if (!this.form.created_at) this.form.created_at = this.todayYmd();
     this.preview.set(undefined);
     this.editOpen.set(true);
+    this.api.get(p.id_producto).subscribe({
+      next: (full) => {
+        this.form = {
+          ...this.form,
+          ...full,
+          descuento_pct: Number(full.descuento_pct || 0),
+          oferta_hasta: full.oferta_hasta ? String(full.oferta_hasta).slice(0, 10) : this.form.oferta_hasta,
+        };
+      },
+      error: () => {},
+    });
   }
   closeEdit() { this.editOpen.set(false); }
 
