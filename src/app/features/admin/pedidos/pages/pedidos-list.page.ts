@@ -482,10 +482,22 @@ export class PedidosListPage implements OnInit {
   }
   toFechaHora(input: any): string {
     if (!input) return '';
-    const s = String(input).replace('T', ' ');
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
-    if (!m) return this.toDDMMYYYY(input);
-    return m[4] ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : `${m[3]}/${m[2]}/${m[1]}`;
+    const s = String(input).trim();
+    let iso = s;
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+      iso = s.replace(' ', 'T') + '-05:00';
+    }
+    const d = new Date(iso);
+    if (!isNaN(d.getTime())) {
+      const parts = new Intl.DateTimeFormat('es-PE', {
+        timeZone: 'America/Lima',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false,
+      }).formatToParts(d);
+      const g = (t: string) => parts.find(p => p.type === t)?.value || '';
+      return `${g('day')}/${g('month')}/${g('year')} ${g('hour')}:${g('minute')}`;
+    }
+    return this.toDDMMYYYY(input);
   }
   toDDMMYYYY(input: any): string {
     if (!input) return '';
