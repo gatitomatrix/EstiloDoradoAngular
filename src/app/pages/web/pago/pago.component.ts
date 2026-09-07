@@ -63,6 +63,8 @@ export class PagoComponent implements AfterViewInit {
 
   // Totales
   get subtotal() { return this.cart.getSubtotal(); }
+  get listado() { return this.cart.getListado(); }
+  get promoDesc() { return this.cart.getDescuentos(); }
   get discount() { return this.checkout.value.discount; }
   get fee() { return this.checkout.value.fee; }
   get total() { return this.subtotal + this.fee - this.discount; }

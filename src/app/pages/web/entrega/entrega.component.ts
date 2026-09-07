@@ -55,6 +55,8 @@ export class EntregaComponent {
 
   // Resumen
   get subtotal() { return this.cart.getSubtotal(); }
+  get listado() { return this.cart.getListado(); }
+  get promoDesc() { return this.cart.getDescuentos(); }
   get fee() { return this.checkout.value.fee; }
   get discount() { return this.checkout.value.discount; }
   get total() { return this.subtotal + this.fee - this.discount; }
@@ -359,6 +361,7 @@ export class EntregaComponent {
     const v = this.addrForm.value;
     const queries = [
       this.buildQueryFromForm(),
+      [v.numero?.trim(), v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
       [v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
       [v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
     ];
@@ -377,7 +380,7 @@ export class EntregaComponent {
     }
     if (this.map) { this.map.remove(); this.map = undefined; }
 
-    this.map = L.map(el, { zoomControl: true }).setView([lat, lng], 16);
+    this.map = L.map(el, { zoomControl: true }).setView([lat, lng], 18);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '&copy; OpenStreetMap'
@@ -544,7 +547,7 @@ export class EntregaComponent {
   // ---------- UTILS ----------
   private buildQueryFromForm(): string {
     const { via, numero, distrito, provincia, departamento } = this.addrForm.value;
-    return [via?.trim() || '', numero?.trim() || '', distrito || '', provincia || '', departamento || 'Perú']
+    return [via?.trim() || '', numero?.trim() || '', distrito || '', provincia || '', departamento || '', 'Perú']
       .filter(Boolean).join(', ');
   }
 }

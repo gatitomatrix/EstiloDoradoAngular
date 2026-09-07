@@ -21,6 +21,8 @@ export class ConfirmarEntregaComponent {
 
   // timeline: en “Entrega” ahora
   get subtotal() { return this.cart.getSubtotal(); }
+  get listado() { return this.cart.getListado(); }
+  get promoDesc() { return this.cart.getDescuentos(); }
   get fee() { return this.checkout.value.fee; }
   get discount() { return this.checkout.value.discount; }
   get total() { return this.subtotal + this.fee - this.discount; }
