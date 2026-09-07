@@ -105,11 +105,25 @@ import { ActivatedRoute, Router } from '@angular/router';
           <option value="inactivo">Inactivo</option>
         </select>
       </div>
+      <div class="col-sm-2">
+        <label class="form-label">Stock</label>
+        <select class="form-select" [(ngModel)]="q.stock_max" name="stock_max">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="3">Bajo (≤ 3)</option>
+          <option [ngValue]="10">≤ 10</option>
+        </select>
+      </div>
       <div class="col-sm-3 d-flex align-items-end gap-2">
         <button class="btn btn-dark flex-fill">Buscar</button>
         <button type="button" class="btn btn-primary" (click)="openCreate()">Nuevo</button>
       </div>
     </form>
+
+    <div class="alert py-2 px-3 mb-2" *ngIf="q.stock_max"
+         style="background:#FFF8E6;border:1px solid #E8C547;color:#5C4A12;">
+      Mostrando {{ total() }} producto{{ total() === 1 ? '' : 's' }} con stock ≤ {{ q.stock_max }}.
+      Las filas en ámbar son stock crítico (≤ 3).
+    </div>
 
     <div class="table-responsive ed-prod-table-wrap">
       <table class="table table-sm align-middle ed-prod-table">
@@ -124,7 +138,7 @@ import { ActivatedRoute, Router } from '@angular/router';
           <th class="col-actions"></th>
         </tr></thead>
         <tbody>
-          <tr *ngFor="let p of rows()">
+          <tr *ngFor="let p of rows()" [class.table-warning]="p.stock <= 3">
             <td class="col-img">
               <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb" loading="lazy" decoding="async" width="56" height="56">
             </td>
@@ -418,7 +432,7 @@ export class ProductosListPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  q: any = { page: 1, per_page: 10, search: '', id_categoria: undefined, estado: undefined };
+  q: any = { page: 1, per_page: 10, search: '', id_categoria: undefined, estado: undefined, stock_max: undefined as number | undefined };
   rows = signal<Producto[]>([]);
   total = signal(0);
   categorias = signal<any[]>([]);
@@ -434,17 +448,18 @@ export class ProductosListPage implements OnInit {
   ngOnInit() {
     this.cats.list().subscribe(res => this.categorias.set(res?.data ?? res ?? []));
     this.prov.list({ per_page: 100 }).subscribe(res => this.proveedores.set(res?.data ?? res ?? []));
-    this.buscar();
-    const editar = Number(this.route.snapshot.queryParamMap.get('editar'));
-    if (editar > 0) {
-      this.api.get(editar).subscribe({
-        next: (p) => {
-          this.openEdit(p);
-          this.router.navigate([], { queryParams: {}, replaceUrl: true });
-        },
-        error: () => {},
-      });
-    }
+    this.route.queryParamMap.subscribe((qp) => {
+      const editar = Number(qp.get('editar'));
+      const bajo = qp.get('stock_bajo');
+      if (bajo === '1' || bajo === '3') this.q.stock_max = 3;
+      this.buscar();
+      if (editar > 0) {
+        this.api.get(editar).subscribe({
+          next: (p) => this.openEdit(p),
+          error: () => {},
+        });
+      }
+    });
   }
 
   isAdmin(): boolean {
@@ -466,7 +481,8 @@ export class ProductosListPage implements OnInit {
       per_page: this.q.per_page,
       q: this.q.search || undefined,
       categoria: this.q.id_categoria || undefined,
-      estado: this.q.estado || undefined
+      estado: this.q.estado || undefined,
+      stock_max: this.q.stock_max || undefined,
     };
   }
 

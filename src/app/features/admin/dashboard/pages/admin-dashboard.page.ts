@@ -23,9 +23,9 @@ type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?:
     <div class="ed-kpi-grid">
       <button type="button" class="ed-kpi ed-kpi-btn" (click)="goPedidos({ hoy: true })">
         <i class="pi pi-shopping-bag ed-kpi-icon"></i>
-        <div class="ed-kpi-label">Pedidos (hoy {{ hoyLabel() }})</div>
+        <div class="ed-kpi-label">Pedidos de hoy</div>
         <div class="ed-kpi-value">{{ kpis().pedidosHoy }}</div>
-        <div class="ed-kpi-cta">Ver pedidos de hoy →</div>
+        <div class="ed-kpi-cta">{{ hoyLabel() }} · ver listado →</div>
       </button>
       <button type="button" class="ed-kpi ed-kpi-btn" (click)="goPedidos({ estado: 'pendiente' })">
         <i class="pi pi-clock ed-kpi-icon"></i>
