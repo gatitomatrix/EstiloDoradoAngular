@@ -201,6 +201,17 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
               </div>
 
               <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="chkNotaAdmin" [(ngModel)]="notaCheck" name="e_nota_chk">
+                  <label class="form-check-label" for="chkNotaAdmin">Agregar nota interna (opcional)</label>
+                </div>
+                <textarea *ngIf="notaCheck" class="form-control mt-2" rows="2" maxlength="500"
+                  [(ngModel)]="edit.nota_admin" name="e_nota"
+                  placeholder="Ej. Cliente no recojó a tiempo, devolver a anaquel."></textarea>
+                <div class="form-text" *ngIf="notaCheck">Solo se ve en el pedido. No cambia el motivo del inventario.</div>
+              </div>
+
+              <div class="col-12">
                 <label class="form-label">Dirección entrega</label>
                 <input class="form-control" [value]="edit.direccion_entrega || '-'" readonly>
               </div>
@@ -441,6 +452,7 @@ export class PedidosListPage implements OnInit {
   savingEdit = false;
   edit: any = {};
   historial: any[] = [];
+  notaCheck = false;
   mapSrc: SafeResourceUrl | null = null;
   mapLink: string | null = null;
   mapsGoogle: string | null = null;
@@ -533,8 +545,10 @@ export class PedidosListPage implements OnInit {
       estado: p.estado,
       forma_pago: p.forma_pago ?? undefined,
       fecha_pedido: p.fecha_pedido,
-      items: p.items || []
+      items: p.items || [],
+      nota_admin: p.nota_admin || '',
     };
+    this.notaCheck = !!(p.nota_admin && String(p.nota_admin).trim());
     this.historial = [];
     this.editOpen = true;
     this.aplicarMapa(p);
@@ -624,7 +638,8 @@ export class PedidosListPage implements OnInit {
     this.savingEdit = true;
     const payload = {
       estado: this.edit.estado,
-      forma_pago: this.edit.forma_pago ?? null
+      forma_pago: this.edit.forma_pago ?? null,
+      nota_admin: this.notaCheck ? (this.edit.nota_admin || '').trim() : '',
     };
     this.api.update(this.edit.id_pedido, payload).subscribe({
       next: () => { this.savingEdit = false; this.editOpen = false; this.buscar(); },
