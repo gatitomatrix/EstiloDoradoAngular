@@ -114,6 +114,7 @@ export class PagoComponent implements AfterViewInit {
     provincia: ['', Validators.required],
     distrito: ['', Validators.required],
   });
+  boletaConfirmar = false;
 
   ngOnInit() {
     this.cart.refreshPrecios();
@@ -544,7 +545,7 @@ export class PagoComponent implements AfterViewInit {
   }
 
   openCard(t: 'credito' | 'debito') { this.cardForm.reset({ ver: false }); this.showCardDrawer = t; }
-  closeDrawers() { this.showCardDrawer = null; this.showFactura = false; this.showBoleta = false; }
+  closeDrawers() { this.showCardDrawer = null; this.showFactura = false; this.showBoleta = false; this.boletaConfirmar = false; }
 
   guardarFactura() {
     if (this.facturaForm.invalid) { this.facturaForm.markAllAsTouched(); return; }
@@ -566,6 +567,10 @@ export class PagoComponent implements AfterViewInit {
 
   guardarBoleta() {
     if (this.boletaForm.invalid) { this.boletaForm.markAllAsTouched(); return; }
+    if (!this.boletaConfirmar) {
+      this.boletaConfirmar = true;
+      return;
+    }
 
     const hasFactura = !!this.pay.currentInvoice();
     if (hasFactura) {
@@ -576,6 +581,7 @@ export class PagoComponent implements AfterViewInit {
 
     this.pay.saveBoleta(this.boletaForm.value as BoletaData);
     this.selectedDoc = 'BO';
+    this.boletaConfirmar = false;
     this.closeDrawers();
 
     if (this.pendingCharge) this.finalizeOrder('BO');
@@ -640,6 +646,7 @@ export class PagoComponent implements AfterViewInit {
       }
     }
     this.showBoleta = true;
+    this.boletaConfirmar = false;
   }
 
   eliminarFactura() { if (confirm('¿Eliminar datos de facturación?')) { this.pay.clearInvoice(); if (this.selectedDoc === 'FA') this.selectedDoc = null; this.closeDrawers(); } }

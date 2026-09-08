@@ -293,8 +293,24 @@
         <input class="form-control" formControlName="direccion" placeholder="Calle, jirón, número">
       </div>
 
+      <div *ngIf="boletaConfirmar" class="alert alert-warning mt-3 mb-0">
+        <strong>¿Confirmas que la información consignada es correcta?</strong>
+        <p class="small mb-2 mt-1">Tu boleta electrónica se emitirá con estos datos. Revisa que el nombre, DNI y dirección coincidan con tu documento.</p>
+        <ul class="small mb-0">
+          <li><strong>Nombre:</strong> {{ boletaForm.value.nombres }}</li>
+          <li><strong>DNI:</strong> {{ boletaForm.value.dni }}</li>
+          <li><strong>Dirección:</strong> {{ boletaForm.value.direccion }}</li>
+          <li>{{ boletaForm.value.distrito }} / {{ boletaForm.value.provincia }} / {{ boletaForm.value.departamento }}</li>
+        </ul>
+      </div>
+
       <div class="d-grid gap-2 mt-3">
-        <button class="btn btn-dark" [disabled]="boletaForm.invalid">Guardar</button>
+        <button class="btn btn-dark" [disabled]="boletaForm.invalid">
+          {{ boletaConfirmar ? 'Sí, la información es correcta' : 'Guardar' }}
+        </button>
+        <button *ngIf="boletaConfirmar" type="button" class="btn btn-outline-secondary" (click)="boletaConfirmar = false">
+          Revisar datos
+        </button>
         <button type="button" class="btn btn-outline-danger" (click)="closeDrawers()">Cancelar</button>
         <button *ngIf="pay.currentBoleta()" type="button" class="btn btn-outline-secondary" (click)="eliminarBoleta()">
           Eliminar datos de boleta electrónica
