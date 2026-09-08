@@ -32,6 +32,13 @@ export class AdminAuthService {
   }
 
   getToken(): string | null { return sessionStorage.getItem(ADMIN_TOKEN_KEY); }
+  getUser(): any {
+    try { return JSON.parse(sessionStorage.getItem(ADMIN_USER_KEY) || 'null'); } catch { return null; }
+  }
+  getEmpleadoId(): number | null {
+    const n = Number(this.getUser()?.id_empleado);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
   getRoles(): string[] { try { return JSON.parse(sessionStorage.getItem(ADMIN_ROLES_KEY) || '[]'); } catch { return []; } }
   isAuthenticated(): boolean { return !!this.getToken(); }
 

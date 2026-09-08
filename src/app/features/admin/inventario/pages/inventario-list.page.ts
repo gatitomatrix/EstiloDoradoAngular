@@ -6,6 +6,7 @@ import { RealtimeService } from '../../../../core/services/realtime.service';
 import { AdminInventarioService } from '../services/admin-inventario.service';
 import { AdminProductosService, Producto } from '../../productos/services/admin-productos.service';
 import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
+import { AdminAuthService } from '../../../../core/services/admin-auth.service';
 
 @Component({
   standalone: true,
@@ -167,6 +168,7 @@ export class InventarioListPage implements OnInit {
   private api = inject(AdminInventarioService);
   private rt  = inject(RealtimeService);
   private prodApi = inject(AdminProductosService);
+  private auth = inject(AdminAuthService);
 
   q: any = { page: 1, per_page: 25, tipo: undefined, fecha_desde: undefined, fecha_hasta: undefined };
   rows = signal<any[]>([]);
@@ -250,6 +252,7 @@ export class InventarioListPage implements OnInit {
       observacion: this.modo === 'entrada' && ref ? `${motivo} · Ref. compra: ${ref}` : motivo,
       referencia_tipo: (this.modo === 'entrada' ? 'compra' : 'ajuste') as 'compra' | 'ajuste',
       fecha: this.mov.fecha || undefined,
+      id_empleado: this.auth.getEmpleadoId() ?? undefined,
     };
     const req$ = this.modo === 'entrada' ? this.api.entrada(payload) : this.api.ajuste(payload);
     req$.subscribe({
