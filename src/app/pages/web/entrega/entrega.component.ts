@@ -45,6 +45,9 @@ export class EntregaComponent {
   private lastCoords?: { lat: number; lng: number };
   private lastDisplay?: string; // 👈 para deducir número
   private restoring = false;
+  private fillingFromMap = false;
+  private geoTimer?: ReturnType<typeof setTimeout>;
+  private mapMoveTimer?: ReturnType<typeof setTimeout>;
 
   // UI
   showAddressModal = false;
@@ -126,8 +129,14 @@ export class EntregaComponent {
     });
 
     this.addrForm.get('distrito')!.valueChanges.subscribe(() => this.persistDraft());
-    this.addrForm.get('via')!.valueChanges.subscribe(() => this.persistDraft());
-    this.addrForm.get('numero')!.valueChanges.subscribe(() => this.persistDraft());
+    this.addrForm.get('via')!.valueChanges.subscribe(() => {
+      this.persistDraft();
+      this.scheduleMapFromForm();
+    });
+    this.addrForm.get('numero')!.valueChanges.subscribe(() => {
+      this.persistDraft();
+      this.scheduleMapFromForm();
+    });
 
     const st = history.state as any;
     if (!this.checkout.telefono) {
@@ -369,7 +378,7 @@ export class EntregaComponent {
       [v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
     ];
     for (const q of queries) {
-      const res = await this.geocode.searchAddress(q);
+      const res = await this.geocode.searchAddress(q, this.lastCoords ? { lat: this.lastCoords.lat, lon: this.lastCoords.lng } : undefined);
       if (res) return { lat: res.lat, lng: res.lon };
     }
     return this.fallbackCoords(v.departamento, v.provincia, v.distrito);
@@ -398,17 +407,30 @@ export class EntregaComponent {
 
     this.marker = L.marker([lat, lng], { draggable: true, icon }).addTo(this.map);
 
-    this.marker.on('dragend', async () => {
-      const pos = this.marker!.getLatLng();
+    const fromMap = async (pos: L.LatLng) => {
       this.lastCoords = { lat: pos.lat, lng: pos.lng };
+      this.marker!.setLatLng(pos);
       await this.fillFromReverse(pos.lat, pos.lng);
+    };
+
+    this.marker.on('dragend', async () => {
+      await fromMap(this.marker!.getLatLng());
     });
 
     this.map.on('click', async (e: L.LeafletMouseEvent) => {
-      const pos = e.latlng;
-      this.marker!.setLatLng(pos);
-      this.lastCoords = { lat: pos.lat, lng: pos.lng };
-      await this.fillFromReverse(pos.lat, pos.lng);
+      await fromMap(e.latlng);
+    });
+
+    this.map.on('moveend', () => {
+      if (this.fillingFromMap) return;
+      clearTimeout(this.mapMoveTimer);
+      this.mapMoveTimer = setTimeout(async () => {
+        if (!this.map || this.fillingFromMap) return;
+        const c = this.map.getCenter();
+        if (this.marker) this.marker.setLatLng(c);
+        this.lastCoords = { lat: c.lat, lng: c.lng };
+        await this.fillFromReverse(c.lat, c.lng);
+      }, 350);
     });
 
     setTimeout(() => this.map?.invalidateSize(), 120);
@@ -488,18 +510,37 @@ export class EntregaComponent {
   }
 
   private async fillFromReverse(lat: number, lng: number) {
-    const r = await this.geocode.reverseAddress(lat, lng); // va por tu backend (sin CORS)
+    const r = await this.geocode.reverseAddress(lat, lng);
     if (!r) return;
 
+    this.fillingFromMap = true;
     this.lastDisplay = r.display || undefined;
 
     const viaRev = (r.via ?? '').toString().trim();
-    const numUser = (this.addrForm.value.numero ?? '').toString().trim();
+    const numRev = (r.numero ?? '').toString().trim();
     const via = viaRev || (this.addrForm.value.via ?? '').toString().trim();
-    const numero = numUser || (r.numero ?? '').toString().trim() || this.guessNumberFromDisplay(this.lastDisplay, via) || '0';
+    const numero = numRev || this.guessNumberFromDisplay(this.lastDisplay, via) || (this.addrForm.value.numero ?? '').toString().trim() || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
+    await this.applyUbigeoFromReverse(r.departamento, r.provincia, r.distrito);
     this.persistDraft();
+    this.fillingFromMap = false;
+  }
+
+  private scheduleMapFromForm() {
+    if (!this.stepMap || !this.map || this.fillingFromMap) return;
+    clearTimeout(this.geoTimer);
+    this.geoTimer = setTimeout(() => this.moveMapFromForm(), 700);
+  }
+
+  private async moveMapFromForm() {
+    if (!this.map || this.fillingFromMap) return;
+    const point = await this.geocodeBest();
+    this.fillingFromMap = true;
+    this.lastCoords = { lat: point.lat, lng: point.lng };
+    this.map.setView([point.lat, point.lng], Math.max(this.map.getZoom(), 17));
+    this.marker?.setLatLng([point.lat, point.lng]);
+    this.fillingFromMap = false;
   }
 
   // ---------- CONFIRMAR ----------

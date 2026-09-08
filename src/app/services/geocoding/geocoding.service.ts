@@ -9,8 +9,11 @@ export class GeocodingService {
   private API = environment.apiBaseUrl;
 
   /** Forward geocoding via backend proxy */
-  async searchAddress(query: string): Promise<{ lat: number; lon: number } | null> {
-    const params = new HttpParams().set('q', query);
+  async searchAddress(query: string, bias?: { lat: number; lon: number }): Promise<{ lat: number; lon: number } | null> {
+    let params = new HttpParams().set('q', query);
+    if (bias) {
+      params = params.set('lat', String(bias.lat)).set('lon', String(bias.lon));
+    }
     const res = await firstValueFrom(
       this.http.get<any[]>(`${this.API}/geo/search`, { params })
     ).catch(() => null);
