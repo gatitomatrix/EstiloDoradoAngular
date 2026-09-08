@@ -9,6 +9,7 @@ import { AdminPedidosService } from '../services/admin-pedidos.service';
 import { AdminClientesService } from '../../clientes/services/admin-clientes.service';
 import { AdminProductosService } from '../../productos/services/admin-productos.service';
 import { environment } from '../../../../../environments/environment';
+import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-pe';
 
 @Component({
   standalone: true,
@@ -499,35 +500,10 @@ export class PedidosListPage implements OnInit {
     return `${y}-${m}-${day}`;
   }
   toFechaHora(input: any): string {
-    if (!input) return '';
-    const s = String(input).trim();
-    let iso = s;
-    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
-      iso = s.replace(' ', 'T') + '-05:00';
-    }
-    const d = new Date(iso);
-    if (!isNaN(d.getTime())) {
-      const parts = new Intl.DateTimeFormat('es-PE', {
-        timeZone: 'America/Lima',
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: false,
-      }).formatToParts(d);
-      const g = (t: string) => parts.find(p => p.type === t)?.value || '';
-      return `${g('day')}/${g('month')}/${g('year')} ${g('hour')}:${g('minute')}`;
-    }
-    return this.toDDMMYYYY(input);
+    return formatFechaHoraPe(input);
   }
   toDDMMYYYY(input: any): string {
-    if (!input) return '';
-    const s = String(input);
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
-    const d = new Date(input);
-    if (isNaN(d.getTime())) return s;
-    const dd = d.getDate().toString().padStart(2,'0');
-    const mm = (d.getMonth()+1).toString().padStart(2,'0');
-    const yy = d.getFullYear();
-    return `${dd}/${mm}/${yy}`;
+    return formatFechaPe(input, false);
   }
   esDelFiltro(p: any): boolean {
     if (!this.q.fecha_desde) return false;

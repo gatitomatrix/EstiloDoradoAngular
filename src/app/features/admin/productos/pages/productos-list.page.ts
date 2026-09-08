@@ -13,6 +13,7 @@ import { ButtonModule } from 'primeng/button';
 import { AdminProductosService, Producto } from '../services/admin-productos.service';
 import { AdminProveedoresService } from '../../proveedores/services/admin-proveedores.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
 
 @Component({
   standalone: true,
@@ -506,25 +507,7 @@ export class ProductosListPage implements OnInit {
     return `${d.getFullYear()}-${mm}-${dd}`;
   }
   formatFecha(raw?: string | null) {
-    if (!raw) return '';
-    const s = String(raw).trim();
-    if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
-      const d = new Date(s);
-      if (!isNaN(d.getTime())) {
-        const parts = new Intl.DateTimeFormat('es-PE', {
-          timeZone: 'America/Lima',
-          day: '2-digit', month: '2-digit', year: 'numeric',
-          hour: '2-digit', minute: '2-digit', hour12: false,
-        }).formatToParts(d);
-        const g = (t: string) => parts.find(p => p.type === t)?.value || '';
-        return `${g('day')}/${g('month')}/${g('year')} ${g('hour')}:${g('minute')}`;
-      }
-    }
-    const m = s.replace('T', ' ').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ ](\d{2}):(\d{2}))?/);
-    if (m) {
-      return m[4] ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : `${m[3]}/${m[2]}/${m[1]}`;
-    }
-    return s;
+    return formatFechaHoraPe(raw);
   }
 
   openCreate() {

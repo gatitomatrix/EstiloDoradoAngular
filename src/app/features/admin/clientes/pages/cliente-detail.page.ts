@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AdminClientesService } from '../services/admin-clientes.service';
+import { formatFechaPe } from '../../../../core/utils/fecha-pe';
 
 @Component({
   standalone: true,
@@ -102,10 +103,6 @@ export class ClienteDetailPage implements OnInit {
   }
 
   fmtFecha(raw?: string) {
-    if (!raw) return '—';
-    const s = String(raw).trim();
-    const m = s.replace('T', ' ').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ ](\d{2}):(\d{2}))?/);
-    if (m) return m[4] ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : `${m[3]}/${m[2]}/${m[1]}`;
-    return s;
+    return formatFechaPe(raw, false);
   }
 }

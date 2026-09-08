@@ -8,11 +8,12 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { PedidoCambiarEstadoWidget } from '../widgets/pedido-cambiar-estado.widget';
 import { PedidoComprobantesWidget } from '../widgets/pedido-comprobantes.widget';
+import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
 
 @Component({
   standalone: true,
   selector: 'app-pedido-detail',
-  imports: [CommonModule, TimelineModule, CardModule, ButtonModule, PedidoCambiarEstadoWidget, PedidoComprobantesWidget],
+  imports: [CommonModule, TimelineModule, CardModule, ButtonModule, PedidoCambiarEstadoWidget, PedidoComprobantesWidget, FechaPePipe],
   template: `
   <div class="p-3" *ngIf="pedido()">
     <div class="flex align-items-center justify-content-between mb-3">
@@ -32,7 +33,7 @@ import { PedidoComprobantesWidget } from '../widgets/pedido-comprobantes.widget'
               <div class="text-500 text-sm">{{e.comentario || '-'}}</div>
             </ng-template>
             <ng-template pTemplate="opposite" let-e>
-              <span class="text-sm text-500">{{ e.fecha || (e.created_at | date:'short') }}</span>
+              <span class="text-sm text-500">{{ (e.fecha || e.created_at) | fechaPe:true }}</span>
             </ng-template>
             <ng-template pTemplate="marker" let-e>
               <span class="bg-primary border-circle" style="width:12px;height:12px;display:inline-block"></span>

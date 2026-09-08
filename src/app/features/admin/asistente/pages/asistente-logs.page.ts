@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
+import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
 
 type ProdChip = {
   id?: number;
@@ -57,7 +58,7 @@ type Ficha = {
 @Component({
   standalone: true,
   selector: 'app-asistente-logs',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FechaPePipe],
   styles: [`
     .ed-chip {
       display: inline-block;
@@ -144,7 +145,7 @@ type Ficha = {
         </thead>
         <tbody>
           <tr *ngFor="let r of items" (click)="openQueja(r)" style="cursor:pointer">
-            <td class="text-nowrap">{{ r.created_at }}</td>
+            <td class="text-nowrap">{{ r.created_at | fechaPe:true }}</td>
             <td (click)="$event.stopPropagation()">
               <button *ngIf="r.id_cliente && r.cliente_nombre" type="button" class="ed-name" (click)="openCliente(r)">{{ r.cliente_nombre }}</button>
               <div *ngIf="!r.id_cliente && r.cliente_nombre">{{ r.cliente_nombre }}</div>
@@ -194,7 +195,7 @@ type Ficha = {
               <img *ngIf="p.items[0]?.imagen_url" [src]="p.items[0].imagen_url" alt="" />
               <div>
                 <strong>Pedido #{{ p.id_pedido }}</strong>
-                <div class="small text-muted">{{ p.fecha }} · S/ {{ p.total }} · {{ p.estado }}</div>
+                <div class="small text-muted">{{ p.fecha | fechaPe:true }} · S/ {{ p.total }} · {{ p.estado }}</div>
                 <div class="small">{{ itemsTxt(p) }}</div>
               </div>
             </div>

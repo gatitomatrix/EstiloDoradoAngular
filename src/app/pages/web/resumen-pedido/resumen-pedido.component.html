@@ -8,7 +8,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <div><strong>ID PEDIDO:</strong> #{{ data?.id_pedido }}</div>
-                <div><strong>Fecha:</strong> {{ data?.fecha_pedido | date:'short' }}</div>
+                <div><strong>Fecha:</strong> {{ data?.fecha_pedido | fechaPe:true }}</div>
             </div>
             <div class="d-flex justify-content-between mt-1">
                 <div><strong>Estado:</strong> {{ data?.estado }}</div>

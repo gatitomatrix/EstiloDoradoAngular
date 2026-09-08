@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminClientesService } from '../services/admin-clientes.service';
+import { formatFechaPe } from '../../../../core/utils/fecha-pe';
 
 
 @Component({
@@ -171,9 +172,7 @@ export class ClientesListPage {
   }
 
   fmtFecha(raw?: string) {
-    if (!raw) return '—';
-    const m = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(raw);
+    return formatFechaPe(raw, false);
   }
 
   onlyLetters(ev: Event, target: 'nuevo' | 'edit', field: 'nombre' | 'apellido') {

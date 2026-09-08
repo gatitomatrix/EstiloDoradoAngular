@@ -5,6 +5,7 @@ import { OrderService } from '../../../services/order/order.service';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
+import { FechaPePipe } from '../../../core/pipes/fecha-pe.pipe';
 import Swal from 'sweetalert2';
 
 declare const bootstrap: any;
@@ -12,7 +13,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'ed-web-resumen-pedido',
   standalone: true,
-  imports: [CommonModule, FranjaMarcaComponent, BarraSuperiorComponent],
+  imports: [CommonModule, FranjaMarcaComponent, BarraSuperiorComponent, FechaPePipe],
   templateUrl: './resumen-pedido.component.html',
   styleUrls: ['./resumen-pedido.component.css']
 })

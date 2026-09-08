@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { RealtimeService } from '../../../../core/services/realtime.service';
 import { AdminInventarioService } from '../services/admin-inventario.service';
 import { AdminProductosService, Producto } from '../../productos/services/admin-productos.service';
+import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
 
 @Component({
   standalone: true,
   selector: 'app-inventario-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FechaPePipe],
   template: `
   <div class="p-3">
     <h2 class="mb-2">Inventario</h2>
@@ -77,7 +78,7 @@ import { AdminProductosService, Producto } from '../../productos/services/admin-
         <tbody>
           <tr *ngFor="let m of rows()">
             <td>{{ m.id_movimiento }}</td>
-            <td>{{ m.fecha | date:'short' }}</td>
+            <td>{{ m.fecha | fechaPe:true }}</td>
             <td>{{ etiquetaTipo(m.tipo_movimiento) }}</td>
             <td>{{ m.producto_nombre }} <span class="text-muted">#{{ m.id_producto }}</span></td>
             <td>{{ m.cantidad }}</td>

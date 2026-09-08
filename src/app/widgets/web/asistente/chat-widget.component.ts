@@ -74,6 +74,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private authSub?: Subscription;
   private pausedForPago = false;
   private wasLoggedIn = false;
+  private pendingAfterLogin: string | null = null;
+  private skipLoginGuide = false;
   private readonly storeKey = 'ed_dori_sesion';
 
   ngOnInit() {
@@ -164,6 +166,8 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         });
         if (res.actions?.some((a) => a.type === 'login') || res.action?.type === 'login') {
           this.showLogin = true;
+          const lastUser = [...this.msgs].reverse().find((m) => m.from === 'user');
+          this.pendingAfterLogin = lastUser?.text || null;
         }
         this.sending = false;
         this.scroll();
@@ -356,11 +360,50 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.loginBusy = false;
     this.showLogin = false;
     this.open = true;
+    this.skipLoginGuide = true;
+    const replay = this.pendingAfterLogin;
+    this.pendingAfterLogin = null;
     this.persist();
+    if (replay) {
+      setTimeout(() => this.replayAfterLogin(replay), 250);
+    }
+  }
+
+  private replayAfterLogin(text: string) {
+    if (!text || this.sending) return;
+    this.sending = true;
+    const ids = this.offered.map((p) => p.id).filter(Boolean);
+    this.api.send(text, ids, this.awaiting, this.complaint).subscribe({
+      next: (res: AsistenteReply) => {
+        if (res.products?.length) this.offered = res.products;
+        this.awaiting = res.awaiting || null;
+        this.complaint = res.complaint || this.complaint;
+        this.msgs.push({
+          from: 'bot',
+          text: res.reply || '…',
+          products: res.products || [],
+          action: res.action,
+          actions: res.actions?.length ? res.actions : (res.action ? [res.action] : []),
+          pedidos: res.pedidos || [],
+        });
+        this.sending = false;
+        this.persist();
+        this.scroll();
+      },
+      error: () => {
+        this.sending = false;
+        this.msgs.push({ from: 'bot', text: 'Ya estás dentro. ¿Seguimos con tu consulta?' });
+        this.persist();
+      },
+    });
   }
 
   private onLoggedInGuide() {
     this.open = true;
+    if (this.skipLoginGuide) {
+      this.skipLoginGuide = false;
+      return;
+    }
     this.msgs.push({
       from: 'bot',
       text: 'Listo, ya estás dentro. Puedes agregar al carrito, elegir recojo o envío y pagar. Sigo en esta ventana; en el pago me minimizo para no tapar Culqi o Yape.',
@@ -377,6 +420,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         awaiting: this.awaiting,
         complaint: this.complaint,
         open: this.open,
+        pendingAfterLogin: this.pendingAfterLogin,
       }));
     } catch { /* cuota */ }
   }
@@ -392,6 +436,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       this.awaiting = d.awaiting || null;
       this.complaint = d.complaint || null;
       this.open = !!d.open;
+      this.pendingAfterLogin = d.pendingAfterLogin || null;
       return true;
     } catch {
       return false;
