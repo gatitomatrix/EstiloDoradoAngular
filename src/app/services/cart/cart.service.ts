@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CartItem } from '../../models/cart/cart-item';
 import { AuthService } from '../auth/auth.service';
+import { ProductoService } from '../product/product.service';
+import { ProductPreview } from '../../models/product/preview';
 
 /**
  * - Invitado: sessionStorage ('ed_cart_guest')
@@ -18,6 +20,7 @@ const USER_KEY_PREFIX = 'ed_cart_user_';
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private auth = inject(AuthService);
+  private productos = inject(ProductoService);
 
   private _items$ = new BehaviorSubject<CartItem[]>([]);
   public items$ = this._items$.asObservable();
@@ -51,6 +54,7 @@ export class CartService {
         this.writeGuest([]);
         this.writeUser(user.id_cliente, merged);
         this._items$.next(merged);
+        this.refreshPrecios();
         return;
       }
 
@@ -69,8 +73,10 @@ export class CartService {
         this.mode = 'user';
         this.currentUserId = user.id_cliente;
         this._items$.next(this.readUser(user.id_cliente));
+        this.refreshPrecios();
       }
     });
+    this.refreshPrecios();
   }
 
   get items(): CartItem[] {
@@ -110,6 +116,47 @@ export class CartService {
 
   clear() {
     this.updateAndPersist([]);
+  }
+
+  /** Recalcula precios/stock con el catálogo actual (promo on/off). */
+  refreshPrecios() {
+    if (!this.items.length) return;
+    this.productos.getAll().subscribe({
+      next: (list) => this.applyCatalog(list),
+      error: () => { /* si falla, se deja el carrito */ },
+    });
+  }
+
+  private applyCatalog(list: ProductPreview[]) {
+    const byId = new Map(list.map((p) => [Number(p.id), p]));
+    let changed = false;
+    const next = this.items.map((it) => {
+      const p = byId.get(Number(it.id));
+      if (!p) return it;
+      const precio = Number(p.precio);
+      const lista = Number(p.precioLista ?? p.precio);
+      const stock = Math.max(0, Number(p.stock ?? it.stockMax));
+      const qty = Math.min(it.qty, Math.max(1, stock || it.qty));
+      if (
+        Math.abs((it.precio ?? 0) - precio) > 0.009 ||
+        Math.abs((it.precioLista ?? it.precio) - lista) > 0.009 ||
+        it.stockMax !== stock ||
+        it.qty !== qty
+      ) {
+        changed = true;
+        return {
+          ...it,
+          precio,
+          precioLista: lista,
+          stockMax: stock || it.stockMax,
+          qty,
+          nombre: p.nombre || it.nombre,
+          imagen: p.imagen || it.imagen,
+        };
+      }
+      return it;
+    });
+    if (changed) this.updateAndPersist(next);
   }
 
   getSubtotal(): number {

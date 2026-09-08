@@ -32,6 +32,10 @@ export class EntregaComponent {
   private geocode = inject(GeocodingService);
   private auth = inject(AuthService);
 
+  constructor() {
+    this.cart.refreshPrecios();
+  }
+
   departamentos: string[] = [];
   provincias: string[] = [];
   distritos: string[] = [];

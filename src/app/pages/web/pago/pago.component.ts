@@ -116,6 +116,7 @@ export class PagoComponent implements AfterViewInit {
   });
 
   ngOnInit() {
+    this.cart.refreshPrecios();
     if (!this.cart.items.length) {
       this.router.navigateByUrl('/carrito');
       return;

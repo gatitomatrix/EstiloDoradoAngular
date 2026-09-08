@@ -19,6 +19,10 @@ export class ConfirmarEntregaComponent {
   private cart = inject(CartService);
   private router = inject(Router);
 
+  constructor() {
+    this.cart.refreshPrecios();
+  }
+
   // timeline: en “Entrega” ahora
   get subtotal() { return this.cart.getSubtotal(); }
   get listado() { return this.cart.getListado(); }

@@ -27,6 +27,7 @@ export class CarritoComponent implements OnInit, OnDestroy {
   sub?: Subscription;
 
   ngOnInit(): void {
+    this.cart.refreshPrecios();
     this.sub = this.cart.items$.subscribe((list) => (this.items = list));
   }
 
