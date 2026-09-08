@@ -213,6 +213,14 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
                   style="width:100%;height:220px;border:0;border-radius:8px;background:#eee"
                 ></iframe>
                 <a *ngIf="mapLink" class="small d-inline-block mt-1" [href]="mapLink" target="_blank" rel="noopener">Abrir mapa grande</a>
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-2" *ngIf="mapsGoogle">
+                  <a class="btn btn-sm btn-outline-primary" [href]="mapsGoogle" target="_blank" rel="noopener">
+                    Abrir en Google Maps
+                  </a>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copiarGoogleMaps()">
+                    {{ mapsCopied ? 'Enlace copiado' : 'Copiar enlace' }}
+                  </button>
+                </div>
               </div>
               <div class="col-12" *ngIf="edit.items?.length">
                 <label class="form-label">Productos a entregar</label>
@@ -435,6 +443,8 @@ export class PedidosListPage implements OnInit {
   historial: any[] = [];
   mapSrc: SafeResourceUrl | null = null;
   mapLink: string | null = null;
+  mapsGoogle: string | null = null;
+  mapsCopied = false;
   mapNota = '';
 
   // Crear
@@ -537,12 +547,16 @@ export class PedidosListPage implements OnInit {
     this.editOpen = false;
     this.mapSrc = null;
     this.mapLink = null;
+    this.mapsGoogle = null;
+    this.mapsCopied = false;
     this.mapNota = '';
   }
 
   private aplicarMapa(p: any) {
     this.mapSrc = null;
     this.mapLink = null;
+    this.mapsGoogle = null;
+    this.mapsCopied = false;
     this.mapNota = '';
     const dir = String(p?.direccion_entrega || '');
     const retiro = !!p?.es_retiro || /retiro|recojo/i.test(dir);
@@ -576,7 +590,33 @@ export class PedidosListPage implements OnInit {
     const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d},${lat - d * 0.7},${lng + d},${lat + d * 0.7}&layer=mapnik&marker=${lat},${lng}`;
     this.mapSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.mapLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`;
+    this.mapsGoogle = `https://www.google.com/maps?q=${lat},${lng}`;
+    this.mapsCopied = false;
     this.mapNota = nota;
+  }
+
+  copiarGoogleMaps() {
+    if (!this.mapsGoogle) return;
+    const done = () => {
+      this.mapsCopied = true;
+      setTimeout(() => (this.mapsCopied = false), 2000);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(this.mapsGoogle).then(done).catch(() => this.fallbackCopy(this.mapsGoogle!, done));
+    } else {
+      this.fallbackCopy(this.mapsGoogle, done);
+    }
+  }
+
+  private fallbackCopy(text: string, done: () => void) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch { /* ignore */ }
+    document.body.removeChild(ta);
   }
 
   guardarEdicion() {
