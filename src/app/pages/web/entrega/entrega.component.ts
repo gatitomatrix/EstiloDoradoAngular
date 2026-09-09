@@ -389,12 +389,13 @@ export class EntregaComponent {
 
   private expandVia(via: string): string {
     return (via || '')
-      .replace(/\bAvda\.?\b/gi, 'Avenida')
-      .replace(/\bAv\.?\b/gi, 'Avenida')
-      .replace(/\bJr\.?\b/gi, 'Jirón')
-      .replace(/\bCal\.?\b/gi, 'Calle')
-      .replace(/\bPje\.?\b/gi, 'Pasaje')
-      .replace(/\bUrb\.?\b/gi, 'Urbanización')
+      .replace(/\bAvda\.?\s*/gi, 'Avenida ')
+      .replace(/\bAv\.?\s*/gi, 'Avenida ')
+      .replace(/\bJr\.?\s*/gi, 'Jirón ')
+      .replace(/\bCal\.?\s*/gi, 'Calle ')
+      .replace(/\bPje\.?\s*/gi, 'Pasaje ')
+      .replace(/\bUrb\.?\s*/gi, 'Urbanización ')
+      .replace(/\s+/g, ' ')
       .trim();
   }
 
