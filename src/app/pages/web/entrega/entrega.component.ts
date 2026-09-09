@@ -42,12 +42,14 @@ export class EntregaComponent {
 
   private map?: L.Map;
   private marker?: L.Marker;
-  private lastCoords?: { lat: number; lng: number };
+  lastCoords?: { lat: number; lng: number };
   private lastDisplay?: string; // 👈 para deducir número
   private restoring = false;
   private fillingFromMap = false;
   private geoTimer?: ReturnType<typeof setTimeout>;
   private mapMoveTimer?: ReturnType<typeof setTimeout>;
+  mapLabel = '';
+  geoBusy = false;
 
   // UI
   showAddressModal = false;
@@ -354,6 +356,7 @@ export class EntregaComponent {
 
     const point = await this.geocodeBest();
     this.lastCoords = { lat: point.lat, lng: point.lng };
+    this.mapLabel = `${(this.addrForm.value.via || '').trim()} ${(this.addrForm.value.numero || '').trim()}`.trim();
     setTimeout(() => this.initMap(point.lat, point.lng), 80);
   }
 
@@ -364,24 +367,55 @@ export class EntregaComponent {
       if (d.includes('CALLAO') || (dep || '').toUpperCase().includes('CALLAO')) {
         return { lat: -12.05659, lng: -77.11814 };
       }
+      if (d.includes('JESUS') || d.includes('JESÚS')) return { lat: -12.0782, lng: -77.0465 };
+      if (d.includes('MIRAFLORES')) return { lat: -12.1211, lng: -77.0297 };
+      if (d.includes('SAN ISIDRO')) return { lat: -12.0979, lng: -77.0353 };
+      if (d.includes('SURCO')) return { lat: -12.1395, lng: -76.9967 };
+      if (d.includes('LA MOLINA')) return { lat: -12.0790, lng: -76.9294 };
+      if (d.includes('SAN MIGUEL')) return { lat: -12.0785, lng: -77.0821 };
+      if (d.includes('PUEBLO LIBRE')) return { lat: -12.0764, lng: -77.0626 };
+      if (d.includes('LINCE')) return { lat: -12.0855, lng: -77.0364 };
+      if (d.includes('MAGDALENA')) return { lat: -12.0906, lng: -77.0701 };
+      if (d.includes('BREÑA') || d.includes('BRENA')) return { lat: -12.0589, lng: -77.0506 };
+      if (d.includes('LA VICTORIA')) return { lat: -12.0714, lng: -77.0166 };
+      if (d.includes('SAN JUAN DE LURIGANCHO') || d.includes('SJL')) return { lat: -12.0299, lng: -76.9928 };
+      if (d.includes('COMAS')) return { lat: -11.9329, lng: -77.0408 };
+      if (d.includes('LOS OLIVOS')) return { lat: -11.9910, lng: -77.0734 };
       return { lat: -12.04637, lng: -77.04279 };
     }
     if (z === 'pasco') return { lat: -10.66848, lng: -76.25688 };
     return { lat: -12.06866, lng: -75.21027 };
   }
 
+  private expandVia(via: string): string {
+    return (via || '')
+      .replace(/\bAvda\.?\b/gi, 'Avenida')
+      .replace(/\bAv\.?\b/gi, 'Avenida')
+      .replace(/\bJr\.?\b/gi, 'Jirón')
+      .replace(/\bCal\.?\b/gi, 'Calle')
+      .replace(/\bPje\.?\b/gi, 'Pasaje')
+      .replace(/\bUrb\.?\b/gi, 'Urbanización')
+      .trim();
+  }
+
   private async geocodeBest(): Promise<{ lat: number; lng: number }> {
     const v = this.addrForm.value;
+    const bias = this.fallbackCoords(v.departamento, v.provincia, v.distrito);
+    const via = this.expandVia(v.via || '');
+    const num = (v.numero || '').trim();
+    const dist = (v.distrito || '').trim();
     const queries = [
-      this.buildQueryFromForm(),
-      [v.via?.trim(), v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
-      [v.distrito, v.provincia, v.departamento, 'Perú'].filter(Boolean).join(', '),
-    ];
+      [via, num, dist, 'Lima', 'Perú'].filter(Boolean).join(', '),
+      [via, num, dist, v.provincia, 'Perú'].filter(Boolean).join(', '),
+      [via, dist, 'Perú'].filter(Boolean).join(', '),
+      [via, num, 'Lima', 'Perú'].filter(Boolean).join(', '),
+    ].filter((q, i, a) => q.length > 5 && a.indexOf(q) === i);
+
     for (const q of queries) {
-      const res = await this.geocode.searchAddress(q, this.lastCoords ? { lat: this.lastCoords.lat, lon: this.lastCoords.lng } : undefined);
+      const res = await this.geocode.searchAddress(q, { lat: bias.lat, lon: bias.lng });
       if (res) return { lat: res.lat, lng: res.lon };
     }
-    return this.fallbackCoords(v.departamento, v.provincia, v.distrito);
+    return bias;
   }
 
   private initMap(lat: number, lng: number) {
@@ -407,14 +441,19 @@ export class EntregaComponent {
 
     this.marker = L.marker([lat, lng], { draggable: true, icon }).addTo(this.map);
 
-    const fromMap = async (pos: L.LatLng) => {
+    const fromMap = async (pos: L.LatLng, pan = false) => {
       this.lastCoords = { lat: pos.lat, lng: pos.lng };
       this.marker!.setLatLng(pos);
+      if (pan) {
+        this.fillingFromMap = true;
+        this.map!.panTo(pos, { animate: false });
+        this.fillingFromMap = false;
+      }
       await this.fillFromReverse(pos.lat, pos.lng);
     };
 
     this.marker.on('dragend', async () => {
-      await fromMap(this.marker!.getLatLng());
+      await fromMap(this.marker!.getLatLng(), true);
     });
 
     this.map.on('click', async (e: L.LeafletMouseEvent) => {
@@ -430,10 +469,13 @@ export class EntregaComponent {
         if (this.marker) this.marker.setLatLng(c);
         this.lastCoords = { lat: c.lat, lng: c.lng };
         await this.fillFromReverse(c.lat, c.lng);
-      }, 350);
+      }, 280);
     });
 
-    setTimeout(() => this.map?.invalidateSize(), 120);
+    setTimeout(() => {
+      this.map?.invalidateSize();
+      void this.fillFromReverse(lat, lng);
+    }, 120);
   }
 
   // === Normalizador y matching suave ===
@@ -510,20 +552,30 @@ export class EntregaComponent {
   }
 
   private async fillFromReverse(lat: number, lng: number) {
+    this.geoBusy = true;
     const r = await this.geocode.reverseAddress(lat, lng);
-    if (!r) return;
-
     this.fillingFromMap = true;
-    this.lastDisplay = r.display || undefined;
 
+    if (!r) {
+      this.mapLabel = `Ubicación ${lat.toFixed(5)}, ${lng.toFixed(5)} — mueve el pin para ajustar`;
+      this.geoBusy = false;
+      this.fillingFromMap = false;
+      this.persistDraft();
+      return;
+    }
+
+    this.lastDisplay = r.display || undefined;
     const viaRev = (r.via ?? '').toString().trim();
     const numRev = (r.numero ?? '').toString().trim();
     const via = viaRev || (this.addrForm.value.via ?? '').toString().trim();
     const numero = numRev || this.guessNumberFromDisplay(this.lastDisplay, via) || (this.addrForm.value.numero ?? '').toString().trim() || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
+    this.mapLabel = (r.display || '').trim()
+      || `${via} ${numero}, ${this.addrForm.value.distrito}, ${this.addrForm.value.provincia}`.trim();
     await this.applyUbigeoFromReverse(r.departamento, r.provincia, r.distrito);
     this.persistDraft();
+    this.geoBusy = false;
     this.fillingFromMap = false;
   }
 
