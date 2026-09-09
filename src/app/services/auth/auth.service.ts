@@ -56,7 +56,11 @@ export class AuthService {
     email: string;
     contrasena: string;
   }): Observable<RegisterResp> {
-    return this.http.post<RegisterResp>(`${API}/auth/register`, p)
+    return this.http.post<RegisterResp>(`${API}/auth/register`, {
+      ...p,
+      password: p.contrasena,
+      password_confirmation: p.contrasena,
+    })
       .pipe(tap(r => persist(r.cliente, r.token, this._user$)));
   }
 

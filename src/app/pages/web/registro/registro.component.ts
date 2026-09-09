@@ -117,20 +117,39 @@ export class RegistroComponent {
     }
   }
 
+  /** Autofill del navegador a veces pinta el input sin actualizar el FormControl. */
+  syncFromDom(ctrl: string, ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    const c = this.form.get(ctrl);
+    if (!c) return;
+    if ((c.value || '') !== (el.value || '')) {
+      c.setValue(el.value, { emitEvent: true });
+    }
+    c.updateValueAndValidity({ emitEvent: false });
+  }
+
   submit() {
     this.formError = '';
+    ['email', 'nombre', 'apellido', 'telefono', 'direccion', 'password'].forEach((name) => {
+      const el = document.querySelector(`.ed-form [formControlName="${name}"]`) as HTMLInputElement | null;
+      if (el) this.syncFromDom(name, { target: el } as unknown as Event);
+    });
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
-    const v = this.form.value;
+    if (this.form.invalid) {
+      this.formError = this.firstFormError();
+      return;
+    }
+    const v = this.form.getRawValue();
     this.submitting = true;
+    const pass = String(v.password || '');
     this.auth
       .register({
-        nombre: v.nombre!.trim(),
-        apellido: (v.apellido || '').trim(),
-        telefono: v.telefono || '',
-        direccion: v.direccion || '',
-        email: v.email!,
-        contrasena: v.password!,
+        nombre: String(v.nombre || '').trim(),
+        apellido: String(v.apellido || '').trim(),
+        telefono: String(v.telefono || '').trim(),
+        direccion: String(v.direccion || '').trim(),
+        email: String(v.email || '').trim(),
+        contrasena: pass,
       })
       .subscribe({
         next: () => {
@@ -139,13 +158,26 @@ export class RegistroComponent {
         },
         error: (e) => {
           this.submitting = false;
+          const errs = e?.error?.errors || {};
+          const firstField = Object.keys(errs).length ? String(errs[Object.keys(errs)[0]]?.[0] || '') : '';
           const msg =
             e?.error?.message ||
-            e?.error?.errors?.email?.[0] ||
+            firstField ||
             'No se pudo registrar. Revisa los datos o prueba otro correo.';
           this.formError = typeof msg === 'string' ? msg : 'Error al registrar';
         },
       });
+  }
+
+  private firstFormError(): string {
+    if (this.form.get('email')?.invalid) return 'Ingresa un correo válido.';
+    if (this.form.get('nombre')?.invalid) return 'El nombre solo admite letras (mín. 2).';
+    if (this.form.get('apellido')?.invalid) return 'El apellido solo admite letras.';
+    if (this.form.get('telefono')?.invalid) return 'Celular inválido: 9 dígitos empezando en 9, o déjalo vacío.';
+    if (this.form.get('password')?.invalid) {
+      return 'La contraseña no cumple: mínimo 8, mayúscula, minúscula, número y sin espacios.';
+    }
+    return 'Revisa los campos marcados.';
   }
 
   async registerGoogle() {
