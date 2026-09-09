@@ -60,7 +60,15 @@
     <div class="ed-card__header">
       <h2>Contraseña</h2>
     </div>
-    <p class="text-muted" style="margin-top:0;">Si creaste la cuenta con correo. Si solo usas Google, pide un código en “¿Olvidaste tu contraseña?”.</p>
+    <ng-container *ngIf="esGoogle; else claveLocal">
+      <p class="text-muted" style="margin-top:0;">
+        Esta cuenta entra con Google. No usa contraseña de Estilo Dorado.
+        Si quieres cambiarla, hazlo en tu
+        <a href="https://myaccount.google.com/security" target="_blank" rel="noopener">cuenta de Google</a>.
+      </p>
+    </ng-container>
+    <ng-template #claveLocal>
+    <p class="text-muted" style="margin-top:0;">Si creaste la cuenta con correo, puedes cambiar la clave aquí.</p>
     <form [formGroup]="passForm" class="ed-grid" (ngSubmit)="cambiarClave()">
       <div>
         <label>Contraseña actual</label>
@@ -83,5 +91,6 @@
       </button>
       <a routerLink="/recuperar" class="ed-link">¿Olvidaste tu contraseña?</a>
     </div>
+    </ng-template>
   </div>
 </section>

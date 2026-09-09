@@ -5,9 +5,16 @@
     <div class="card shadow-sm my-4">
         <div class="card-body p-4">
             <h3 class="fw-bold mb-3">Recuperar contraseña</h3>
-            <p class="text-muted">Te enviamos un código de 6 dígitos al correo (válido 60 minutos). También llega un enlace para abrirlo aquí.</p>
+            <p class="text-muted" *ngIf="!google">Te enviamos un código de 6 dígitos al correo (válido 60 minutos). También llega un enlace para abrirlo aquí.</p>
 
-            <form [formGroup]="form" class="d-grid gap-3" (ngSubmit)="continuar()">
+            <div class="alert alert-info" *ngIf="google">
+              Esta cuenta entra con Google. No se envía código de recuperación.
+              Inicia sesión con el botón <strong>Continuar con Google</strong>.
+              La contraseña se cambia en tu
+              <a href="https://myaccount.google.com/security" target="_blank" rel="noopener">cuenta de Google</a>.
+            </div>
+
+            <form *ngIf="!google" [formGroup]="form" class="d-grid gap-3" (ngSubmit)="continuar()">
                 <div>
                     <label class="form-label">Correo electrónico</label>
                     <input type="email" class="form-control" placeholder="nombre@ejemplo.com" formControlName="email">
@@ -23,7 +30,7 @@
                 </button>
             </form>
 
-            <div class="text-center mt-3">
+            <div class="text-center mt-3" *ngIf="!google">
                 <a class="link-primary text-decoration-underline" routerLink="/restablecer">Ya tengo el código</a>
             </div>
             <div class="text-center mt-2">

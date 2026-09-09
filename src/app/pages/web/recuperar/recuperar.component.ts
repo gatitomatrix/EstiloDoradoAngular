@@ -22,6 +22,7 @@ export class RecuperarComponent implements OnInit {
 
   sending = false;
   sent = false;
+  google = false;
   err = '';
 
   form = this.fb.group({
@@ -42,13 +43,20 @@ export class RecuperarComponent implements OnInit {
     const email = (this.emailCtrl.value || '').trim();
     this.sending = true;
     this.err = '';
-    this.http.post(`${environment.apiBaseUrl}/auth/password/forgot`, { email })
-      .subscribe({
-        next: () => {
-          this.sending = false;
+    this.http.post<{ success?: boolean; google?: boolean; message?: string }>(
+      `${environment.apiBaseUrl}/auth/password/forgot`,
+      { email }
+    ).subscribe({
+      next: (r) => {
+        this.sending = false;
+        if (r?.google) {
+          this.google = true;
           this.sent = true;
-          this.router.navigate(['/restablecer'], { queryParams: { email } });
-        },
+          return;
+        }
+        this.sent = true;
+        this.router.navigate(['/restablecer'], { queryParams: { email } });
+      },
         error: () => {
           this.sending = false;
           this.err = 'No se pudo enviar el correo. Intenta de nuevo.';

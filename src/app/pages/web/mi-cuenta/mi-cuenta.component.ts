@@ -31,6 +31,11 @@ export class MiCuentaComponent implements OnInit {
   passErr = '';
   passBusy = false;
 
+  get esGoogle() {
+    const u = this.user || this.auth.user;
+    return !!u && (u.es_google === true || u.auth_provider === 'google');
+  }
+
   form = this.fb.group({
     nombre: ['', [Validators.required, Validators.pattern(NAME_RE)]],
     apellido: ['', [Validators.pattern(NAME_OPT_RE)]],
@@ -153,7 +158,7 @@ export class MiCuentaComponent implements OnInit {
       },
       error: (e) => {
         this.passBusy = false;
-        this.passErr = e?.error?.message || 'No se pudo cambiar. Si entraste con Google, usa “¿Olvidaste tu contraseña?”.';
+        this.passErr = e?.error?.message || 'No se pudo cambiar la contraseña.';
       },
     });
   }

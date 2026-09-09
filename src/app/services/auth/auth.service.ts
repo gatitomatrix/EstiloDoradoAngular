@@ -10,6 +10,8 @@ export interface AuthUser {
   telefono?: string | null;
   direccion?: string | null;
   email: string;
+  auth_provider?: 'local' | 'google' | string;
+  es_google?: boolean;
 }
 
 interface LoginResp {
@@ -39,6 +41,11 @@ export class AuthService {
 
   get isLoggedIn() {
     return !!localStorage.getItem(KEYT);
+  }
+
+  get isGoogleAccount() {
+    const u = this._user$.value;
+    return !!u && (u.es_google === true || u.auth_provider === 'google');
   }
 
   register(p: {
