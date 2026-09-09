@@ -557,8 +557,8 @@ export class EntregaComponent {
     const r = await this.geocode.reverseAddress(lat, lng);
     this.fillingFromMap = true;
 
-    if (!r) {
-      this.mapLabel = `Ubicación ${lat.toFixed(5)}, ${lng.toFixed(5)} — mueve el pin para ajustar`;
+    if (!r || (!(r.via || '').trim() && /ubicaci[oó]n\s+-?\d/i.test((r.display || '')))) {
+      this.mapLabel = 'Mueve el pin: buscamos la calle en el mapa…';
       this.geoBusy = false;
       this.fillingFromMap = false;
       this.persistDraft();
@@ -572,8 +572,12 @@ export class EntregaComponent {
     const numero = numRev || this.guessNumberFromDisplay(this.lastDisplay, via) || (this.addrForm.value.numero ?? '').toString().trim() || '0';
 
     this.addrForm.patchValue({ via, numero }, { emitEvent: false });
-    this.mapLabel = (r.display || '').trim()
-      || `${via} ${numero}, ${this.addrForm.value.distrito}, ${this.addrForm.value.provincia}`.trim();
+    const rawDisplay = (r.display || '').trim();
+    const coordOnly = /^ubicaci[oó]n\s+-?\d/i.test(rawDisplay) || /^-?\d+(\.\d+)?\s*,\s*-?\d+/.test(rawDisplay);
+    this.mapLabel = (!coordOnly && rawDisplay)
+      ? rawDisplay
+      : `${via} ${numero}`.trim()
+        || 'Mueve el pin para fijar la calle';
     await this.applyUbigeoFromReverse(r.departamento, r.provincia, r.distrito);
     this.persistDraft();
     this.geoBusy = false;
