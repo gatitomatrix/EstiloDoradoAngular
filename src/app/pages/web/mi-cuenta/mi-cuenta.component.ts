@@ -32,8 +32,8 @@ export class MiCuentaComponent implements OnInit {
   passBusy = false;
 
   get esGoogle() {
-    const u = this.user || this.auth.user;
-    return !!u && (u.es_google === true || u.auth_provider === 'google');
+    return this.auth.isGoogleAccount
+      || !!(this.user && (this.user.es_google === true || this.user.auth_provider === 'google'));
   }
 
   form = this.fb.group({
