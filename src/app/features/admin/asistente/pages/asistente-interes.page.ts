@@ -80,7 +80,7 @@ type Item = {
         <div class="ed-stat">
           <strong>{{ stats.consultas_invitado }}</strong>
           <div class="ed-stat-label">Consultas de invitado</div>
-          <div class="ed-stat-hint">Veces que Dori mostró un producto en un chat <strong>sin login</strong>. No son 59 personas.</div>
+          <div class="ed-stat-hint">Veces que Dori mostró un producto en un chat sin login.</div>
         </div>
         <div class="ed-stat">
           <strong>{{ stats.likes }}</strong>
