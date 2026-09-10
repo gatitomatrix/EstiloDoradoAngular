@@ -24,6 +24,7 @@ export interface AsistenteAction {
   imagen_url?: string;
   url?: string;
   label?: string;
+  phone?: string;
 }
 
 export interface AsistentePedidoChip {

@@ -318,6 +318,22 @@ a.ed-gold {
   display: inline-block;
   text-decoration: none;
 }
+.ed-confirm--wa {
+  flex-direction: column;
+  align-items: stretch;
+}
+.ed-wa-num {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d2418;
+  font-family: system-ui, sans-serif;
+}
+a.ed-gold--wa {
+  display: block;
+  text-align: center;
+  padding: 10px 14px;
+}
 
 .ed-chat__panel { position: relative; }
 .ed-order-pop {
