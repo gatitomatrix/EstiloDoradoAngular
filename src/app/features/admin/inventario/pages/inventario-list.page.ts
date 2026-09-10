@@ -20,11 +20,19 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
       la <strong>salida</strong> se confirma cuando el pedido se marca como entregado.
     </p>
 
-    <div class="alert alert-warning py-2" *ngIf="criticos().length">
+    <div class="alert alert-warning py-2 ed-repo" *ngIf="criticos().length">
       <strong>Reposición:</strong>
-      <span *ngFor="let c of criticos(); let last = last">
-        {{ c.nombre }} ({{ c.stock }})<span *ngIf="!last"> · </span>
-      </span>
+      <span class="small text-muted">clic para registrar ingreso ·</span>
+      <button
+        type="button"
+        class="ed-repo-chip"
+        *ngFor="let c of criticos()"
+        [class.ed-repo-chip--out]="(c.stock ?? 0) <= 0"
+        (click)="openIngreso(c)"
+        [title]="'Registrar ingreso de ' + c.nombre"
+      >
+        {{ c.nombre }} ({{ c.stock }})
+      </button>
     </div>
 
     <form class="row g-2 mb-3 align-items-end" (ngSubmit)="buscar()">
@@ -162,6 +170,24 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
   styles: [`
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); }
     .modal { position: fixed; inset: 0; overflow-y: auto; }
+    .ed-repo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .ed-repo-chip {
+      border: 1px solid #E8C547;
+      background: #FFF8E6;
+      color: #5C4A12;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ed-repo-chip:hover { background: #C9A227; color: #1a1408; }
+    .ed-repo-chip--out {
+      border-color: #E2A0A0;
+      background: #FDECEC;
+      color: #8B1E1E;
+    }
+    .ed-repo-chip--out:hover { background: #8B1E1E; color: #fff; }
   `]
 })
 export class InventarioListPage implements OnInit {
@@ -232,6 +258,14 @@ export class InventarioListPage implements OnInit {
   openModal(modo: 'entrada' | 'ajuste') {
     this.modo = modo;
     this.mov = this.emptyMov();
+    this.modalOpen = true;
+  }
+
+  openIngreso(c: { id_producto?: number; id?: number; nombre?: string }) {
+    this.modo = 'entrada';
+    this.mov = this.emptyMov();
+    this.mov.id_producto = c.id_producto ?? c.id;
+    this.mov.observacion = c.nombre ? `Reposición · ${c.nombre}` : 'Reposición';
     this.modalOpen = true;
   }
   closeModal() { this.modalOpen = false; }
