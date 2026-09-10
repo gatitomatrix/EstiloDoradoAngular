@@ -22,10 +22,10 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
     <!-- Filtros -->
     <form class="row g-2 mb-3 align-items-end" (ngSubmit)="buscar()">
       <div class="col-sm-3">
-        <label class="form-label small">Nombre cliente (exacto)</label>
+        <label class="form-label small">Nombre cliente</label>
         <div class="input-group">
           <span class="input-group-text"><i class="pi pi-user"></i></span>
-          <input class="form-control" [(ngModel)]="q.cliente" name="cliente" placeholder="Ej. Juan Jose">
+          <input class="form-control" [(ngModel)]="q.cliente" name="cliente" placeholder="Ej. Juan, Jose o Mel">
         </div>
       </div>
 
