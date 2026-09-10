@@ -24,6 +24,8 @@ import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/
   styleUrls: ['./entrega.component.css']
 })
 export class EntregaComponent {
+  // Recojo vs envío. Pasco = domicilio 5 (sin Shalom). Lima/Huancayo: agencia o domicilio extra.
+  // Si elige envío y no hay agencia/dirección, Pago no deja ir a Culqi.
   private cart = inject(CartService);
   private checkout = inject(CheckoutService);
   private fb = inject(FormBuilder);

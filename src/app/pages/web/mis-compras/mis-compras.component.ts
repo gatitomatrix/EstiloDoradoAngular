@@ -16,6 +16,7 @@ import { formatFechaHoraPe } from '../../../core/utils/fecha-pe';
   styleUrls: ['./mis-compras.component.css']
 })
 export class MisComprasComponent implements OnInit {
+  // Pedidos del cliente. PDF de boleta/factura si pagó Culqi. Recojo efectivo = pendiente.
   private auth = inject(AuthService);
   private order = inject(OrderService);
   private router = inject(Router);

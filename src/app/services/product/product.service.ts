@@ -24,6 +24,7 @@ type ApiProducto = {
 
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
+  // Listado de la tienda. matchesQuery: nombre y etiquetas; el 1 no debe jalar el 10.
   private http = inject(HttpClient);
   private base = `${environment.apiBaseUrl}/productos`;
 

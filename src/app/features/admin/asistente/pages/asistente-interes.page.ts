@@ -127,6 +127,7 @@ type Item = {
   `,
 })
 export class AsistenteInteresPage implements OnInit, OnDestroy {
+  // Interés Dori: clicks a productos. "Consultas de invitado" = veces, no personas.
   private http = inject(HttpClient);
   items: Item[] = [];
   stats = { productos: 0, consultas: 0, consultas_invitado: 0, likes: 0, carritos: 0, stock_bajo: 0 };

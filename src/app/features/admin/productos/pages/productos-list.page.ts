@@ -430,6 +430,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
   `
 })
 export class ProductosListPage implements OnInit {
+  // Ficha y precio. El stock se mira acá, se mueve en Inventario. No eliminar: desactivar.
   private api  = inject(AdminProductosService);
   private cats = inject(AdminCategoriasService);
   private prov = inject(AdminProveedoresService);

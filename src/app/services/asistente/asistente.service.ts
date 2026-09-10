@@ -58,6 +58,7 @@ export interface AsistenteReply {
 
 @Injectable({ providedIn: 'root' })
 export class AsistenteService {
+  // HTTP de Dori. El cerebro está en Laravel AsistenteService.
   private http = inject(HttpClient);
   private url = `${environment.apiBaseUrl}/asistente`;
 

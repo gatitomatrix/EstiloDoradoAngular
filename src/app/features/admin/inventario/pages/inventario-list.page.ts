@@ -191,6 +191,7 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
   `]
 })
 export class InventarioListPage implements OnInit {
+  // Kardex. Entrada = compra. Ajuste = merma/conteo. La venta sale al marcar Entregado en Pedidos.
   private api = inject(AdminInventarioService);
   private rt  = inject(RealtimeService);
   private prodApi = inject(AdminProductosService);

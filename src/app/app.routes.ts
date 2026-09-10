@@ -13,6 +13,8 @@ import { PrivacidadComponent } from './pages/web/privacidad/privacidad.component
 
 const bounceOldAdmin: CanMatchFn = () => inject(Router).parseUrl('/');
 
+// Tienda: /  /producto /carrito /entrega /pago
+// Admin:  /panel-ed-k7m2  (si alguien pone /admin lo mando a la tienda a propósito)
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'producto/:id', component: DetalleComponent },

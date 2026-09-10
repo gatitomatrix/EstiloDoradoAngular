@@ -19,6 +19,7 @@ const USER_KEY_PREFIX = 'ed_cart_user_';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  // Carrito en localStorage. Si hay login, la clave es por usuario para no mezclar cuentas.
   private auth = inject(AuthService);
   private productos = inject(ProductoService);
 

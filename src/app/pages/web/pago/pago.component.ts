@@ -29,6 +29,8 @@ declare const bootstrap: any;
   styleUrls: ['./pago.component.css']
 })
 export class PagoComponent implements AfterViewInit {
+  // Recojo + efectivo: no pido boleta. Culqi: primero BO/FA, después tarjeta/Yape.
+  // El correo de la boleta sale del login; se puede cambiar con el check.
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private http = inject(HttpClient);

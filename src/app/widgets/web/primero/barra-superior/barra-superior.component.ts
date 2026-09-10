@@ -21,6 +21,7 @@ import { WhatsappService } from '../../../../core/services/whatsapp.service';
   styleUrls: ['./barra-superior.component.css'],
 })
 export class BarraSuperiorComponent implements OnInit, OnDestroy {
+  // Buscador → /?q=  Login modal. Mis compras pide sesión.
   private cart = inject(CartService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);

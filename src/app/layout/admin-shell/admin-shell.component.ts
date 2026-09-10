@@ -103,6 +103,7 @@ import { filter, Subscription } from 'rxjs';
   `],
 })
 export class AdminShellComponent implements OnInit, OnDestroy {
+  // Marco del panel. El toast de pedido nuevo pega a Pedidos filtrado por estado.
   private auth = inject(AdminAuthService);
   private router = inject(Router);
   private realtime = inject(RealtimeService);

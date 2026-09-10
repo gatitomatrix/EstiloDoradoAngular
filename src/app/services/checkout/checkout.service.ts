@@ -32,6 +32,7 @@ const KEY = 'ed_checkout_state';
 
 @Injectable({ providedIn: 'root' })
 export class CheckoutService {
+  // Memoria del checkout (recojo/envío, fee, DNI/RUC). Vive en session hasta confirmar.
   private state: CheckoutState = this.read() ?? { mode: 'NONE', fee: 0, discount: 0 };
 
   get value(): CheckoutState { return this.state; }

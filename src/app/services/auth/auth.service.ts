@@ -31,6 +31,7 @@ const KEYT = 'ed_auth_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  // Token Sanctum del cliente (no del admin). Login correo o Google.
   private http = inject(HttpClient);
   private _user$ = new BehaviorSubject<AuthUser | null>(loadUser());
   user$ = this._user$.asObservable();

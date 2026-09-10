@@ -418,6 +418,7 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
   `]
 })
 export class PedidosListPage implements OnInit {
+  // No hay "eliminar pedido": se cancela. El lápiz cambia estado y mueve el stock.
   private api = inject(AdminPedidosService);
   private clientesApi = inject(AdminClientesService);
   private prodsApi = inject(AdminProductosService);

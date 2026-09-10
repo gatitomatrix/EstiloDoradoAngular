@@ -35,6 +35,7 @@ interface OrderViewItem {
   styleUrls: ['./chat-widget.component.css'],
 })
 export class ChatWidgetComponent implements OnInit, OnDestroy {
+  // Burbuja de Dori. Si abre login, no la cierro: vuelve al chat para seguir la compra.
   private api = inject(AsistenteService);
   private cart = inject(CartService);
   private ui = inject(UiService);

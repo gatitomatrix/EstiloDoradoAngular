@@ -32,6 +32,7 @@ import { UiService } from '../../../core/services/ui.service';
   styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements OnInit {
+  // Catálogo. q= del buscador filtra por NOMBRE (matchesQuery). Los chips Amor/Peluches usan etiquetas.
   private productService = inject(ProductoService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
