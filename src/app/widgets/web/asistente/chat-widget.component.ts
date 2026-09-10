@@ -254,9 +254,20 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   }
 
   vote(p: AsistenteProducto, voto: 'up' | 'down') {
-    if (!p?.id || this.votes[p.id] === voto) return;
-    this.votes[p.id] = voto;
-    this.http.post(`${environment.apiBaseUrl}/asistente/feedback`, { id_producto: p.id, voto }).subscribe({ error: () => {} });
+    const id = Number(p?.id);
+    if (!id) return;
+    if (this.votes[id] === voto) return;
+    const prev = this.votes[id];
+    this.votes[id] = voto;
+    this.persist();
+    this.http.post(`${environment.apiBaseUrl}/asistente/feedback`, { id_producto: id, voto }).subscribe({
+      error: () => {
+        if (prev) this.votes[id] = prev;
+        else delete this.votes[id];
+        this.persist();
+        this.ui.warn('No se pudo guardar el me gusta. Intenta otra vez.');
+      },
+    });
   }
 
   imgOf(url?: string | null): string {
@@ -421,6 +432,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
         complaint: this.complaint,
         open: this.open,
         pendingAfterLogin: this.pendingAfterLogin,
+        votes: this.votes,
       }));
     } catch { /* cuota */ }
   }
@@ -437,6 +449,13 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       this.complaint = d.complaint || null;
       this.open = !!d.open;
       this.pendingAfterLogin = d.pendingAfterLogin || null;
+      this.votes = {};
+      if (d.votes && typeof d.votes === 'object') {
+        for (const [k, v] of Object.entries(d.votes as Record<string, unknown>)) {
+          const n = Number(k);
+          if (n && (v === 'up' || v === 'down')) this.votes[n] = v;
+        }
+      }
       return true;
     } catch {
       return false;

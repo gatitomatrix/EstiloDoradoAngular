@@ -64,8 +64,8 @@
                           >
                             {{ (p.stock || 0) < 1 ? 'Agotado' : 'Agregar' }}
                           </button>
-                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'up'" (click)="vote(p, 'up')" title="Me sirve">👍</button>
-                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'down'" (click)="vote(p, 'down')" title="No me sirve">👎</button>
+                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'up'" (click)="vote(p, 'up'); $event.stopPropagation()" title="Me gusta">👍</button>
+                          <button type="button" class="ed-vote" [class.ed-vote--on]="votes[p.id] === 'down'" (click)="vote(p, 'down'); $event.stopPropagation()" title="No me gusta">👎</button>
                         </div>
                       </article>
                     }
