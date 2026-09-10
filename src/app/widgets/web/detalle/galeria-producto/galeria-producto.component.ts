@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 export class GaleriaProductoComponent {
   /** Rutas absolutas o relativas de imágenes */
   @Input() imagenes: string[] = [];
+  @Input() agotado = false;
 
   idx = 0;
   sel(i: number) { this.idx = i; }

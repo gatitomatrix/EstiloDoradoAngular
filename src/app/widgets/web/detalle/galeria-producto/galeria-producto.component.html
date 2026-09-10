@@ -1,9 +1,10 @@
 <div class="ed-gal">
-  <div class="ed-gal__main">
+  <div class="ed-gal__main" [class.ed-gal__main--out]="agotado">
     <img *ngIf="imagenes?.length"
          [src]="imagenes[idx]"
          alt="Imagen principal"
          class="ed-gal__main-img" />
+    <span *ngIf="agotado" class="ed-gal__agotado" aria-hidden="true">Agotado</span>
   </div>
 
   <div class="ed-gal__thumbs" *ngIf="(imagenes?.length || 0) > 1">

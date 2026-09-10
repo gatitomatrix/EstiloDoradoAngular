@@ -10,6 +10,7 @@
 .ed-det__list li { margin: 4px 0; }
 
 .ed-det__stock { margin-top: 8px; font-weight: 700; }
+.ed-det__stock--out { color: #8B1E1E; }
 
 .ed-det__rating img { width: 20px; height: 20px; margin-right: 4px; }
 
@@ -82,6 +83,13 @@
 .ed-btn { height: 42px; border-radius: 8px; cursor: pointer; font-weight: 800; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; }
 .ed-btn--primary { background: #c9a227; color: #111; border-color: #c9a227; }
 .ed-btn--primary:hover { filter: brightness(0.95); }
+.ed-btn--primary:disabled {
+  background: #cfc6b8;
+  border-color: #cfc6b8;
+  color: #5c5348;
+  cursor: not-allowed;
+  filter: none;
+}
 .ed-btn--ghost { background: #fff; color: #333; border-color: #c9a227; }
 .ed-btn--ghost:hover { background: #f7f2e0; }
 

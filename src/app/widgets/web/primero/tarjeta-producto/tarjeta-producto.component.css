@@ -19,6 +19,7 @@
   /* 4:3 (ajusta a 100% para cuadrado o 56.25% para 16:9) */
   padding-top: 75%;
   background: #f7f7f7;
+  overflow: hidden;
 }
 
 /* Imagen centrada y recortada */
@@ -94,6 +95,32 @@
   font-weight: 600;
 }
 .ed-card__stock--out { color: #c62828; }
+
+.ed-card__media--out img {
+  filter: grayscale(0.25) brightness(0.78);
+}
+.ed-card__agotado {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: rgba(139, 30, 30, 0.92);
+  color: #fff;
+  text-align: center;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 7px 8px;
+  pointer-events: none;
+}
+.ed-card__actions .btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
 .ed-card__price-old {
   color: #999;
   text-decoration: line-through;

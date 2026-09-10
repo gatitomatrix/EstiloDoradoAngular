@@ -1,7 +1,10 @@
 <article class="ed-card" (click)="onOpen()">
   <!-- MEDIA -->
-<div class="ed-card__media">
+<div class="ed-card__media" [class.ed-card__media--out]="agotado">
   <img [src]="producto.imagen || '/images/productos/placeholder.jpg'" [alt]="producto.nombre" loading="lazy" />
+  @if (agotado) {
+    <span class="ed-card__agotado" aria-hidden="true">Agotado</span>
+  }
 </div>
 
 <!-- BODY -->
@@ -17,13 +20,19 @@
       S/ {{ producto.precio | number:'1.2-2' }}
     }
   </div>
-  <p class="ed-card__stock" [class.ed-card__stock--out]="(producto.stock || 0) < 1">
-    {{ (producto.stock || 0) > 0 ? ('Stock ' + producto.stock) : 'Agotado' }}
+  <p class="ed-card__stock" [class.ed-card__stock--out]="agotado">
+    {{ agotado ? 'Agotado' : ('Stock ' + producto.stock) }}
   </p>
 
   <div class="ed-card__actions">
-    <button class="btn btn-outline-secondary" (click)="openDetail.emit(producto)">Ver detalle</button>
-    <button class="btn btn-warning" (click)="addToCart.emit(producto)">Agregar al carrito</button>
+    <button class="btn btn-outline-secondary" (click)="openDetail.emit(producto); $event.stopPropagation()">Ver detalle</button>
+    <button
+      class="btn btn-warning"
+      [disabled]="agotado"
+      (click)="agregar(); $event.stopPropagation()"
+    >
+      {{ agotado ? 'Agotado' : 'Agregar al carrito' }}
+    </button>
   </div>
 </div>
 </article>

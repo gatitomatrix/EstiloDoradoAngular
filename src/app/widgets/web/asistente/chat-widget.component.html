@@ -47,7 +47,11 @@
                           />
                           <div>
                             <b>{{ p.nombre }}</b>
-                            <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
+                            @if ((p.stock || 0) < 1) {
+                              <small>Agotado</small>
+                            } @else {
+                              <small>S/ {{ p.precio | number:'1.2-2' }} · stock {{ p.stock }}</small>
+                            }
                           </div>
                         </button>
                         <div class="ed-card__actions">

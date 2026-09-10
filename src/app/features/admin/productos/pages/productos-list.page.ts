@@ -123,7 +123,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
     <div class="alert py-2 px-3 mb-2" *ngIf="q.stock_max"
          style="background:#FFF8E6;border:1px solid #E8C547;color:#5C4A12;">
       Mostrando {{ total() }} producto{{ total() === 1 ? '' : 's' }} con stock ≤ {{ q.stock_max }}.
-      Las filas en ámbar son stock crítico (≤ 3).
+      Rojo = agotado (0). Ámbar = stock crítico (1 a 3).
     </div>
 
     <div class="table-responsive ed-prod-table-wrap">
@@ -139,7 +139,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
           <th class="col-actions"></th>
         </tr></thead>
         <tbody>
-          <tr *ngFor="let p of rows()" [class.table-warning]="p.stock <= 3">
+          <tr *ngFor="let p of rows()" [class.table-danger]="p.stock <= 0" [class.table-warning]="p.stock > 0 && p.stock <= 3">
             <td class="col-img">
               <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb" loading="lazy" decoding="async" width="56" height="56">
             </td>
@@ -155,7 +155,10 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
               <div class="small text-success" *ngIf="(p.descuento_pct || 0) > 0">−{{ p.descuento_pct }}%</div>
             </td>
             <td class="col-stock">
-              <span class="badge" [class.text-bg-danger]="p.stock<=3" [class.text-bg-success]="p.stock>3">{{p.stock}}</span>
+              <span class="badge"
+                [class.text-bg-danger]="p.stock<=0"
+                [class.text-bg-warning]="p.stock>0 && p.stock<=3"
+                [class.text-bg-success]="p.stock>3">{{p.stock}}</span>
             </td>
             <td class="col-cat">{{ catName(p.id_categoria) }}</td>
             <td class="col-state">

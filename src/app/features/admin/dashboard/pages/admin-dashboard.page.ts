@@ -39,15 +39,19 @@ type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?:
         <div class="ed-kpi-value">{{ kpis().pagados }}</div>
         <div class="ed-kpi-cta">Filtrar pagados →</div>
       </button>
-      <button type="button" class="ed-kpi ed-kpi-btn" (click)="goProductosStock()">
+      <button type="button" class="ed-kpi ed-kpi-btn" [class.ed-kpi--danger]="stockAgotado().length > 0" (click)="goProductosStock()">
         <i class="pi pi-exclamation-triangle ed-kpi-icon"></i>
         <div class="ed-kpi-label">Stock bajo (≤3)</div>
         <div class="ed-kpi-value">{{ stockCritico().length }}</div>
-        <div class="ed-kpi-cta">Ver productos →</div>
+        <div class="ed-kpi-cta">{{ stockAgotado().length ? (stockAgotado().length + ' agotado' + (stockAgotado().length === 1 ? '' : 's') + ' · ') : '' }}ver productos →</div>
       </button>
     </div>
 
-    <div *ngIf="stockCritico().length" class="ed-alert-stock">
+    <div *ngIf="stockAgotado().length" class="ed-alert-stock ed-alert-stock--out" style="margin-bottom:0.75rem;">
+      <strong>Agotados (0 unidades):</strong>
+      {{ agotadoNames() }}
+    </div>
+    <div *ngIf="stockCriticoBajo().length" class="ed-alert-stock" [style.margin-top]="stockAgotado().length ? '0.75rem' : null">
       <strong>Alerta de stock:</strong>
       Productos con pocas unidades: {{ lowStockNames() }}
     </div>
@@ -169,8 +173,20 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   stockCritico = computed(() =>
     (this.stockBajo() ?? []).filter((p) => Number(p?.stock ?? 0) <= 3),
   );
+  stockAgotado = computed(() =>
+    (this.stockBajo() ?? []).filter((p) => Number(p?.stock ?? 0) <= 0),
+  );
+  stockCriticoBajo = computed(() =>
+    (this.stockBajo() ?? []).filter((p) => {
+      const n = Number(p?.stock ?? 0);
+      return n > 0 && n <= 3;
+    }),
+  );
   lowStockNames = computed(() =>
-    this.stockCritico().map((p) => p?.nombre).filter(Boolean).join(', '),
+    this.stockCriticoBajo().map((p) => p?.nombre).filter(Boolean).join(', '),
+  );
+  agotadoNames = computed(() =>
+    this.stockAgotado().map((p) => p?.nombre).filter(Boolean).join(', '),
   );
 
   ngOnInit() {
@@ -276,7 +292,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
         datasets: [{
           label: 'Unidades',
           data: rows.map((p) => Number(p.stock ?? 0)),
-          backgroundColor: rows.map((p) => Number(p.stock ?? 0) <= 3 ? '#8B1E1E' : '#C9A227'),
+          backgroundColor: rows.map((p) => Number(p.stock ?? 0) <= 0 ? '#8B1E1E' : Number(p.stock ?? 0) <= 3 ? '#C45C26' : '#C9A227'),
           borderRadius: 6,
           maxBarThickness: 16,
         }],

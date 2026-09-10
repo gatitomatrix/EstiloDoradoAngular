@@ -10,7 +10,7 @@
 
   <div class="ed-detalle__grid">
     <div class="ed-detalle__left">
-      <ed-web-galeria-producto [imagenes]="imagenes"></ed-web-galeria-producto>
+      <ed-web-galeria-producto [imagenes]="imagenes" [agotado]="(prod?.stock ?? 0) < 1"></ed-web-galeria-producto>
     </div>
 
     <div class="ed-detalle__right">

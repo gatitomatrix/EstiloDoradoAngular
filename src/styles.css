@@ -480,6 +480,22 @@ body, html {
   padding: .9rem 1rem;
   color: var(--text);
 }
+.admin-gold-theme .ed-alert-stock--out {
+  background: #FDECEC;
+  border-color: #E2A0A0;
+  border-left-color: #8B1E1E;
+  color: #5C1212;
+}
+.admin-gold-theme .ed-kpi--danger {
+  border-color: #E2A0A0;
+  background: #FFF8F8;
+}
+.admin-gold-theme .ed-kpi--danger::before {
+  background: linear-gradient(180deg, #C62828, #8B1E1E);
+}
+.admin-gold-theme .ed-kpi--danger .ed-kpi-icon {
+  color: #8B1E1E;
+}
 
 /* =========  ADMIN LOGIN (página suelta, sin shell)  ========= */
 .admin-login-page {

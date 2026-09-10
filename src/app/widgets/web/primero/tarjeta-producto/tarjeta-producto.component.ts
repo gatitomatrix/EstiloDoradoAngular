@@ -15,7 +15,14 @@ export class TarjetaProductoComponent {
   @Output() addToCart = new EventEmitter<ProductPreview>();
 
   verDetalle() { this.openDetail.emit(this.producto); }
-  agregar()    { this.addToCart.emit(this.producto); }
+  agregar() {
+    if (this.agotado) return;
+    this.addToCart.emit(this.producto);
+  }
+
+  get agotado(): boolean {
+    return (this.producto?.stock || 0) < 1;
+  }
 
   onImgError(e: Event) {
     (e.target as HTMLImageElement).src = '/images/productos/placeholder.jpg';
