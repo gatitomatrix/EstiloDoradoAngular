@@ -128,6 +128,12 @@ export class HomeComponent implements OnInit {
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase().trim();
       lista = lista.filter((p) => this.productService.matchesQuery(p, q));
+      lista.sort((a, b) => {
+        const an = (a.nombre || '').toLowerCase();
+        const bn = (b.nombre || '').toLowerCase();
+        const rank = (n: string) => n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) ? 2 : 3;
+        return rank(an) - rank(bn) || an.localeCompare(bn, 'es');
+      });
     }
 
     if (this.chipActivo && this.chipActivo !== 'Todos') {

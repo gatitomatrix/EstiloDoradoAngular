@@ -89,14 +89,30 @@ export class ProductoService {
 
   matchesQuery(p: ProductPreview, q: string): boolean {
     if (!q) return true;
-    const blob = `${p.nombre} ${p.descripcion || ''} ${p.etiquetas || ''} ${p.slug || ''} ${p.id}`
-      .toLowerCase();
-    const tokens = q.split(/\s+/).filter((t) => t.length >= 2);
-    if (tokens.length === 0) return blob.includes(q);
-    return tokens.every((t) => this.tokenVariants(t).some((v) => blob.includes(v)));
+    const nq = q.toLowerCase().trim();
+    const name = `${p.nombre || ''} ${p.slug || ''}`.toLowerCase();
+    const tags = (p.etiquetas || '').toLowerCase();
+    const desc = (p.descripcion || '').toLowerCase();
+
+    if (name.includes(nq) || tags.includes(nq)) return true;
+    if (/^\d+$/.test(nq) && String(p.id) === nq) return true;
+
+    const tokens = nq.split(/\s+/).filter(Boolean);
+    if (!tokens.length) return true;
+
+    const inHay = (hay: string) => tokens.every((t) => this.tokenIn(hay, t));
+    if (inHay(name) || inHay(tags)) return true;
+    if (tokens.length === 1 && tokens[0].length >= 3 && inHay(desc)) return true;
+    return false;
   }
 
   /** peluches → peluche; ositos → osito; cartera → billetera */
+  private tokenIn(hay: string, t: string): boolean {
+    if (/^\d+$/.test(t)) {
+      return new RegExp(`(?:^|[^0-9])${t}(?:[^0-9]|$)`).test(hay);
+    }
+    return this.tokenVariants(t).some((v) => hay.includes(v));
+  }
   private tokenVariants(t: string): string[] {
     const out = new Set<string>([t]);
     if (t.endsWith('es') && t.length > 4) {
