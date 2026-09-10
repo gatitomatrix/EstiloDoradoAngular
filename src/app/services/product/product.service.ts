@@ -94,7 +94,9 @@ export class ProductoService {
     const tags = (p.etiquetas || '').toLowerCase();
     const desc = (p.descripcion || '').toLowerCase();
 
-    if (name.includes(nq) || tags.includes(nq)) return true;
+    if (name.includes(nq) || tags.includes(nq)) {
+      if (!/\d/.test(nq)) return true;
+    }
     if (/^\d+$/.test(nq) && String(p.id) === nq) return true;
 
     const tokens = nq.split(/\s+/).filter(Boolean);
