@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CheckoutService } from '../../../services/checkout/checkout.service';
 import { CartService } from '../../../services/cart/cart.service';
+import { AuthService } from '../../../services/auth/auth.service';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { DIRECCION_TIENDA, TEXTO_RECOJO, costoEnvio } from '../../../core/utils/tarifa-envio';
@@ -18,6 +19,7 @@ export class ConfirmarEntregaComponent {
   private checkout = inject(CheckoutService);
   private cart = inject(CartService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   constructor() {
     this.cart.refreshPrecios();
@@ -30,6 +32,8 @@ export class ConfirmarEntregaComponent {
   get fee() { return this.checkout.value.fee; }
   get discount() { return this.checkout.value.discount; }
   get total() { return this.subtotal + this.fee - this.discount; }
+  get telefono() { return this.checkout.telefono; }
+  get telefonoOk() { return this.checkout.telefonoOk; }
 
   get address() {
     if (this.selected === 'STORE_PICKUP') return TEXTO_RECOJO;
@@ -64,13 +68,24 @@ export class ConfirmarEntregaComponent {
 
    /** habilita el botón cuando ya hay un modo de entrega elegido */
   get resumenOk(): boolean {
-    return this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address);
+    if (this.checkout.value.mode === 'STORE_PICKUP') return true;
+    return this.checkout.envioListo(this.checkout.value.address) && this.telefonoOk;
   }
 
   ngOnInit() {
     if (!this.cart.items.length) {
       this.router.navigateByUrl('/carrito');
+      return;
     }
+    this.checkout.bindCliente(this.auth.user?.id_cliente, this.auth.user?.telefono);
+  }
+
+  onPhoneInput(ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    let d = el.value.replace(/\D/g, '');
+    if (d.length > 9) d = d.slice(0, 9);
+    el.value = d;
+    this.checkout.setTelefono(d);
   }
   
   onSelectPickup() {
@@ -105,8 +120,16 @@ export class ConfirmarEntregaComponent {
   }
 
   irAPagar() {
-    if (this.checkout.value.mode === 'STORE_PICKUP' || this.checkout.envioListo(this.checkout.value.address)) {
+    if (this.checkout.value.mode === 'STORE_PICKUP') {
       this.router.navigateByUrl('/pago');
+      return;
+    }
+    if (this.checkout.envioListo(this.checkout.value.address) && this.telefonoOk) {
+      this.router.navigateByUrl('/pago');
+      return;
+    }
+    if (this.checkout.envioListo(this.checkout.value.address) && !this.telefonoOk) {
+      alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
       return;
     }
     this.router.navigate(['/entrega'], { state: { openAddress: true } });

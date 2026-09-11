@@ -9,6 +9,7 @@ import { ReturnUrlService } from '../../../core/services/return-url.service';
 import { GoogleAuthService } from '../../../core/services/google-auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { celularCliente } from '../../../core/utils/celular';
 
 /** Solo letras (incl. acentos) y espacios — nombres/apellidos */
 const NAME_RE = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)*$/;
@@ -146,7 +147,7 @@ export class RegistroComponent {
       .register({
         nombre: String(v.nombre || '').trim(),
         apellido: String(v.apellido || '').trim(),
-        telefono: String(v.telefono || '').trim(),
+        telefono: celularCliente(String(v.telefono || '').trim()),
         direccion: String(v.direccion || '').trim(),
         email: String(v.email || '').trim(),
         contrasena: pass,

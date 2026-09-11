@@ -143,10 +143,7 @@ export class EntregaComponent {
     });
 
     const st = history.state as any;
-    if (!this.checkout.telefono) {
-      const fromProfile = (this.auth.user?.telefono || '').replace(/\D/g, '').slice(0, 9);
-      if (fromProfile) this.checkout.setTelefono(fromProfile);
-    }
+    this.checkout.bindCliente(this.auth.user?.id_cliente, this.auth.user?.telefono);
     if (st?.openAddress) {
       this.openAddressModal(true);
     } else {

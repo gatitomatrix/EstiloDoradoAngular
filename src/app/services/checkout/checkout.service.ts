@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { celularCliente } from '../../core/utils/celular';
 
 export type DeliveryMode = 'NONE' | 'STORE_PICKUP' | 'EXPRESS';
 export type TipoEnvio = 'AGENCIA' | 'DOMICILIO';
@@ -26,6 +27,7 @@ export interface CheckoutState {
   fee: number;       // costo de entrega
   discount: number;  // descuento aplicado
   telefono?: string;
+  telefonoUserId?: number | null;
 }
 
 const KEY = 'ed_checkout_state';
@@ -67,16 +69,35 @@ export class CheckoutService {
   }
 
   get telefono(): string {
-    return (this.state.telefono || '').replace(/\D/g, '').slice(0, 9);
+    let d = (this.state.telefono || '').replace(/\D/g, '');
+    if (d.startsWith('51') && d.length >= 11) d = d.slice(2);
+    return d.slice(0, 9);
   }
 
   get telefonoOk(): boolean {
-    return /^9\d{8}$/.test(this.telefono);
+    return celularCliente(this.telefono).length === 9;
   }
 
   setTelefono(raw: string) {
-    const d = (raw || '').replace(/\D/g, '').slice(0, 9);
+    let d = (raw || '').replace(/\D/g, '');
+    if (d.startsWith('51') && d.length >= 11) d = d.slice(2);
+    d = d.slice(0, 9);
+    if (d.length === 9 && !celularCliente(d)) d = '';
     this.state.telefono = d;
+    this.persist();
+  }
+
+  /** Evita heredar el celular de otra cuenta o el WhatsApp de la tienda. */
+  bindCliente(userId?: number | null, profileTel?: string | null) {
+    const profile = celularCliente(profileTel);
+    if (!userId || this.state.telefonoUserId !== userId) {
+      this.state.telefono = profile;
+      this.state.telefonoUserId = userId ?? null;
+      this.persist();
+      return;
+    }
+    const actual = celularCliente(this.state.telefono);
+    this.state.telefono = actual || profile;
     this.persist();
   }
 
@@ -100,7 +121,7 @@ export class CheckoutService {
   }
 
   reset() {
-    this.state = { mode: 'NONE', fee: 0, discount: 0, draft: this.state.draft ?? null, telefono: this.state.telefono };
+    this.state = { mode: 'NONE', fee: 0, discount: 0, draft: this.state.draft ?? null };
     this.persist();
   }
 

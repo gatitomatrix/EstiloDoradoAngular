@@ -40,6 +40,21 @@
         </div>
       </div>
 
+      <div class="card shadow-sm mb-3" *ngIf="selected==='EXPRESS'">
+        <div class="card-body">
+          <label class="form-label small mb-1">Celular de contacto (Shalom / motorizado)</label>
+          <div class="input-group">
+            <span class="input-group-text">+51</span>
+            <input type="tel" class="form-control" maxlength="9" inputmode="numeric"
+              [value]="telefono" (input)="onPhoneInput($event)"
+              placeholder="9xxxxxxxx">
+          </div>
+          <div class="text-danger small mt-1" *ngIf="!telefonoOk">
+            Obligatorio: 9 dígitos que empiecen con 9. No uses el WhatsApp de la tienda.
+          </div>
+        </div>
+      </div>
+
       <div class="card shadow-sm">
         <div class="card-body">
           <div class="mb-2 small">Vendido por <em style="color:#9C7B2F">Estilo Dorado</em></div>

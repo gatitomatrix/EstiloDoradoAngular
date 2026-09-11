@@ -130,6 +130,11 @@ export class PagoComponent implements AfterViewInit {
       this.router.navigate(['/entrega'], { state: { openAddress: true } });
       return;
     }
+    this.checkout.bindCliente(this.auth.user?.id_cliente, this.auth.user?.telefono);
+    if (this.mode === 'EXPRESS' && !this.checkout.telefonoOk) {
+      this.router.navigateByUrl('/confirmar-entrega');
+      return;
+    }
     this.pay.setHasMethod(true);
     this.correoPago = this.correoCuenta;
     // limpiar selección de doc en esta pantalla
@@ -216,6 +221,11 @@ export class PagoComponent implements AfterViewInit {
   pagarConCulqi() {
     if (this.mode !== 'STORE_PICKUP' && !this.checkout.envioListo(this.checkout.value.address)) {
       this.router.navigate(['/entrega'], { state: { openAddress: true } });
+      return;
+    }
+    if (this.mode === 'EXPRESS' && !this.checkout.telefonoOk) {
+      alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
+      this.router.navigateByUrl('/confirmar-entrega');
       return;
     }
     const email = this.correoCulqi;

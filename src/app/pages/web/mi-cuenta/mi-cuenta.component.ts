@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
+import { celularCliente } from '../../../core/utils/celular';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 
@@ -91,7 +92,7 @@ export class MiCuentaComponent implements OnInit {
       .updateMe({
         nombre: (v.nombre || '').trim(),
         apellido: (v.apellido || '').trim(),
-        telefono: v.telefono || '',
+        telefono: celularCliente(v.telefono || ''),
         direccion: v.direccion || '',
       })
       .subscribe({

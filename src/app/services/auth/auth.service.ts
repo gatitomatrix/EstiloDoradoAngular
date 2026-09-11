@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { CheckoutService } from '../checkout/checkout.service';
 
 export interface AuthUser {
   id_cliente: number;
@@ -33,6 +34,7 @@ const KEYT = 'ed_auth_token';
 export class AuthService {
   // Token Sanctum del cliente (no del admin). Login correo o Google.
   private http = inject(HttpClient);
+  private checkout = inject(CheckoutService);
   private _user$ = new BehaviorSubject<AuthUser | null>(loadUser());
   user$ = this._user$.asObservable();
 
@@ -95,7 +97,10 @@ export class AuthService {
 
   logout(): Observable<any> {
     return this.http.post(`${API}/auth/logout`, {})
-      .pipe(tap(() => clear(this._user$)));
+      .pipe(tap(() => {
+        this.checkout.reset();
+        clear(this._user$);
+      }));
   }
 
   /**
@@ -122,6 +127,7 @@ export class AuthService {
     localStorage.removeItem(KEYT);
     localStorage.removeItem(KEYU);
     this._user$.next(null);
+    this.checkout.reset();
   }
 
   /** Aplica token/cliente de login externo (Google u OAuth). */
