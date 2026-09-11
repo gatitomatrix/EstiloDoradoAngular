@@ -8,6 +8,8 @@
   align-items: flex-end;
   gap: 10px;
   font-family: Georgia, 'Times New Roman', serif;
+  color-scheme: light;
+  color: #2d2418;
 }
 
 .ed-chat__fab {
@@ -155,6 +157,7 @@
   font-size: 14px;
   line-height: 1.45;
   font-family: system-ui, sans-serif;
+  color: inherit;
 }
 .ed-typing {
   color: #6b5d4d;
@@ -170,6 +173,7 @@
   background: #f8f1e9;
   border-radius: 10px;
   padding: 8px;
+  color: #2d2418;
 }
 .ed-card__main {
   width: 100%;
@@ -181,6 +185,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #2d2418;
 }
 .ed-card__thumb {
   width: 44px;
@@ -193,6 +198,7 @@
 .ed-card__main b {
   display: block;
   font-size: 13px;
+  color: #2d2418;
 }
 .ed-card__main small {
   color: #6b5d4d;
