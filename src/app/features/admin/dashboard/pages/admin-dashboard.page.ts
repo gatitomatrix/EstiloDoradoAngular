@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef, inject, signal, computed } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
@@ -85,12 +85,10 @@ type StockBajoResp = { data?: Array<{ nombre?: string; stock?: number }>; meta?:
       <article class="ed-dash-card">
         <h3>3. Stock bajo (≤10)</h3>
         <p>Unidades restantes. Los de ≤3 salen en la alerta de arriba.</p>
-        <div class="ed-dash-canvas-wrap ed-dash-canvas-wrap--h" *ngIf="stockBajo().length; else sinStock">
+        <div class="ed-dash-canvas-wrap ed-dash-canvas-wrap--h" [hidden]="!stockBajo().length">
           <canvas #stockCanvas></canvas>
         </div>
-        <ng-template #sinStock>
-          <p class="ed-dash-empty">Ningún producto por debajo de 10 unidades.</p>
-        </ng-template>
+        <p class="ed-dash-empty" *ngIf="!stockBajo().length">Ningún producto por debajo de 10 unidades.</p>
       </article>
     </div>
   </div>
@@ -154,6 +152,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private reportes = inject(AdminReportesService);
   private realtime = inject(RealtimeService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   @ViewChild('ventasCanvas') ventasCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('pagoCanvas') pagoCanvas?: ElementRef<HTMLCanvasElement>;
@@ -270,9 +269,17 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private cargarStock() {
-    this.productos.stockBajo(10).subscribe((res: StockBajoResp) => {
-      this.stockBajo.set(res?.data ?? []);
-      queueMicrotask(() => this.pintarStock());
+    this.productos.stockBajo(10).subscribe({
+      next: (res: StockBajoResp) => {
+        const rows = Array.isArray(res?.data) ? res.data : [];
+        this.stockBajo.set(rows);
+        this.cdr.detectChanges();
+        setTimeout(() => this.pintarStock());
+      },
+      error: () => {
+        this.stockBajo.set([]);
+        this.cdr.detectChanges();
+      },
     });
   }
 
