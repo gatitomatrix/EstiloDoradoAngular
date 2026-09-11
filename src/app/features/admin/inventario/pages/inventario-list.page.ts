@@ -164,6 +164,7 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
               <div class="col-md-4">
                 <label class="form-label">Fecha</label>
                 <input type="date" class="form-control" [(ngModel)]="mov.fecha" name="fecha">
+                <div class="small text-muted">La hora es la de Lima al guardar, no 00:00.</div>
               </div>
               <div class="col-md-8" *ngIf="modo === 'entrada'">
                 <label class="form-label">Referencia de compra</label>
@@ -290,6 +291,13 @@ export class InventarioListPage implements OnInit {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
+  fechaConHoraLima(ymd?: string): string {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    const day = ymd && /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : this.hoy();
+    return `${day}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}-05:00`;
+  }
+
   productosFiltrados(): Producto[] {
     const q = (this.prodQuery || '').trim().replace(/^#/, '').toLowerCase();
     const list = this.productos();
@@ -368,7 +376,7 @@ export class InventarioListPage implements OnInit {
       cantidad: this.modo === 'ajuste' && this.mov.sentido === '-' ? -qty : qty,
       observacion: this.modo === 'entrada' && ref ? `${motivo} · Ref. compra: ${ref}` : motivo,
       referencia_tipo: (this.modo === 'entrada' ? 'compra' : 'ajuste') as 'compra' | 'ajuste',
-      fecha: this.mov.fecha || undefined,
+      fecha: this.fechaConHoraLima(this.mov.fecha),
       id_empleado: this.auth.getEmpleadoId() ?? undefined,
     };
     const req$ = this.modo === 'entrada' ? this.api.entrada(payload) : this.api.ajuste(payload);
