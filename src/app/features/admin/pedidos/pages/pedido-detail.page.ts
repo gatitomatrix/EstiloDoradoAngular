@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { PedidoCambiarEstadoWidget } from '../widgets/pedido-cambiar-estado.widget';
 import { PedidoComprobantesWidget } from '../widgets/pedido-comprobantes.widget';
 import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
+import { celularFmt, waCliente } from '../../../../core/utils/celular';
 
 @Component({
   standalone: true,
@@ -44,7 +45,11 @@ import { FechaPePipe } from '../../../../core/pipes/fecha-pe.pipe';
       <div class="col-12 md:col-4">
         <p-card header="Resumen">
           <div>Cliente: <strong>{{pedido().cliente?.nombre || pedido().cliente_nombre}}</strong></div>
-          <div>Celular: <strong>{{pedido().telefono_contacto || pedido().cliente?.telefono || '—'}}</strong></div>
+          <div>
+            Celular:
+            <a *ngIf="waPedido() as wa" [href]="wa" target="_blank" rel="noopener">{{ fmtCel() }}</a>
+            <strong *ngIf="!waPedido()">—</strong>
+          </div>
           <div>Estado: <strong>{{pedido().estado}}</strong></div>
           <div>Total: <strong>{{pedido().totales?.total ?? pedido().total | number:'1.2-2'}}</strong></div>
         </p-card>
@@ -73,5 +78,21 @@ export class PedidoDetailPage implements OnInit {
   reload(){
     this.api.detail(this.id).subscribe(res => this.pedido.set(res?.data ?? res));
     this.api.historial(this.id).subscribe(res => this.historial.set(res?.data ?? res ?? []));
+  }
+
+  fmtCel(): string {
+    const p = this.pedido();
+    return p?.celular_fmt || celularFmt(p?.telefono_contacto || p?.cliente?.telefono) || 'WhatsApp';
+  }
+  waPedido(): string {
+    const p = this.pedido();
+    if (!p) return '';
+    if (p.wa_url) return p.wa_url;
+    const nombre = p.cliente?.nombre || p.cliente_nombre || '';
+    const first = String(nombre).trim().split(/\s+/)[0] || '';
+    const text = first
+      ? `Hola ${first}, te escribimos de Estilo Dorado por tu pedido #${p.id_pedido}.`
+      : `Hola, te escribimos de Estilo Dorado por tu pedido #${p.id_pedido}.`;
+    return waCliente(p.telefono_contacto || p.cliente?.telefono, text);
   }
 }

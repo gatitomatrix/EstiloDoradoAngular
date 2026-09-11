@@ -10,6 +10,7 @@ import { AdminClientesService } from '../../clientes/services/admin-clientes.ser
 import { AdminProductosService } from '../../productos/services/admin-productos.service';
 import { environment } from '../../../../../environments/environment';
 import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-pe';
+import { celularFmt, waCliente } from '../../../../core/utils/celular';
 
 @Component({
   standalone: true,
@@ -86,6 +87,7 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
             <th>Id</th>
             <th>Fecha</th>
             <th>Cliente</th>
+            <th>WhatsApp</th>
             <th>Estado</th>
             <th>Forma pago</th>
             <th>Dirección entrega</th>
@@ -98,7 +100,7 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
         </thead>
         <tbody>
           <tr *ngIf="!rows().length">
-            <td colspan="11" class="text-center text-muted py-4">
+            <td colspan="12" class="text-center text-muted py-4">
               No hay pedidos con estos filtros.
             </td>
           </tr>
@@ -106,6 +108,13 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
             <td>#{{p.id_pedido}}</td>
             <td>{{ toFechaHora(p.fecha_pedido) }}</td>
             <td>{{ shortCliente(p.cliente_nombre) }}</td>
+            <td>
+              <a *ngIf="waPedido(p) as wa" class="btn btn-sm btn-success" [href]="wa" target="_blank" rel="noopener"
+                 title="Escribir por WhatsApp" (click)="$event.stopPropagation()">
+                {{ fmtCel(p) }}
+              </a>
+              <span *ngIf="!waPedido(p)" class="text-muted">—</span>
+            </td>
             <td>
               <span class="badge"
                 [class.text-bg-secondary]="p.estado==='pendiente'"
@@ -178,6 +187,21 @@ import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-p
               <div class="col-md-9">
                 <label class="form-label">Cliente</label>
                 <input class="form-control" [value]="edit.cliente_nombre || ''" readonly>
+              </div>
+
+              <div class="col-12" *ngIf="edit.wa_url || edit.celular_fmt">
+                <label class="form-label">Celular de contacto</label>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <input class="form-control" style="max-width:220px" [value]="edit.celular_fmt || '—'" readonly>
+                  <a *ngIf="edit.wa_url" class="btn btn-success" [href]="edit.wa_url" target="_blank" rel="noopener">
+                    Abrir WhatsApp
+                  </a>
+                </div>
+                <div class="form-text">Para Shalom o el motorizado. Se abre el chat con el número del pedido.</div>
+              </div>
+              <div class="col-12" *ngIf="!edit.wa_url && !edit.celular_fmt">
+                <label class="form-label">Celular de contacto</label>
+                <div class="text-muted">Este pedido no tiene celular (retiro en tienda o compra anterior).</div>
               </div>
 
               <div class="col-md-4">
@@ -516,6 +540,19 @@ export class PedidosListPage implements OnInit {
     const last  = parts.length > 1 ? parts[1] : '';
     return `${first} ${last}`.trim();
   }
+  waPedido(p: any): string {
+    if (p?.wa_url) return p.wa_url;
+    const nombre = this.shortCliente(p?.cliente_nombre);
+    const first = (nombre || '').split(/\s+/)[0] || '';
+    const id = p?.id_pedido || '';
+    const text = first
+      ? `Hola ${first}, te escribimos de Estilo Dorado por tu pedido #${id}.`
+      : `Hola, te escribimos de Estilo Dorado por tu pedido #${id}.`;
+    return waCliente(p?.telefono_contacto || p?.cliente_telefono, text);
+  }
+  fmtCel(p: any): string {
+    return p?.celular_fmt || celularFmt(p?.telefono_contacto || p?.cliente_telefono) || 'WhatsApp';
+  }
   toYYYYMMDD(d: Date): string {
     const y = d.getFullYear();
     const m = (d.getMonth()+1).toString().padStart(2,'0');
@@ -548,6 +585,9 @@ export class PedidosListPage implements OnInit {
       fecha_pedido: p.fecha_pedido,
       items: p.items || [],
       nota_admin: p.nota_admin || '',
+      telefono_contacto: p.telefono_contacto || '',
+      celular_fmt: p.celular_fmt || this.fmtCel(p),
+      wa_url: p.wa_url || this.waPedido(p),
     };
     this.notaCheck = !!(p.nota_admin && String(p.nota_admin).trim());
     this.historial = [];

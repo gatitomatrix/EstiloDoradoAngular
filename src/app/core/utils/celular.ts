@@ -17,3 +17,15 @@ export function celularCliente(raw?: string | null): string {
   if (d === celularTienda()) return '';
   return d;
 }
+
+export function celularFmt(raw?: string | null): string {
+  const d = celularCliente(raw);
+  return d ? `+51 ${d}` : '';
+}
+
+export function waCliente(raw?: string | null, text?: string): string {
+  const d = celularCliente(raw);
+  if (!d) return '';
+  const q = text ? `?text=${encodeURIComponent(text)}` : '';
+  return `https://wa.me/51${d}${q}`;
+}
