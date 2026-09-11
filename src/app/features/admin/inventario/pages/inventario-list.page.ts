@@ -163,13 +163,16 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
               </div>
               <div class="col-md-4">
                 <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" [(ngModel)]="mov.fecha" name="fecha">
-                <div class="small text-muted">La hora es la de Lima al guardar, no 00:00.</div>
+                <input type="date" class="form-control" [(ngModel)]="mov.fecha" name="fecha" [attr.max]="hoy()">
+                <div class="small text-muted">Hoy o anterior. Sin fechas futuras. La hora es la de Lima al guardar.</div>
               </div>
               <div class="col-md-8" *ngIf="modo === 'entrada'">
-                <label class="form-label">Referencia de compra</label>
+                <label class="form-label">Referencia de compra <span *ngIf="fechaPasada" class="text-danger">*</span></label>
                 <input type="text" class="form-control" [(ngModel)]="mov.referencia_compra" name="referencia_compra"
-                  placeholder="Ej. Factura F001-123 o guía (opcional)">
+                  [placeholder]="fechaPasada ? 'Obligatorio: factura o guía' : 'Ej. Factura F001-123 o guía (opcional hoy)'">
+                <div class="text-danger small mt-1" *ngIf="fechaPasada && !(mov.referencia_compra || '').trim()">
+                  Si el ingreso no es de hoy, indica factura o guía.
+                </div>
               </div>
               <div class="col-12">
                 <label class="form-label">Motivo</label>
@@ -179,7 +182,7 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-dark" [disabled]="saving || !mov.id_producto || !mov.cantidad">Guardar</button>
+            <button class="btn btn-dark" [disabled]="saving || !mov.id_producto || !mov.cantidad || (modo === 'entrada' && fechaPasada && !(mov.referencia_compra || '').trim())">Guardar</button>
             <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
           </div>
         </form>
@@ -291,6 +294,16 @@ export class InventarioListPage implements OnInit {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
+  get fechaPasada(): boolean {
+    const f = String(this.mov?.fecha || '').slice(0, 10);
+    return !!f && f < this.hoy();
+  }
+
+  get fechaFutura(): boolean {
+    const f = String(this.mov?.fecha || '').slice(0, 10);
+    return !!f && f > this.hoy();
+  }
+
   fechaConHoraLima(ymd?: string): string {
     const d = new Date();
     const p = (n: number) => String(n).padStart(2, '0');
@@ -363,6 +376,14 @@ export class InventarioListPage implements OnInit {
 
   submitMovimiento() {
     if (!this.mov?.id_producto || !this.mov?.cantidad) return;
+    if (this.fechaFutura) {
+      alert('No se puede registrar un movimiento con fecha futura.');
+      return;
+    }
+    if (this.modo === 'entrada' && this.fechaPasada && !(this.mov.referencia_compra || '').trim()) {
+      alert('Si el ingreso es de un día anterior, indica la referencia de compra (factura o guía).');
+      return;
+    }
     if (this.modo === 'ajuste' && !(this.mov.observacion || '').trim()) {
       alert('En un ajuste el motivo es obligatorio.');
       return;
@@ -371,7 +392,7 @@ export class InventarioListPage implements OnInit {
     const qty = Math.abs(Number(this.mov.cantidad));
     const motivo = this.mov.observacion?.trim() || (this.modo === 'entrada' ? 'Ingreso de mercadería' : 'Ajuste');
     const ref = (this.mov.referencia_compra || '').trim();
-    const payload = {
+    const payload: any = {
       id_producto: Number(this.mov.id_producto),
       cantidad: this.modo === 'ajuste' && this.mov.sentido === '-' ? -qty : qty,
       observacion: this.modo === 'entrada' && ref ? `${motivo} · Ref. compra: ${ref}` : motivo,
@@ -379,6 +400,9 @@ export class InventarioListPage implements OnInit {
       fecha: this.fechaConHoraLima(this.mov.fecha),
       id_empleado: this.auth.getEmpleadoId() ?? undefined,
     };
+    if (this.modo === 'entrada' && ref) {
+      payload.referencia_compra = ref;
+    }
     const req$ = this.modo === 'entrada' ? this.api.entrada(payload) : this.api.ajuste(payload);
     req$.subscribe({
       next: () => {

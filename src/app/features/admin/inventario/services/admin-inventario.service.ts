@@ -16,7 +16,7 @@ export class AdminInventarioService {
   }
 
   // Ahora aceptan fecha e id_empleado opcionales
-  entrada(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
+  entrada(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; referencia_compra?: string; fecha?: string; id_empleado?: number }) {
     return this.http.post(`${this.base}/inventario/entrada`, payload);
   }
   salida(payload: { id_producto: number; cantidad: number; observacion?: string; referencia_tipo?: 'pedido'|'ajuste'|'otro'|'compra'; referencia_id?: number; fecha?: string; id_empleado?: number }) {
