@@ -1,5 +1,6 @@
 import { Component, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../../services/order/order.service';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
@@ -26,9 +27,18 @@ export class ResumenPedidoComponent implements AfterViewInit {
   data: any;
   files?: { xml?: string; cdr?: string; pdf?: string };
   readonly direccionTienda = DIRECCION_TIENDA;
+  cancelling = false;
 
   @ViewChild('okModal') okModalRef!: ElementRef<HTMLDivElement>;
   private okModal?: any;
+
+  get esPendiente(): boolean {
+    return String(this.data?.estado || '').toLowerCase() === 'pendiente';
+  }
+
+  get esCancelado(): boolean {
+    return String(this.data?.estado || '').toLowerCase() === 'cancelado';
+  }
 
   ngOnInit() {
     this.id = +(this.route.snapshot.paramMap.get('id') || 0);
@@ -58,6 +68,46 @@ export class ResumenPedidoComponent implements AfterViewInit {
     else {
       Swal.fire({ icon: 'success', title: '¡Venta exitosa!', text: 'Gracias por su compra.', confirmButtonColor: '#111827' });
     }
+  }
+
+  async cancelar(): Promise<void> {
+    if (!this.esPendiente || this.cancelling) return;
+
+    const ok = await Swal.fire({
+      icon: 'question',
+      title: 'Cancelar pedido',
+      text: `¿Cancelar el pedido #${this.id}? Solo se puede cancelar si aún no está pagado.`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#b91c1c',
+      cancelButtonColor: '#6b7280',
+      reverseButtons: true,
+    });
+    if (!ok.isConfirmed) return;
+
+    this.cancelling = true;
+    this.order.cancelar(this.id, 'Cancelado por el cliente').subscribe({
+      next: (res) => {
+        this.cancelling = false;
+        this.data = { ...this.data, ...res, estado: 'cancelado' };
+        Swal.fire({
+          icon: 'success',
+          title: 'Pedido cancelado',
+          text: 'El stock volvió al inventario.',
+          confirmButtonColor: '#d4af37',
+        }).then(() => this.router.navigateByUrl('/mis-compras'));
+      },
+      error: (err: HttpErrorResponse) => {
+        this.cancelling = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo cancelar',
+          text: err?.error?.message || 'Inténtalo de nuevo.',
+          confirmButtonColor: '#b91c1c',
+        });
+      }
+    });
   }
 
   abrirArchivo(url: string | undefined, tipo: string) {

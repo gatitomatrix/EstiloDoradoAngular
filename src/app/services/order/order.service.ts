@@ -96,4 +96,11 @@ export class OrderService {
   listMine() {
     return this.http.get<PedidoListItem[]>(`${this.API}/pedidos`);
   }
+
+  cancelar(id: number, motivo = 'Cancelado por el cliente') {
+    return this.http.post<ConfirmarRes & { success?: boolean; message?: string }>(
+      `${this.API}/pedidos/${id}/cancelar`,
+      { motivo }
+    );
+  }
 }

@@ -9,6 +9,7 @@
 
 <div class="ed-mc-banner">
   El estado del pedido se actualiza según el proceso de compra y el tiempo de entrega o recojo en tienda.
+  Si el recojo en tienda sigue pendiente, puedes cancelarlo desde aquí.
 </div>
 
 <div class="ed-mc-filters">
@@ -62,8 +63,16 @@
       <div class="ed-mc-row">
         <div class="ed-mc-item"><b>Entrega:</b> {{ p.direccion_entrega || '—' }}</div>
         <div class="ed-mc-item"><b>Pago:</b> {{ p.forma_pago || '—' }}</div>
-        <div class="px-3 pb-3">
+        <div class="px-3 pb-3 d-flex flex-wrap gap-2">
           <button class="btn btn-outline-dark btn-sm" [routerLink]="['/resumen', p.id_pedido]">Ver detalle</button>
+          <button
+            *ngIf="puedeCancelar(p)"
+            type="button"
+            class="btn btn-outline-danger btn-sm"
+            [disabled]="cancellingId === p.id_pedido"
+            (click)="cancelar(p)">
+            {{ cancellingId === p.id_pedido ? 'Cancelando…' : 'Cancelar pedido' }}
+          </button>
         </div>
       </div>
     </div>
