@@ -31,11 +31,15 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
         (click)="openIngreso(c)"
         [title]="'Registrar ingreso de ' + c.nombre"
       >
-        {{ c.nombre }} ({{ c.stock }})
+        {{ c.nombre }} (#{{ c.id_producto }}) · {{ c.stock }}
       </button>
     </div>
 
     <form class="row g-2 mb-3 align-items-end" (ngSubmit)="buscar()">
+      <div class="col-sm-3">
+        <label class="form-label small">Producto (nombre o ID)</label>
+        <input class="form-control" [(ngModel)]="q.search" name="search" placeholder="Ej. Hot Wheels o 18">
+      </div>
       <div class="col-sm-2">
         <label class="form-label small">Tipo</label>
         <select class="form-select" [(ngModel)]="q.tipo" name="tipo">
@@ -126,10 +130,25 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
             <div class="row g-3">
               <div class="col-md-8">
                 <label class="form-label">Producto</label>
-                <select class="form-select" [(ngModel)]="mov.id_producto" name="id_producto" required>
-                  <option [ngValue]="undefined">Seleccione...</option>
-                  <option *ngFor="let p of productos()" [ngValue]="p.id_producto">{{ p.nombre }} (stock {{ p.stock }})</option>
-                </select>
+                <input
+                  class="form-control"
+                  [(ngModel)]="prodQuery"
+                  name="prod_query"
+                  autocomplete="off"
+                  placeholder="Escribe nombre o ID"
+                  (focus)="prodPickOpen = true"
+                  (input)="onProdQuery()"
+                />
+                <div class="ed-pick" *ngIf="prodPickOpen && productosFiltrados().length">
+                  <button type="button" class="ed-pick__item" *ngFor="let p of productosFiltrados()" (mousedown)="elegirProducto(p)">
+                    <strong>#{{ p.id_producto }}</strong>
+                    <span>{{ p.nombre }}</span>
+                    <small>stock {{ p.stock }}</small>
+                  </button>
+                </div>
+                <div class="small text-muted mt-1" *ngIf="productoElegido()">
+                  Seleccionado: #{{ productoElegido()!.id_producto }} · {{ productoElegido()!.nombre }} (stock {{ productoElegido()!.stock }})
+                </div>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Cantidad</label>
@@ -188,6 +207,18 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
       color: #8B1E1E;
     }
     .ed-repo-chip--out:hover { background: #8B1E1E; color: #fff; }
+    .ed-pick {
+      max-height: 220px; overflow: auto; margin-top: 4px;
+      border: 1px solid #E7DAC6; border-radius: 8px; background: #fff;
+    }
+    .ed-pick__item {
+      display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid #f3e6d0;
+      background: transparent; padding: 8px 10px; cursor: pointer;
+    }
+    .ed-pick__item:last-child { border-bottom: 0; }
+    .ed-pick__item:hover { background: #FFF8E6; }
+    .ed-pick__item small { color: #6b5d4d; margin-left: auto; }
   `]
 })
 export class InventarioListPage implements OnInit {
@@ -197,10 +228,12 @@ export class InventarioListPage implements OnInit {
   private prodApi = inject(AdminProductosService);
   private auth = inject(AdminAuthService);
 
-  q: any = { page: 1, per_page: 25, tipo: undefined, fecha_desde: undefined, fecha_hasta: undefined };
+  q: any = { page: 1, per_page: 25, tipo: undefined, fecha_desde: undefined, fecha_hasta: undefined, search: '' };
   rows = signal<any[]>([]);
   criticos = signal<any[]>([]);
   productos = signal<Producto[]>([]);
+  prodQuery = '';
+  prodPickOpen = false;
 
   modalOpen = false;
   saving = false;
@@ -238,7 +271,8 @@ export class InventarioListPage implements OnInit {
       per_page: this.q.per_page,
       tipo_movimiento: this.q.tipo,
       desde: this.q.fecha_desde,
-      hasta: this.q.fecha_hasta
+      hasta: this.q.fecha_hasta,
+      q: (this.q.search || '').trim() || undefined,
     };
     this.api.list(params).subscribe(res => {
       this.rows.set(res?.data ?? []);
@@ -256,9 +290,43 @@ export class InventarioListPage implements OnInit {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
+  productosFiltrados(): Producto[] {
+    const q = (this.prodQuery || '').trim().toLowerCase();
+    const list = this.productos();
+    if (!q) return list.slice(0, 12);
+    return list.filter((p) => {
+      const id = String(p.id_producto);
+      const name = (p.nombre || '').toLowerCase();
+      return id === q || id.startsWith(q) || name.includes(q);
+    }).slice(0, 12);
+  }
+
+  productoElegido(): Producto | undefined {
+    const id = Number(this.mov?.id_producto);
+    if (!id) return undefined;
+    return this.productos().find((p) => p.id_producto === id);
+  }
+
+  onProdQuery() {
+    this.prodPickOpen = true;
+    const q = (this.prodQuery || '').trim();
+    if (/^\d+$/.test(q)) {
+      const hit = this.productos().find((p) => String(p.id_producto) === q);
+      if (hit) this.mov.id_producto = hit.id_producto;
+    }
+  }
+
+  elegirProducto(p: Producto) {
+    this.mov.id_producto = p.id_producto;
+    this.prodQuery = `#${p.id_producto} · ${p.nombre}`;
+    this.prodPickOpen = false;
+  }
+
   openModal(modo: 'entrada' | 'ajuste') {
     this.modo = modo;
     this.mov = this.emptyMov();
+    this.prodQuery = '';
+    this.prodPickOpen = true;
     this.modalOpen = true;
   }
 
@@ -267,6 +335,9 @@ export class InventarioListPage implements OnInit {
     this.mov = this.emptyMov();
     this.mov.id_producto = c.id_producto ?? c.id;
     this.mov.observacion = c.nombre ? `Reposición · ${c.nombre}` : 'Reposición';
+    const p = this.productoElegido();
+    this.prodQuery = p ? `#${p.id_producto} · ${p.nombre}` : (c.nombre || '');
+    this.prodPickOpen = false;
     this.modalOpen = true;
   }
   closeModal() { this.modalOpen = false; }

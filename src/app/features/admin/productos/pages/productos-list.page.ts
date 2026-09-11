@@ -33,7 +33,8 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
       padding: 0.65rem 0.5rem;
     }
     .ed-prod-table .col-img { width: 64px; }
-    .ed-prod-table .col-name { width: 26%; }
+    .ed-prod-table .col-id { width: 56px; }
+    .ed-prod-table .col-name { width: 24%; }
     .ed-prod-table .col-tags { width: 22%; }
     .ed-prod-table .col-price { width: 90px; }
     .ed-prod-table .col-stock { width: 64px; }
@@ -88,8 +89,8 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
 
     <form class="row g-2 mb-3" (ngSubmit)="onBuscarClick()">
       <div class="col-sm-4">
-        <label class="form-label">Buscar por nombre</label>
-        <input class="form-control" [(ngModel)]="q.search" name="search" placeholder="Ej. Cajita Circular Rosa">
+        <label class="form-label">Buscar por nombre o ID</label>
+        <input class="form-control" [(ngModel)]="q.search" name="search" placeholder="Ej. Cajita o 18">
       </div>
       <div class="col-sm-3">
         <label class="form-label">Categoría</label>
@@ -129,6 +130,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
     <div class="table-responsive ed-prod-table-wrap">
       <table class="table table-sm align-middle ed-prod-table">
         <thead><tr>
+          <th class="col-id">ID</th>
           <th class="col-img">Imagen</th>
           <th class="col-name">Nombre</th>
           <th class="col-tags">Etiquetas</th>
@@ -140,6 +142,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
         </tr></thead>
         <tbody>
           <tr *ngFor="let p of rows()" [class.table-danger]="p.stock <= 0" [class.table-warning]="p.stock > 0 && p.stock <= 3">
+            <td class="col-id"><strong>#{{ p.id_producto }}</strong></td>
             <td class="col-img">
               <img [src]="p.imagen_url || 'assets/img/no-image.png'" alt="" class="ed-prod-thumb" loading="lazy" decoding="async" width="56" height="56">
             </td>
