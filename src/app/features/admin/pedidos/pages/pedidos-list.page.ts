@@ -201,7 +201,7 @@ import { celularFmt, waCliente } from '../../../../core/utils/celular';
               </div>
               <div class="col-12" *ngIf="!edit.wa_url && !edit.celular_fmt">
                 <label class="form-label">Celular de contacto</label>
-                <div class="text-muted">Este pedido no tiene celular (retiro en tienda o compra anterior).</div>
+                <div class="text-muted">Este pedido no tiene celular (compra anterior al dato de contacto).</div>
               </div>
 
               <div class="col-md-4">

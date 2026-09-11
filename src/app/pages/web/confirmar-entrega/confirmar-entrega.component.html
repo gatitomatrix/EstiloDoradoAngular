@@ -40,9 +40,9 @@
         </div>
       </div>
 
-      <div class="card shadow-sm mb-3" *ngIf="selected==='EXPRESS'">
+      <div class="card shadow-sm mb-3" *ngIf="selected==='EXPRESS' || selected==='STORE_PICKUP'">
         <div class="card-body">
-          <label class="form-label small mb-1">Celular de contacto (Shalom / motorizado)</label>
+          <label class="form-label small mb-1">{{ selected==='STORE_PICKUP' ? 'Celular para recordarte el recojo' : 'Celular de contacto (Shalom / motorizado)' }}</label>
           <div class="input-group">
             <span class="input-group-text">+51</span>
             <input type="tel" class="form-control" maxlength="9" inputmode="numeric"

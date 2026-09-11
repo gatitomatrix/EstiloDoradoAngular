@@ -64,7 +64,7 @@ export class CheckoutService {
   }
 
   get puedePagar(): boolean {
-    if (this.state.mode === 'STORE_PICKUP') return true;
+    if (this.state.mode === 'STORE_PICKUP') return this.telefonoOk;
     return this.state.mode === 'EXPRESS' && this.envioListo(this.state.address) && this.telefonoOk;
   }
 

@@ -46,6 +46,18 @@
                                 📍 {{ direccionTienda }}
                             </div>
                             <div class="text-muted small">Recuerda que si pagas por Culqui puedes obtener tu comprobante electrónico.</div>
+                            <div class="mt-2" *ngIf="mode === 'STORE_PICKUP'" (click)="$event.stopPropagation()">
+                              <label class="form-label small mb-1">Celular para recordarte el recojo</label>
+                              <div class="input-group input-group-sm">
+                                <span class="input-group-text">+51</span>
+                                <input type="tel" class="form-control" maxlength="9" inputmode="numeric"
+                                  [value]="telefono" (input)="onPhoneInput($event)"
+                                  placeholder="9xxxxxxxx">
+                              </div>
+                              <div class="text-danger small" *ngIf="!telefonoOk">
+                                9 dígitos que empiecen con 9. Si pasa un día, te escribimos por WhatsApp.
+                              </div>
+                            </div>
                         </div>
                         <div class="ed-check" *ngIf="mode === 'STORE_PICKUP'" aria-hidden="true">✓</div>
                     </div>
@@ -103,7 +115,7 @@
                     <div class="d-flex justify-content-between fw-bold mb-3">
                         <span>Total:</span><span>S/ {{ total | number:'1.2-2' }}</span>
                     </div>
-                    <button class="btn btn-dark w-100" [disabled]="mode === 'NONE' || (mode === 'EXPRESS' && envioListo && !telefonoOk)" (click)="goPay()">{{ payLabel }}</button>
+                    <button class="btn btn-dark w-100" [disabled]="mode === 'NONE' || ((mode === 'STORE_PICKUP' || (mode === 'EXPRESS' && envioListo)) && !telefonoOk)" (click)="goPay()">{{ payLabel }}</button>
                     <div class="small text-muted mt-2" *ngIf="mode !== 'STORE_PICKUP' && !envioListo">
                       Si eliges envío, primero indica agencia Shalom o domicilio.
                     </div>

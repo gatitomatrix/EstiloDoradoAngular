@@ -173,12 +173,16 @@ export class EntregaComponent {
 
   goPay() {
     if (this.mode === 'STORE_PICKUP') {
+      if (!this.telefonoOk) {
+        alert('Indica un celular de 9 dígitos que empiece con 9. Así te recordamos el recojo.');
+        return;
+      }
       this.router.navigateByUrl('/pago');
       return;
     }
     if (this.envioListo) {
       if (!this.telefonoOk) {
-        alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
+        alert('Indica un celular de 9 dígitos que empiece con 9.');
         return;
       }
       this.router.navigateByUrl('/pago');

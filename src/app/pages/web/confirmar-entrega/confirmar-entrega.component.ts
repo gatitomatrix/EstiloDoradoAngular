@@ -68,7 +68,7 @@ export class ConfirmarEntregaComponent {
 
    /** habilita el botón cuando ya hay un modo de entrega elegido */
   get resumenOk(): boolean {
-    if (this.checkout.value.mode === 'STORE_PICKUP') return true;
+    if (this.checkout.value.mode === 'STORE_PICKUP') return this.telefonoOk;
     return this.checkout.envioListo(this.checkout.value.address) && this.telefonoOk;
   }
 
@@ -120,16 +120,18 @@ export class ConfirmarEntregaComponent {
   }
 
   irAPagar() {
+    if (!this.telefonoOk) {
+      alert(this.checkout.value.mode === 'STORE_PICKUP'
+        ? 'Indica un celular de 9 dígitos que empiece con 9. Así te recordamos el recojo.'
+        : 'Indica un celular de 9 dígitos que empiece con 9.');
+      return;
+    }
     if (this.checkout.value.mode === 'STORE_PICKUP') {
       this.router.navigateByUrl('/pago');
       return;
     }
-    if (this.checkout.envioListo(this.checkout.value.address) && this.telefonoOk) {
+    if (this.checkout.envioListo(this.checkout.value.address)) {
       this.router.navigateByUrl('/pago');
-      return;
-    }
-    if (this.checkout.envioListo(this.checkout.value.address) && !this.telefonoOk) {
-      alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
       return;
     }
     this.router.navigate(['/entrega'], { state: { openAddress: true } });

@@ -131,8 +131,8 @@ export class PagoComponent implements AfterViewInit {
       return;
     }
     this.checkout.bindCliente(this.auth.user?.id_cliente, this.auth.user?.telefono);
-    if (this.mode === 'EXPRESS' && !this.checkout.telefonoOk) {
-      this.router.navigateByUrl('/confirmar-entrega');
+    if (!this.checkout.telefonoOk) {
+      this.router.navigateByUrl(this.mode === 'STORE_PICKUP' ? '/entrega' : '/confirmar-entrega');
       return;
     }
     this.pay.setHasMethod(true);
@@ -223,9 +223,9 @@ export class PagoComponent implements AfterViewInit {
       this.router.navigate(['/entrega'], { state: { openAddress: true } });
       return;
     }
-    if (this.mode === 'EXPRESS' && !this.checkout.telefonoOk) {
-      alert('Para el envío indica un celular de contacto (9 dígitos, empieza con 9).');
-      this.router.navigateByUrl('/confirmar-entrega');
+    if (!this.checkout.telefonoOk) {
+      alert('Indica un celular de 9 dígitos que empiece con 9.');
+      this.router.navigateByUrl(this.mode === 'STORE_PICKUP' ? '/entrega' : '/confirmar-entrega');
       return;
     }
     const email = this.correoCulqi;
@@ -405,6 +405,11 @@ export class PagoComponent implements AfterViewInit {
   pagarEnEfectivo() {
     if (!this.canCash) {
       alert('El pago en efectivo solo está disponible para Retiro en tienda.');
+      return;
+    }
+    if (!this.checkout.telefonoOk) {
+      alert('Indica un celular de 9 dígitos que empiece con 9. Así te recordamos el recojo.');
+      this.router.navigateByUrl('/entrega');
       return;
     }
     const direccion = TEXTO_RECOJO;
