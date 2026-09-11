@@ -78,8 +78,27 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   private pendingAfterLogin: string | null = null;
   private skipLoginGuide = false;
   private readonly storeKey = 'ed_dori_sesion';
+  private chatOwner = 'invitado';
+
+  private ownerId(): string {
+    const id = this.auth.user?.id_cliente;
+    return id ? `u:${id}` : 'invitado';
+  }
+
+  private slotKey(): string {
+    return `${this.storeKey}:${this.chatOwner}`;
+  }
+
+  private welcomeMsg(): ChatMsg {
+    return {
+      from: 'bot',
+      text: 'Hola, soy Dori. ¿Te ayudo a elegir un regalo? Dime qué buscas o para quién es.',
+    };
+  }
 
   ngOnInit() {
+    try { sessionStorage.removeItem(this.storeKey); } catch { /* clave vieja mezclaba cuentas */ }
+    this.chatOwner = this.ownerId();
     this.wasLoggedIn = this.auth.isLoggedIn;
     this.syncRoute(this.router.url);
     this.sub = this.router.events
@@ -87,18 +106,20 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
       .subscribe((e) => this.syncRoute(e.urlAfterRedirects));
     this.authSub = this.auth.user$.subscribe((u) => {
       const now = !!u;
+      const next = this.ownerId();
+      if (next !== this.chatOwner) {
+        const keepDoriLogin = now && !this.wasLoggedIn && (this.skipLoginGuide || this.showLogin || !!this.pendingAfterLogin);
+        this.chatOwner = next;
+        if (keepDoriLogin) this.persist();
+        else this.resetChat();
+      }
       if (now && !this.wasLoggedIn) this.onLoggedInGuide();
       this.wasLoggedIn = now;
     });
 
     window.addEventListener('ed-open-asistente', this.openFromEvent);
     if (!this.restore()) {
-      this.msgs = [
-        {
-          from: 'bot',
-          text: 'Hola, soy Dori. ¿Te ayudo a elegir un regalo? Dime qué buscas o para quién es.',
-        },
-      ];
+      this.msgs = [this.welcomeMsg()];
     }
   }
 
@@ -427,9 +448,24 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     this.scroll();
   }
 
+  private resetChat() {
+    this.awaiting = null;
+    this.complaint = null;
+    this.showLogin = false;
+    this.orderView = null;
+    this.offered = [];
+    this.pendingAfterLogin = null;
+    this.votes = {};
+    this.draft = '';
+    if (!this.restore()) {
+      this.msgs = [this.welcomeMsg()];
+    }
+    this.persist();
+  }
+
   private persist() {
     try {
-      sessionStorage.setItem(this.storeKey, JSON.stringify({
+      sessionStorage.setItem(this.slotKey(), JSON.stringify({
         msgs: this.msgs.slice(-40),
         offered: this.offered,
         awaiting: this.awaiting,
@@ -443,7 +479,7 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   private restore(): boolean {
     try {
-      const raw = sessionStorage.getItem(this.storeKey);
+      const raw = sessionStorage.getItem(this.slotKey());
       if (!raw) return false;
       const d = JSON.parse(raw);
       if (!Array.isArray(d?.msgs) || !d.msgs.length) return false;
