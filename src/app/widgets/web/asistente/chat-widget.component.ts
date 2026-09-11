@@ -249,7 +249,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   goPath(url: string) {
     if (!url) return;
-    this.open = true;
+    // Mis compras: cierro el chat para que se vea la página (si no, Dori tapa el pedido).
+    const toCompras = url.startsWith('/mis-compras');
+    this.open = !toCompras;
+    this.orderView = null;
     this.persist();
     this.router.navigateByUrl(url);
   }
