@@ -10,7 +10,7 @@ import { AdminClientesService } from '../../clientes/services/admin-clientes.ser
 import { AdminProductosService } from '../../productos/services/admin-productos.service';
 import { environment } from '../../../../../environments/environment';
 import { formatFechaHoraPe, formatFechaPe } from '../../../../core/utils/fecha-pe';
-import { celularFmt, waCliente } from '../../../../core/utils/celular';
+import { celularCliente, celularFmt, waCliente } from '../../../../core/utils/celular';
 
 @Component({
   standalone: true,
@@ -189,19 +189,30 @@ import { celularFmt, waCliente } from '../../../../core/utils/celular';
                 <input class="form-control" [value]="edit.cliente_nombre || ''" readonly>
               </div>
 
-              <div class="col-12" *ngIf="edit.wa_url || edit.celular_fmt">
+              <div class="col-12">
                 <label class="form-label">Celular de contacto</label>
                 <div class="d-flex flex-wrap align-items-center gap-2">
-                  <input class="form-control" style="max-width:220px" [value]="edit.celular_fmt || '—'" readonly>
-                  <a *ngIf="edit.wa_url" class="btn btn-success" [href]="edit.wa_url" target="_blank" rel="noopener">
+                  <div class="input-group" style="max-width:240px">
+                    <span class="input-group-text">+51</span>
+                    <input type="tel" class="form-control" maxlength="9" inputmode="numeric"
+                      [(ngModel)]="edit.telefono_edit" name="e_cel" (input)="onEditPhone($event)"
+                      placeholder="9xxxxxxxx">
+                  </div>
+                  <a *ngIf="waPedido(edit) as wa" class="btn btn-success" [href]="wa" target="_blank" rel="noopener">
                     Abrir WhatsApp
                   </a>
                 </div>
-                <div class="form-text">Para Shalom o el motorizado. Se abre el chat con el número del pedido.</div>
-              </div>
-              <div class="col-12" *ngIf="!edit.wa_url && !edit.celular_fmt">
-                <label class="form-label">Celular de contacto</label>
-                <div class="text-muted">Este pedido no tiene celular (compra anterior al dato de contacto).</div>
+                <div class="text-danger small mt-1" *ngIf="edit.telefono_edit && !celEditOk">
+                  9 dígitos que empiecen con 9. No uses el de la tienda.
+                </div>
+                <div class="form-text">Solo este pedido. No cambia la cuenta del cliente. WhatsApp no se envía solo.</div>
+                <div class="form-check mt-2" *ngIf="celCambio">
+                  <input class="form-check-input" type="checkbox" id="chkCelPedido" [(ngModel)]="confirmarCel" name="e_cel_chk">
+                  <label class="form-check-label" for="chkCelPedido">
+                    Confirmo que el cliente pidió cambiar el celular de este pedido
+                    <span *ngIf="edit.telefono_orig"> ({{ fmtDig(edit.telefono_orig) }} → {{ fmtDig(edit.telefono_edit) }})</span>.
+                  </label>
+                </div>
               </div>
 
               <div class="col-md-4">
@@ -478,6 +489,7 @@ export class PedidosListPage implements OnInit {
   edit: any = {};
   historial: any[] = [];
   notaCheck = false;
+  confirmarCel = false;
   mapSrc: SafeResourceUrl | null = null;
   mapLink: string | null = null;
   mapsGoogle: string | null = null;
@@ -541,17 +553,35 @@ export class PedidosListPage implements OnInit {
     return `${first} ${last}`.trim();
   }
   waPedido(p: any): string {
-    if (p?.wa_url) return p.wa_url;
+    const cel = celularCliente(p?.telefono_edit ?? p?.telefono_contacto ?? p?.cliente_telefono);
+    if (!cel && p?.wa_url) return p.wa_url;
     const nombre = this.shortCliente(p?.cliente_nombre);
     const first = (nombre || '').split(/\s+/)[0] || '';
     const id = p?.id_pedido || '';
     const text = first
       ? `Hola ${first}, te escribimos de Estilo Dorado por tu pedido #${id}.`
       : `Hola, te escribimos de Estilo Dorado por tu pedido #${id}.`;
-    return waCliente(p?.telefono_contacto || p?.cliente_telefono, text);
+    return waCliente(cel, text);
   }
   fmtCel(p: any): string {
     return p?.celular_fmt || celularFmt(p?.telefono_contacto || p?.cliente_telefono) || 'WhatsApp';
+  }
+  fmtDig(raw?: string): string {
+    const d = celularCliente(raw);
+    return d ? d : 'sin número';
+  }
+  get celEditOk(): boolean {
+    return celularCliente(this.edit?.telefono_edit).length === 9;
+  }
+  get celCambio(): boolean {
+    return celularCliente(this.edit?.telefono_edit) !== celularCliente(this.edit?.telefono_orig);
+  }
+  onEditPhone(ev: Event) {
+    const el = ev.target as HTMLInputElement;
+    let d = (el.value || '').replace(/\D/g, '').slice(0, 9);
+    el.value = d;
+    this.edit.telefono_edit = d;
+    if (!this.celCambio) this.confirmarCel = false;
   }
   toYYYYMMDD(d: Date): string {
     const y = d.getFullYear();
@@ -586,10 +616,13 @@ export class PedidosListPage implements OnInit {
       items: p.items || [],
       nota_admin: p.nota_admin || '',
       telefono_contacto: p.telefono_contacto || '',
+      telefono_orig: celularCliente(p.telefono_contacto || p.cliente_telefono),
+      telefono_edit: celularCliente(p.telefono_contacto || p.cliente_telefono),
       celular_fmt: p.celular_fmt || this.fmtCel(p),
       wa_url: p.wa_url || this.waPedido(p),
     };
     this.notaCheck = !!(p.nota_admin && String(p.nota_admin).trim());
+    this.confirmarCel = false;
     this.historial = [];
     this.editOpen = true;
     this.aplicarMapa(p);
@@ -605,6 +638,7 @@ export class PedidosListPage implements OnInit {
     this.mapsGoogle = null;
     this.mapsCopied = false;
     this.mapNota = '';
+    this.confirmarCel = false;
   }
 
   private aplicarMapa(p: any) {
@@ -676,14 +710,28 @@ export class PedidosListPage implements OnInit {
 
   guardarEdicion() {
     if (!this.edit?.id_pedido) return;
+    if (this.celCambio) {
+      if (!this.celEditOk) {
+        alert('Celular inválido. 9 dígitos que empiecen con 9. No uses el de la tienda.');
+        return;
+      }
+      if (!this.confirmarCel) {
+        alert('Marca la confirmación: el cliente pidió cambiar el celular de este pedido.');
+        return;
+      }
+    }
     this.savingEdit = true;
-    const payload = {
+    const payload: any = {
       estado: this.edit.estado,
       forma_pago: this.edit.forma_pago ?? null,
       nota_admin: this.notaCheck ? (this.edit.nota_admin || '').trim() : '',
     };
+    if (this.celCambio) {
+      payload.telefono_contacto = celularCliente(this.edit.telefono_edit);
+      payload.confirmar_cambio_celular = true;
+    }
     this.api.update(this.edit.id_pedido, payload).subscribe({
-      next: () => { this.savingEdit = false; this.editOpen = false; this.buscar(); },
+      next: () => { this.savingEdit = false; this.closeEditar(); this.buscar(); },
       error: (e) => { this.savingEdit = false; this.alertHttp(e, 'No se pudo guardar'); }
     });
   }
@@ -766,7 +814,8 @@ export class PedidosListPage implements OnInit {
       alert('No autorizado para realizar esta acción.');
       return;
     }
-    alert(fallback);
+    const msg = e?.error?.message || fallback;
+    alert(msg);
     console.error(e);
   }
 }
