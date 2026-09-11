@@ -208,7 +208,7 @@ import { AdminAuthService } from '../../../../core/services/admin-auth.service';
     }
     .ed-repo-chip--out:hover { background: #8B1E1E; color: #fff; }
     .ed-pick {
-      max-height: 220px; overflow: auto; margin-top: 4px;
+      max-height: 280px; overflow: auto; margin-top: 4px;
       border: 1px solid #E7DAC6; border-radius: 8px; background: #fff;
     }
     .ed-pick__item {
@@ -261,7 +261,7 @@ export class InventarioListPage implements OnInit {
   }
 
   cargarProductos() {
-    this.prodApi.list({ per_page: -1, sort: 'nombre', order: 'asc' })
+    this.prodApi.list({ per_page: -1, sort: 'id_producto', order: 'asc' })
       .subscribe(res => this.productos.set(res?.data ?? res ?? []));
   }
 
@@ -291,29 +291,40 @@ export class InventarioListPage implements OnInit {
   }
 
   productosFiltrados(): Producto[] {
-    const q = (this.prodQuery || '').trim().toLowerCase();
+    const q = (this.prodQuery || '').trim().replace(/^#/, '').toLowerCase();
     const list = this.productos();
-    if (!q) return list.slice(0, 12);
-    return list.filter((p) => {
-      const id = String(p.id_producto);
-      const name = (p.nombre || '').toLowerCase();
-      return id === q || id.startsWith(q) || name.includes(q);
-    }).slice(0, 12);
+    if (!q) return list;
+    const scored = list
+      .map((p) => {
+        const id = String(p.id_producto);
+        const name = (p.nombre || '').toLowerCase();
+        let s = 0;
+        if (id === q) s = 100;
+        else if (id.startsWith(q)) s = 80;
+        else if (name.includes(q)) s = 40;
+        else return null;
+        return { p, s };
+      })
+      .filter((x): x is { p: Producto; s: number } => !!x)
+      .sort((a, b) => b.s - a.s || a.p.id_producto - b.p.id_producto);
+    return scored.map((x) => x.p);
+  }
+
+  onProdQuery() {
+    this.prodPickOpen = true;
+    const q = (this.prodQuery || '').trim().replace(/^#/, '');
+    if (/^\d+$/.test(q)) {
+      const hit = this.productos().find((p) => String(p.id_producto) === q);
+      if (hit) this.mov.id_producto = hit.id_producto;
+    } else if (!q) {
+      this.mov.id_producto = undefined;
+    }
   }
 
   productoElegido(): Producto | undefined {
     const id = Number(this.mov?.id_producto);
     if (!id) return undefined;
     return this.productos().find((p) => p.id_producto === id);
-  }
-
-  onProdQuery() {
-    this.prodPickOpen = true;
-    const q = (this.prodQuery || '').trim();
-    if (/^\d+$/.test(q)) {
-      const hit = this.productos().find((p) => String(p.id_producto) === q);
-      if (hit) this.mov.id_producto = hit.id_producto;
-    }
   }
 
   elegirProducto(p: Producto) {

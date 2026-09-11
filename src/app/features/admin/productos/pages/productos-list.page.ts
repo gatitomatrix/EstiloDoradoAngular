@@ -115,6 +115,14 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
           <option [ngValue]="10">≤ 10</option>
         </select>
       </div>
+      <div class="col-sm-2">
+        <label class="form-label">Ver</label>
+        <select class="form-select" [(ngModel)]="q.per_page" name="per_page">
+          <option [ngValue]="-1">Todos</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
       <div class="col-sm-3 d-flex align-items-end gap-2">
         <button class="btn btn-dark flex-fill">Buscar</button>
         <button type="button" class="btn btn-primary" (click)="openCreate()">Nuevo</button>
@@ -177,7 +185,7 @@ import { formatFechaHoraPe } from '../../../../core/utils/fecha-pe';
 
     <div class="d-flex justify-content-between">
       <div>Mostrando {{rows().length}} / {{total()}} resultados</div>
-      <div class="btn-group">
+      <div class="btn-group" *ngIf="q.per_page > 0">
         <button class="btn btn-outline-secondary" (click)="pageDown()" [disabled]="q.page<=1">«</button>
         <button class="btn btn-outline-secondary" disabled>pág. {{q.page}}</button>
         <button class="btn btn-outline-secondary" (click)="pageUp()" [disabled]="q.page>=totalPages()">»</button>
@@ -440,7 +448,7 @@ export class ProductosListPage implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  q: any = { page: 1, per_page: 10, search: '', id_categoria: undefined, estado: undefined, stock_max: undefined as number | undefined };
+  q: any = { page: 1, per_page: -1, search: '', id_categoria: undefined, estado: undefined, stock_max: undefined as number | undefined };
   rows = signal<Producto[]>([]);
   total = signal(0);
   categorias = signal<any[]>([]);
@@ -484,13 +492,16 @@ export class ProductosListPage implements OnInit {
   }
 
   private mapQuery() {
+    const raw = String(this.q.search || '').trim().replace(/^#/, '');
     return {
       page: this.q.page,
       per_page: this.q.per_page,
-      q: this.q.search || undefined,
+      q: raw || undefined,
       categoria: this.q.id_categoria || undefined,
       estado: this.q.estado || undefined,
       stock_max: this.q.stock_max || undefined,
+      sort: 'id_producto',
+      order: 'asc',
     };
   }
 
@@ -505,7 +516,11 @@ export class ProductosListPage implements OnInit {
   }
   pageUp(){ this.q.page = (this.q.page || 1) + 1; this.buscar(); }
   pageDown(){ this.q.page = Math.max(1, (this.q.page || 1) - 1); this.buscar(); }
-  totalPages(){ return Math.max(1, Math.ceil((this.total()||0)/(this.q.per_page||10))); }
+  totalPages(){
+    const per = Number(this.q.per_page);
+    if (!per || per < 0) return 1;
+    return Math.max(1, Math.ceil((this.total()||0)/per));
+  }
 
   private todayYmd(): string {
     const d = new Date();
