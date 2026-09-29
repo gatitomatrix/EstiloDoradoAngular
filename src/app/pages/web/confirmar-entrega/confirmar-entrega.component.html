@@ -45,7 +45,7 @@
           <label class="form-label small mb-1">{{ selected==='STORE_PICKUP' ? 'Celular para recordarte el recojo' : 'Celular de contacto (Shalom / motorizado)' }}</label>
           <div class="input-group">
             <span class="input-group-text">+51</span>
-            <input type="tel" class="form-control" maxlength="9" inputmode="numeric"
+            <input type="tel" class="form-control" maxlength="12" inputmode="numeric"
               [value]="telefono" (input)="onPhoneInput($event)"
               placeholder="9xxxxxxxx">
           </div>

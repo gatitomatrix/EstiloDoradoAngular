@@ -274,6 +274,7 @@ export class EntregaComponent {
   onPhoneInput(ev: Event) {
     const el = ev.target as HTMLInputElement;
     let d = el.value.replace(/\D/g, '');
+    if (d.startsWith('51') && d.length > 9) d = d.slice(2);
     if (d.length > 9) d = d.slice(0, 9);
     el.value = d;
     this.checkout.setTelefono(d);

@@ -8,6 +8,13 @@ export function celularTienda(): string {
   return /^9\d{8}$/.test(d) ? d : '916464315';
 }
 
+/** Deja solo los 9 dígitos. Si pegan 51987654321, quita el 51. */
+export function normalizarCelularInput(raw?: string | null): string {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.startsWith('51') && d.length > 9) d = d.slice(2);
+  return d.slice(0, 9);
+}
+
 /** 9 dígitos que empiezan en 9, o vacío.
  *  No se descarta el número de la tienda: el dueño puede usarlo para comprar. */
 export function celularCliente(raw?: string | null): string {
