@@ -45,13 +45,13 @@
       <div class="ed-mc-head__mid">
         <span class="ed-mc-label"><b>Pedido:</b> {{ fmtFechaHora(p.fecha_pedido) }}</span>
         <span class="ed-mc-label" *ngIf="p.fecha_estado">
-          <b>{{ p.estado }}:</b> {{ fmtFechaHora(p.fecha_estado) }}
+          <b>{{ etiqueta(p.estado) }}:</b> {{ fmtFechaHora(p.fecha_estado) }}
         </span>
         <span class="ed-mc-chip"
           [class.ok]="p.estado==='entregado' || p.estado==='pagado'"
           [class.warn]="p.estado==='pendiente'"
           [class.cancel]="p.estado==='cancelado'">
-          {{ p.estado }}
+          {{ etiqueta(p.estado) }}
         </span>
       </div>
       <div class="ed-mc-head__right">
@@ -62,7 +62,7 @@
     <div class="ed-mc-body">
       <div class="ed-mc-row">
         <div class="ed-mc-item"><b>Entrega:</b> {{ p.direccion_entrega || '—' }}</div>
-        <div class="ed-mc-item"><b>Pago:</b> {{ p.forma_pago || '—' }}</div>
+        <div class="ed-mc-item"><b>Pago:</b> {{ etiqueta(p.forma_pago) || '—' }}</div>
         <div class="px-3 pb-3 d-flex flex-wrap gap-2">
           <button class="btn btn-outline-dark btn-sm" [routerLink]="['/resumen', p.id_pedido]">Ver detalle</button>
           <button

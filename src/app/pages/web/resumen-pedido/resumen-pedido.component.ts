@@ -6,6 +6,7 @@ import { OrderService } from '../../../services/order/order.service';
 import { FranjaMarcaComponent } from '../../../widgets/web/primero/franja-marca/franja-marca.component';
 import { BarraSuperiorComponent } from '../../../widgets/web/primero/barra-superior/barra-superior.component';
 import { DIRECCION_TIENDA } from '../../../core/utils/tarifa-envio';
+import { etiqueta } from '../../../core/utils/celular';
 import { FechaPePipe } from '../../../core/pipes/fecha-pe.pipe';
 import Swal from 'sweetalert2';
 
@@ -27,6 +28,7 @@ export class ResumenPedidoComponent implements AfterViewInit {
   data: any;
   files?: { xml?: string; cdr?: string; pdf?: string };
   readonly direccionTienda = DIRECCION_TIENDA;
+  readonly etiqueta = etiqueta;
   cancelling = false;
 
   @ViewChild('okModal') okModalRef!: ElementRef<HTMLDivElement>;

@@ -8,6 +8,7 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { OrderService, PedidoListItem } from '../../../services/order/order.service';
 import { formatFechaHoraPe } from '../../../core/utils/fecha-pe';
+import { etiqueta } from '../../../core/utils/celular';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -30,6 +31,7 @@ export class MisComprasComponent implements OnInit {
 
   data: PedidoListItem[] = [];
   highlightId: number | null = null;
+  readonly etiqueta = etiqueta;
 
   filtroId?: number;
   rango: 'last' | '3m' | '1y' = '1y'; // por defecto
