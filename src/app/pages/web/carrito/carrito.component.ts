@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -10,6 +10,7 @@ import { CartItem } from '../../../models/cart/cart-item';
 import { AuthService } from '../../../services/auth/auth.service';
 import { ReturnUrlService } from '../../../core/services/return-url.service';
 import { UiService } from '../../../core/services/ui.service';
+import { ProductoService } from '../../../services/product/product.service';
 
 @Component({
   selector: 'ed-web-carrito',
@@ -24,17 +25,65 @@ export class CarritoComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private returnUrl = inject(ReturnUrlService);
   private ui = inject(UiService);
+  private productosApi = inject(ProductoService);
 
   items: CartItem[] = [];
   sub?: Subscription;
+  preview: CartItem | null = null;
+  previewDesc = '';
+  previewLoading = false;
+  previewZoom = false;
+  private previewReq?: Subscription;
 
   ngOnInit(): void {
     this.cart.refreshPrecios();
-    this.sub = this.cart.items$.subscribe((list) => (this.items = list));
+    this.sub = this.cart.items$.subscribe((list) => {
+      this.items = list;
+      if (!this.preview) return;
+      const vivo = list.find((x) => x.id === this.preview!.id);
+      this.preview = vivo ?? null;
+      if (!vivo) this.cerrarPreview();
+    });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.previewReq?.unsubscribe();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.preview) this.cerrarPreview();
+  }
+
+  verProducto(it: CartItem) {
+    this.preview = it;
+    this.previewDesc = '';
+    this.previewZoom = false;
+    this.previewLoading = true;
+    this.previewReq?.unsubscribe();
+    const id = Number(it.id);
+    if (!Number.isFinite(id)) {
+      this.previewLoading = false;
+      return;
+    }
+    this.previewReq = this.productosApi.getById(id).subscribe({
+      next: (p) => {
+        this.previewDesc = (p.descripcion || '').trim();
+        this.previewLoading = false;
+      },
+      error: () => {
+        this.previewLoading = false;
+      },
+    });
+  }
+
+  cerrarPreview() {
+    this.preview = null;
+    this.previewDesc = '';
+    this.previewZoom = false;
+    this.previewLoading = false;
+    this.previewReq?.unsubscribe();
   }
 
   dec(item: CartItem) {

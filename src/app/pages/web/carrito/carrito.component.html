@@ -19,9 +19,9 @@
     </div>
 
     <div *ngFor="let it of items" class="ed-item">
-      <div class="ed-item__img">
+      <button type="button" class="ed-item__img" (click)="verProducto(it)" [attr.aria-label]="'Ver ' + it.nombre">
         <img [src]="it.imagen || '/images/productos/placeholder.jpg'" [alt]="it.nombre">
-      </div>
+      </button>
 
       <div class="ed-item__info">
         <div class="ed-item__name">{{ it.nombre }}</div>
@@ -82,3 +82,32 @@
     </div>
   </aside>
 </section>
+
+<div class="ed-preview" *ngIf="preview" (click)="cerrarPreview()" role="presentation">
+  <div
+    class="ed-preview__card"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="preview.nombre"
+    (click)="$event.stopPropagation()"
+  >
+    <button type="button" class="ed-preview__x" (click)="cerrarPreview()" aria-label="Cerrar">×</button>
+    <button type="button" class="ed-preview__photo" (click)="previewZoom = !previewZoom" [attr.aria-pressed]="previewZoom">
+      <img
+        [class.is-zoom]="previewZoom"
+        [src]="preview.imagen || '/images/productos/placeholder.jpg'"
+        [alt]="preview.nombre"
+      >
+    </button>
+    <p class="ed-preview__hint">Clic en la foto para acercar o alejar</p>
+    <h2>{{ preview.nombre }}</h2>
+    <p class="ed-preview__price">
+      <s *ngIf="preview.precioLista && preview.precioLista > preview.precio">S/ {{ preview.precioLista | number:'1.2-2' }}</s>
+      S/ {{ preview.precio | number:'1.2-2' }}
+    </p>
+    <p class="ed-preview__qty">En tu carrito: {{ preview.qty }} · S/ {{ (preview.precio * preview.qty) | number:'1.2-2' }}</p>
+    <p class="ed-preview__desc" *ngIf="previewDesc">{{ previewDesc }}</p>
+    <p class="ed-preview__desc ed-preview__desc--mute" *ngIf="!previewDesc && previewLoading">Cargando detalle…</p>
+    <button type="button" class="ed-btn ed-btn--primary" (click)="cerrarPreview()">Seguir en el carrito</button>
+  </div>
+</div>

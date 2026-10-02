@@ -26,7 +26,16 @@
   margin-bottom: 12px;
   align-items: center;
 }
-.ed-item__img img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+.ed-item__img {
+  border: 0;
+  padding: 0;
+  background: #F6F1E8;
+  cursor: zoom-in;
+  border-radius: 8px;
+  display: block;
+  width: 100%;
+}
+.ed-item__img img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; display: block; }
 .ed-item__name { font-weight: 800; margin-bottom: 8px; }
 .ed-item__controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ed-item__price { text-align: right; display: grid; gap: 4px; }
@@ -63,3 +72,64 @@
 /* vacío */
 .ed-empty{border:1px dashed #ddd;background:#fafafa;border-radius:12px;padding:20px;text-align:center;margin:12px 0}
 .ed-empty a{cursor:pointer;color:#0d6efd;text-decoration:underline}
+
+.ed-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(45, 36, 24, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.ed-preview__card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: min(90vh, 760px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 16px 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .18);
+}
+.ed-preview__x {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.ed-preview__photo {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: #F6F1E8;
+  border-radius: 12px;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.ed-preview__photo img {
+  width: 100%;
+  max-height: 46vh;
+  object-fit: contain;
+  display: block;
+  background: #F6F1E8;
+}
+.ed-preview__photo img.is-zoom { max-height: none; }
+.ed-preview__hint { margin: 8px 0 0; color: #8A7B65; font-size: .8rem; }
+.ed-preview__card h2 { margin: 10px 0 6px; font-size: 1.25rem; }
+.ed-preview__price { margin: 0; font-weight: 800; font-size: 1.15rem; }
+.ed-preview__price s { color: #8A7B65; font-weight: 500; margin-right: 8px; }
+.ed-preview__qty { margin: 6px 0 10px; color: #5c5144; }
+.ed-preview__desc { margin: 0 0 14px; white-space: pre-line; line-height: 1.45; }
+.ed-preview__desc--mute { color: #8A7B65; }
+.ed-preview__card .ed-btn { width: 100%; }
