@@ -9,6 +9,7 @@ import { CartService } from '../../../services/cart/cart.service';
 import { CartItem } from '../../../models/cart/cart-item';
 import { AuthService } from '../../../services/auth/auth.service';
 import { ReturnUrlService } from '../../../core/services/return-url.service';
+import { UiService } from '../../../core/services/ui.service';
 
 @Component({
   selector: 'ed-web-carrito',
@@ -22,6 +23,7 @@ export class CarritoComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(AuthService);
   private returnUrl = inject(ReturnUrlService);
+  private ui = inject(UiService);
 
   items: CartItem[] = [];
   sub?: Subscription;
@@ -39,6 +41,10 @@ export class CarritoComponent implements OnInit, OnDestroy {
     this.cart.updateQty(item.id, item.qty - 1);
   }
   inc(item: CartItem) {
+    if (item.qty >= item.stockMax) {
+      this.ui.warn('No hay más unidades disponibles');
+      return;
+    }
     this.cart.updateQty(item.id, item.qty + 1);
   }
   remove(item: CartItem) {

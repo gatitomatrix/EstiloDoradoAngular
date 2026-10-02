@@ -20,8 +20,8 @@
       S/ {{ producto.precio | number:'1.2-2' }}
     }
   </div>
-  <p class="ed-card__stock" [class.ed-card__stock--out]="agotado">
-    {{ agotado ? 'Agotado' : ('Stock ' + producto.stock) }}
+  <p class="ed-card__stock" [class.ed-card__stock--out]="agotado" *ngIf="agotado">
+    Agotado
   </p>
 
   <div class="ed-card__actions">

@@ -8,7 +8,7 @@
     </ul>
 
     <p class="ed-det__stock" [class.ed-det__stock--out]="stock < 1">
-      {{ stock < 1 ? 'Agotado' : ('Stock ' + stock + ' Uni.') }}
+      {{ stock < 1 ? 'Agotado' : 'Disponible' }}
     </p>
 
     <div class="ed-det__rating" aria-label="Valoración">
@@ -32,9 +32,10 @@
             <div class="ed-qty-group">
                 <button type="button" class="ed-qty-btn" (click)="dec()" [disabled]="stock < 1" aria-label="Menos" style="font-weight: bold; color: black;">−</button>
 <input type="number" class="ed-qty-input" [value]="qty" readonly style="font-weight: bold; color: black;" />
-<button type="button" class="ed-qty-btn" (click)="inc()" [disabled]="stock < 1 || qty >= maxLimit" aria-label="Más" style="font-weight: bold; color: black;">+</button>
+<button type="button" class="ed-qty-btn" (click)="inc()" [disabled]="stock < 1" aria-label="Más" style="font-weight: bold; color: black;">+</button>
             </div>
-            <small>{{ stock < 1 ? 'Sin unidades disponibles' : ('Máximo ' + maxLimit + ' unidades') }}</small>
+            <small *ngIf="stock < 1">Sin unidades disponibles</small>
+            <small *ngIf="stock >= 1 && qty >= maxLimit">No hay más unidades disponibles</small>
         </div>
 
         <!-- Total dinámico -->

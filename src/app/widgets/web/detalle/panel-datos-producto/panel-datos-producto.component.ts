@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { WhatsappService } from '../../../../core/services/whatsapp.service';
+import { UiService } from '../../../../core/services/ui.service';
 
 @Component({
   selector: 'ed-web-panel-datos-producto',
@@ -12,6 +13,7 @@ import { WhatsappService } from '../../../../core/services/whatsapp.service';
 })
 export class PanelDatosProductoComponent {
   readonly wa = inject(WhatsappService);
+  private ui = inject(UiService);
 
   @Input() titulo = '';
   @Input() productoId: number | null = null;
@@ -49,7 +51,12 @@ export class PanelDatosProductoComponent {
   }
 
   inc() {
-    if (this.qty < this.maxLimit) this.qty++;
+    if (this.stock < 1) return;
+    if (this.qty >= this.maxLimit) {
+      this.ui.warn('No hay más unidades disponibles');
+      return;
+    }
+    this.qty++;
   }
   dec() {
     if (this.qty > 1) this.qty--;

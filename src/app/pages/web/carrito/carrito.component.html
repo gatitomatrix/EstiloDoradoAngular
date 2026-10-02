@@ -30,10 +30,10 @@
             <button class="ed-qty-btn" (click)="dec(it)" [disabled]="it.qty<=1"
               style="font-weight: bold; color: black;">−</button>
             <input class="ed-qty-input" [value]="it.qty" readonly style="font-weight: bold; color: black;" />
-            <button class="ed-qty-btn" (click)="inc(it)" [disabled]="it.qty>=it.stockMax"
+            <button class="ed-qty-btn" (click)="inc(it)"
               style="font-weight: bold; color: black;">+</button>
           </div>
-          <small>Máx {{ it.stockMax }} unidades</small>
+          <small *ngIf="it.qty >= it.stockMax">No hay más unidades disponibles</small>
         </div>
       </div>
 
