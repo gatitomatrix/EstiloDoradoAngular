@@ -148,6 +148,9 @@ export class HomeComponent implements OnInit {
     if (this.precioMaxSel !== null) {
       lista = lista.filter((p) => p.precio <= (this.precioMaxSel as number));
     }
+    if (this.precioMinSel !== null || this.precioMaxSel !== null) {
+      lista.sort((a, b) => a.precio - b.precio || (a.nombre || '').localeCompare(b.nombre || '', 'es'));
+    }
 
     this.productos = lista;
     this.page = 1;
